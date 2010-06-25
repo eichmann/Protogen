@@ -1,0 +1,169 @@
+package @PROGNAME@.controller;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import @PROGNAME@.dao.@TABLENAME@Service;
+import @PROGNAME@.dao.*;
+import @PROGNAME@.domain.@TABLENAME@;
+import @PROGNAME@.domain.*;
+
+
+
+@Controller
+@RequestMapping("/@schemaname@/@tablename@/*")
+
+public class @TABLENAME@Controller 
+{
+
+	@ModelAttribute("username")
+	public String getUsername() {
+
+		return SecurityContextHolder.getContext().getAuthentication().getName();
+	}
+	
+	@ModelAttribute("tablename")
+	public String getTablename() {
+
+		return "@tablename@";
+	}
+	
+	
+	@ModelAttribute("schemaname")
+	public String getSchemaName() {
+
+		return "@schemaname@";
+	}
+	
+	
+	
+	private static final Log log =LogFactory.getLog(@TABLENAME@Controller.class);
+	
+	private @TABLENAME@Service @tableName@Service;
+	
+	@Autowired
+	public void set@TABLENAME@Service(@TABLENAME@Service @tableName@Service) {
+		this.@tableName@Service = @tableName@Service;
+	}
+
+@parentservices@
+	
+
+
+
+	@RequestMapping(value = "index.html",method = RequestMethod.GET)
+	public ModelAndView index(ModelMap model)
+	{
+		
+		model.addAttribute("templatepagename","index");
+
+		@TABLENAME@ @tableName@ = new @TABLENAME@();
+		model.addAttribute(@tableName@);
+
+		return new ModelAndView("Default",model);
+		
+	}
+	
+	@RequestMapping(value = "list.html", method = RequestMethod.GET)
+	public ModelAndView list(ModelMap model)
+	{
+
+		
+		ModelMap modelMap = new ModelMap();
+		
+		
+		
+		
+		modelMap.addAttribute("@tableName@List",@tableName@Service.list().iterator());
+		
+		model.addAttribute("templatepagename","list");
+
+		return new ModelAndView("Default",modelMap);
+		
+	}
+	
+	
+	
+	
+	@RequestMapping(value = "add.html", method = RequestMethod.GET)
+	public ModelAndView add(ModelMap model)
+	{
+		
+
+		@TABLENAME@ @tableName@ = new @TABLENAME@();
+		model.addAttribute(@tableName@);
+		@parentlist@
+		model.addAttribute("templatepagename","edit");
+		
+		return new ModelAndView("Default",model);
+		
+	}
+	
+
+	
+	@RequestMapping(value = "edit.html", method = RequestMethod.GET)
+	public ModelAndView edit(@RequestParam("@tableName@Id") int @tableName@Id,ModelMap model)
+	{
+
+		
+		@TABLENAME@ @tableName@ = @tableName@Service.findById(@tableName@Id);
+		
+
+		model.addAttribute(@tableName@);
+@parentlist@
+	
+		model.addAttribute("templatepagename","edit");
+		
+		return new ModelAndView("Default",model);
+		
+	}
+	
+
+	
+	
+
+	@RequestMapping(value = "show.html", method = RequestMethod.GET)
+	public ModelAndView show(@RequestParam("@tableName@Id") int @tableName@Id,ModelMap model)
+	{
+		@TABLENAME@ @tableName@ = @tableName@Service.findById(@tableName@Id);
+	
+		model.addAttribute("@tableName@",@tableName@);
+
+		model.addAttribute("templatepagename","show");
+		
+		return new ModelAndView("Default",model);
+		
+	}
+	
+	
+	@RequestMapping(value = "delete.html", method = RequestMethod.GET)
+	public ModelAndView delete(@RequestParam("@tableName@Id") int @tableName@Id,ModelMap model)
+	{
+		
+		@tableName@Service.delete(@tableName@Id);
+
+		return new ModelAndView("redirect:list.html",model);
+		
+	}
+	
+	@RequestMapping(value = "save.html", method = RequestMethod.GET)
+	public ModelAndView onSave(@onsaveparams@ @ModelAttribute("@tableName@") @TABLENAME@ @tableName@, ModelMap model) {
+	@onsavebody@
+		
+		   @tableName@Service.save(@tableName@);	       
+			
+	       return new ModelAndView("redirect:list.html",model);
+	   }
+		
+		
+		
+
+}

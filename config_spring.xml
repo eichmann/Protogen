@@ -1,0 +1,125 @@
+<project xmlns:ivy="antlib:org.apache.ivy.ant" name="ConfigureSpring" default="setup">
+
+	<property environment="env" />
+
+	<!--  all properties are in build.properties -->
+	<property file="${user.name}.properties" />
+	<property file="/home/hudson/db.config.properties" />
+	<property file="build.properties" />
+
+	<property name="default.dir" value="SPRING_DEFAULT" />
+
+
+	<target name="GetProjectName">
+		<input message="Please enter Eclipse Project : " addproperty="spring_target.project.name" />
+		
+		<echo>Entered Project Name: ${spring_target.project.name}</echo>
+	</target>
+	
+	
+	<target name="setup" depends="GetProjectName">
+		<antcall target="copy_ivy_config" />
+		<antcall target="copy_src" />
+		<antcall target="copy_spring_config" />
+		<antcall target="copy_default_build_files" />
+		<antcall target="copy_default_properties" />
+		<antcall target="copy_clay" />
+		<antcall target="copy_user_props" />
+		<eclipse.refreshLocal resource="${spring_target.project.name}"/>
+		<ant antfile="build.xml"  dir="../${spring_target.project.name}" target="resolve-dependencies_sync" inheritall="false"/>
+		<antcall target="run_target_generator" />
+		
+	</target>
+
+	
+	<target name="copy_user_props">
+		<copy todir="../${spring_target.project.name}/" failonerror="false" overwrite="false" verbose="true" >
+			<fileset  file="custom/${user.name}.properties" />
+		</copy>
+	</target>
+	
+	<target name="copy_ivy_config" >
+		<copy todir="../${spring_target.project.name}/" overwrite="false" >
+			<fileset file="${default.dir}/ivy.xml" />
+			<fileset file="${default.dir}/ivysettings.xml" />
+
+		</copy>
+
+
+		<!-- Any token replacements should happen now -->
+		
+	</target>
+	
+	<target name="copy_src">
+		<mkdir dir="../${spring_target.project.name}/src" />
+		<copy todir="../${spring_target.project.name}/src" overwrite="false" >
+					<fileset dir="${default.dir}/src" includes="**/*.java" />
+		</copy>	
+	</target>
+	
+	<target name="copy_default_build_files">
+		<copy todir="../${spring_target.project.name}/" overwrite="false" >
+			<fileset file="${default.dir}/build.xml" />
+			<fileset file="${default.dir}/build.properties" />
+		</copy>
+		<replace file="../${spring_target.project.name}/build.properties" token="@CURRENT@" value="${spring_target.project.name}"/>
+		<replace file="../${spring_target.project.name}/build.xml" token="@CURRENT@" value="${spring_target.project.name}"/>
+		<replace file="../${spring_target.project.name}/build.properties" token="@TARGET@" value="${spring_target.project.name}"/>
+	</target>
+	
+	<target name="copy_default_properties">
+		<copy todir="../${spring_target.project.name}/WebContent/META-INF" overwrite="false" >
+			<fileset file="${default.dir}/context.xml" />
+			<fileset file="${default.dir}/context-test.xml" />
+		</copy>
+		
+		<replace dir="../${spring_target.project.name}/WebContent/META-INF" token="@CURRENT@" value="${spring_target.project.name}">
+			<include  name="*.xml" />		
+		</replace>
+	</target>
+	
+	<target name="check_clay">
+	    <available file="../${spring_target.project.name}/WebContent/resources/${spring_target.project.name}.clay" property="clay.exists"/>
+	</target>
+	    	
+	<target name="copy_clay" depends="check_clay" unless="clay.exists">
+		
+		<copy tofile="../${spring_target.project.name}/WebContent/resources/${spring_target.project.name}.clay"  overwrite="false" >
+				<fileset file="${default.dir}/Temp.clay" />
+		</copy>
+		<replace dir="../${spring_target.project.name}/WebContent/resources" token="@CURRENT@" value="${spring_target.project.name}" >
+			<include  name="*.clay" />		
+		</replace>
+		
+	</target>
+
+	<target name="copy_spring_config">
+		<mkdir dir="../${spring_target.project.name}/WebContent/resources" />
+		
+		<copy todir="../${spring_target.project.name}/WebContent/resources" overwrite="false" >
+			<fileset dir="${default.dir}/resources" />
+		</copy>
+		<copy todir="../${spring_target.project.name}/WebContent/" overwrite="false" >
+			<fileset file="${default.dir}/index.jsp" />
+		</copy>
+		  <move todir="../${spring_target.project.name}/WebContent/WEB-INF" includeemptydirs="false">
+		    <fileset dir="../${spring_target.project.name}/WebContent/WEB-INF">
+		      <include name="web.xml"/>
+		    </fileset>
+		    <mapper type="glob" from="*" to="*.bak"/>
+		  </move>
+
+		<copy todir="../${spring_target.project.name}/WebContent/WEB-INF" overwrite="false" >
+			<fileset dir="${default.dir}/WEB-INF" />
+		</copy>
+		<replace dir="../${spring_target.project.name}/WebContent/WEB-INF" token="@CURRENT@" value="${spring_target.project.name}">
+			<include  name="*.xml" />		
+		</replace>
+
+	</target>
+	
+	<target name="run_target_generator">
+		<ant antfile="build.xml"  dir="../${spring_target.project.name}" target="run_generator" inheritall="false"/>
+	</target>
+	
+</project>

@@ -1,0 +1,16 @@
+package @PROGNAME@.dao;
+
+
+import java.util.List;
+
+
+import @PROGNAME@.domain.@TABLENAME@;
+
+
+public interface @TABLENAME@Service extends GenericDaoInterface {
+
+	public List<@TABLENAME@>  list();
+	public @TABLENAME@  findById(int id);
+	public List<@TABLENAME@>  listOrdered(String order, String direction);
+	
+}

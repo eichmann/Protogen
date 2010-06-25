@@ -1,0 +1,319 @@
+/* 
+ICTS Template
+*/
+body,img,h1,h2,h3,h4,h5,h6,ul,li,p,a,form {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+body {
+	background: #000000 url(../images/bg-content.png) repeat-y center;
+	font-family: "Lucida Grande", Lucida, Verdana, sans-serif;
+	font-size: .85em;
+	line-height: 1.5em;
+	color: #000000;
+}
+
+h2 {
+	border-bottom: 1px dotted #666666;
+	font-family: Georgia, "Times New Roman", Times, serif;
+	margin: 20px 0;
+	font-size: 1.25em;
+}
+
+p {
+	padding: 0 30px 10px 0;
+}
+
+a {
+	color: #B08200;
+}
+
+.alert {
+	color: #F00;
+}
+
+
+a:hover {
+	background-color: #EAEAEA;
+}
+
+/* Lists */
+.bulletedList {
+	list-style-image: url(../images/bullet-l1.gif);
+}
+
+.bulletedList li ul {
+	list-style-image: none;
+}
+
+/* University Top Header */
+#roof {
+	background: #000000 url(../images/bg-top.png) repeat-x;
+	height: 24px;
+}
+
+#roof div {
+	width: 960px;
+	text-align: right;
+	padding-right: 165px;
+	margin: 0 auto;
+}
+
+#roof a {
+	margin: 0 auto;
+}
+
+#roof a:hover {
+	background: none;
+}
+
+#content {
+	width: 960px;
+	margin: 0 auto;
+	background: #ffffff;
+	display: block;
+}
+
+/* Header */
+#primaryNav {
+	height: 40px;
+	background: url(../images/bg-roof.png) repeat-x;
+	font-size: 12px;
+}
+
+#primaryNav li {
+	float: left;
+	list-style-type: none;
+}
+
+#primaryNav a {
+	border-right: 1px solid #999999;
+	padding: 10px 15px;
+	display: block;
+	color: #333333;
+	text-decoration: none;
+	font-variant: small-caps;
+}
+
+#primaryNav a:hover {
+	background: url(../images/bg-roof-over.png);
+	color: #333333;
+}
+
+#primaryNav a.current {
+	background: #ffffff;
+}
+
+#primaryNav form {
+	float: right;
+	padding: 7px 20px 0 0;
+}
+
+#banner {
+	height: 100px;
+	padding: 10px 10px;
+	text-align: center;
+}
+
+/* Left Column */
+#leftCol {
+	width: 170px;
+	float: left;
+	clear: left;
+	font-size: .90em;
+	border-right: 1px dotted #cccccc;
+	padding-left: 10px;
+}
+
+#leftCol h3 {
+	color: #444444;
+	font-size: 1.1em;
+	border-bottom: 3px solid #E0AA00;
+	text-align: right;
+	padding-right: 5px;
+}
+
+#leftCol ul {
+	list-style-type: none;
+	margin-bottom: 2em;
+	line-height: 1.2em;
+}
+
+#leftCol a {
+	border-bottom: 1px dotted #cccccc;
+	display: block;
+	color: #333333;
+	text-decoration: none;
+	padding: 5px 0px 3px 5px;
+	text-indent: -5px;
+}
+
+#leftCol address {
+	padding: 10px 0 0 0px;
+	line-height: 1.5em;
+}
+
+/* Center Column */
+#centerCol {
+	float: left;
+	width: 750px;
+	margin-top: 15px;
+	margin-left: 15px;
+	margin-right: 10px;
+	font-size: 1em;
+}
+
+/************************/ /* Multipurpose Classes */
+	/************************/
+.left {
+	float: left;
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+.clear {
+	clear: both;
+}
+
+/*this is to keep page from shifting to left on load in safari and firefox*/
+#centerColFull {
+	float: left;
+	width: 900px;
+	margin-top: 15px;
+	margin-left: 20px;
+	margin-right: 10px;
+	font-size: 1em;
+}
+
+html {
+	min-height: 100%;
+	margin-bottom: 1px;
+}
+
+html {
+	overflow: -moz-scrollbars-vertical !important;
+}
+
+div.container1 {
+	width: 100%;
+	border-width: 0px;
+	font-size: 0.9em;
+}
+
+div.container1 h2
+{
+	text-decoration: none;
+	border:none;
+	
+	font-size: 1.3em;
+	font-family: serif;
+	padding: 0px 10px 0px 0px;
+	margin-bottom: 5px;
+			
+}
+	
+
+table.formData1 {
+	border: solid;
+	width: 100%;
+	border-width: 1px 1px 1px 1px;
+	border-color: #aaaaaa;
+	background: url(..//images/formbackground2.gif) 0% 0% repeat-x #C9BE62;
+	color: #333;
+		padding: 10px 5px 5px 5px;
+}
+
+table.formData1 th {
+	text-align: right;
+	font-weight: bold;
+	border-width: 0px;
+	width: 30%; 
+	padding-right: 10px;
+	font-size: 1.05em;
+
+}
+
+table.formData1 td {
+	clear: both;
+	border: none;
+	width: 70%; 
+	padding: 5px 5px 5px 5px;
+
+}
+table.formData1 td table th{
+	font-weight: normal;
+	text-decoration: underline;
+		font-size: 1em;
+}
+
+table.formData1 tr {
+	clear: both;
+	border: solid;
+	border-width: 0px 0px 1px 0px;
+	border-color: #aaa;
+}
+
+table.formData1 td.buttons {
+	text-align: center;
+}
+
+table.formData1	a {
+	color: #052323;
+}
+
+table.formData1 th	a {
+	text-decoration: none;
+}
+
+table.formData1	input {
+	border: solid 1px #aaa;
+}
+
+table.tableData1 {
+	border: solid;
+	width: 100%;
+	border-width: 1px 1px 1px 1px;
+	border-color: #aaaaaa;
+	background: url(../images/formbackground2.gif) 0% 0% repeat-x #C9BE62;
+	color: #333;
+}
+
+table.tableData1 th {
+	text-align: left;
+	font-weight: bold;
+	border-width: 0px;
+	padding: 5px 5px 5px 5px;
+
+}
+
+table.tableData1 td {
+	clear: both;
+	border: dotted;
+	border-width: 0px 0px 0px 0px;
+	text-align: left;
+	padding: 5px 5px 5px 5px;
+	margin: 0px 0px 0px 0px;
+	text-align: left;
+}
+
+table.tableData1 tr:hover { background: #FFF; }
+
+table.tableData1 td.buttons {
+	text-align: center;
+}
+
+table.tableData1	a {
+	color: #052323;
+}
+
+table.tableData1 th	a {
+	text-decoration: none;
+}
+
+table.tableData1	input {
+	border: solid 1px #aaa;
+}
+
+

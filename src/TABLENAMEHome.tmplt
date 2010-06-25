@@ -1,0 +1,65 @@
+package @PROGNAME@.dao;
+
+
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import @PROGNAME@.domain.@TABLENAME@;
+
+
+@Repository
+@Transactional(readOnly = true)
+public class @TABLENAME@Home   extends GenericDao implements @TABLENAME@Service{
+	
+	private static final Log log =LogFactory.getLog(@TABLENAME@Home.class);
+	
+	public @TABLENAME@Home ()
+	{
+		 setDomainName("@PROGNAME@.domain.@TABLENAME@");
+			
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
+	public List<@TABLENAME@>  list()
+	{
+	
+		List<@TABLENAME@> list = this.sessionFactory.getCurrentSession().createQuery("from " + getDomainName()).list();
+
+		return list;
+	}
+	
+	
+	
+
+	@SuppressWarnings("unchecked")
+	@Transactional(readOnly = true)
+	public List<@TABLENAME@>  listOrdered(String order, String direction)
+	{
+		
+		List<@TABLENAME@> list = this.sessionFactory.getCurrentSession().createQuery("from " + getDomainName() + " order by " + order + " " + direction).list();
+
+		return list;
+	}
+
+	@Transactional(readOnly = true)
+	public @TABLENAME@  findById(int id)
+	{	
+
+		@TABLENAME@ obj = (@TABLENAME@)this.sessionFactory.getCurrentSession().get(getDomainName(), id);
+		
+		return obj;
+	}
+	
+
+
+}
