@@ -321,3 +321,4 @@ src/edu/uiowa/webapp/Relationship.java -text
 src/edu/uiowa/webapp/Schema.java -text
 src/edu/uiowa/webapp/TLDGenerator.java -text
 src/edu/uiowa/webapp/TagClassGenerator.java -text
+subversion/config -text
