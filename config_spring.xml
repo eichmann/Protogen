@@ -1,5 +1,5 @@
 <project xmlns:ivy="antlib:org.apache.ivy.ant" name="ConfigureSpring" default="setup">
-
+<!-- Test: PROTOGEN-1  2010-04-05T12-54  2010-04-05T12-54   -->
 	<property environment="env" />
 
 	<!--  all properties are in build.properties -->
