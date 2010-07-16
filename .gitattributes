@@ -225,6 +225,7 @@ required_jars/jta-1.1.jar -text
 required_jars/jtidy-r918.jar -text
 required_jars/junit-3.8.1.jar -text
 required_jars/ldaptaglib.jar -text
+required_jars/liquibase-1.9.5.jar -text
 required_jars/log4j-1.2.14.jar -text
 required_jars/lucene-analyzers-2.2.0.jar -text
 required_jars/lucene-analyzers-2.4.1.jar -text

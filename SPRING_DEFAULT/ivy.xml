@@ -85,7 +85,7 @@
         <dependency org="other" name="antlr" rev="latest.integration" conf="full->default"/>
         <dependency org="other" name="antlr-runtime" rev="latest.integration" conf="full->default"/>
         <dependency org="other" name="aopalliance" rev="latest.integration" conf="full->default"/>
-         
+         <dependency org="liquibase" name="liquibase" rev="latest.integration" conf="full->default"/>
               
 
               		  <!--  Apache Tiles -->

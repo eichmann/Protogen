@@ -49,13 +49,14 @@ public class Generator {
 
 		if(mode.equalsIgnoreCase("tags"))
 		{
-			TagClassGenerator theGenerator = new TagClassGenerator(pathPrefix + "/" + args[1]+ "/"  + "src", args[0], args[1]);
+			String packageRoot = args[0] + "."+ args[1];
+			TagClassGenerator theGenerator = new TagClassGenerator(pathPrefix + "/" + args[1]+ "/"  + "src", packageRoot, args[1]);
 			theGenerator.generateTagClasses(theDatabase);
 
-			TLDGenerator theTLDgenerator = new TLDGenerator(pathPrefix + args[1] + "/WebContent/", args[0], args[1]);
+			TLDGenerator theTLDgenerator = new TLDGenerator(pathPrefix + args[1] + "/WebContent/", packageRoot, args[1]);
 			theTLDgenerator.generateTLD(theDatabase);
 
-			JSPGenerator theJSPgenerator = new JSPGenerator(pathPrefix + args[1] + "/WebContent/", args[0], args[1]);
+			JSPGenerator theJSPgenerator = new JSPGenerator(pathPrefix + args[1] + "/WebContent/", packageRoot, args[1]);
 			theJSPgenerator.generateJSPs(theDatabase);
 		}
 		else
