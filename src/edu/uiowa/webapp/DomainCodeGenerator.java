@@ -83,11 +83,13 @@ public class DomainCodeGenerator {
 		for (int i = 0; i < schema.getEntities().size(); i++)
 		{
 
+			
 			DomainClass ec = generateDomainCodeForEntity(schema.getEntities().elementAt(i));
 			if(ec != null)
 				domainClassList.add(ec);		
-			
+			System.out.println("check:"+i+" -"+schema.getEntities().elementAt(i).getLabel());
 		}
+		
 		connectLinks();
 		writeFiles();
 
@@ -96,9 +98,12 @@ public class DomainCodeGenerator {
 
 
 	private DomainClass generateDomainCodeForEntity(Entity entity) throws IOException {
-
+		
 		if(isManyToMany(entity))
+		{
+			System.out.println("Entity is manyToMany.  Not Creating Class");
 			return null;
+		}
 	
 		HashMap<String,Attribute> foreignAndPrimaryKeysAttributes = getHashFromAttributesFtPt(entity.getAttributes().iterator());	
 		HashMap<String,Attribute> foreignAndNotPrimaryKeysAttributes = getHashFromAttributesFtPf(entity.getAttributes().iterator());
@@ -294,9 +299,11 @@ public class DomainCodeGenerator {
 		Iterator<Attribute> iter2 = attribList.iterator();
 		checkExists = new HashMap<String,Integer>();
 		while (iter2.hasNext()) {
+	
 			Attribute at = iter2.next();
 			System.out.println("***Attribute:"+at.getUnqualifiedLabel());
 			Entity e = at.getReferencedEntity();//entity.getForeignReferenceEntity(at);
+			
 			if(e != null)
 			{
 				
@@ -317,10 +324,13 @@ public class DomainCodeGenerator {
 						System.out.println("************EXISTS = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
 						checkExists.put(e.getUnqualifiedLabel(),0);
+						
+					
 					}
 
 					String variableName= e.getUnqualifiedLowerLabel()+"" + postfix;
 					ClassVariable v = new ClassVariable("private", ""+e.getUnqualifiedLabel()+"", variableName);
+					
 					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size()==1)
 					{
 						v.setRelationshipType(RelationshipType.ONETOONE);
@@ -342,15 +352,16 @@ public class DomainCodeGenerator {
 					symTable.add(v);
 					symTableHash.add(v.getIdentifier());
 
-
+					
 				
 			}
 			else
 			{
 				System.out.println("************PARENT ENTITY = NULL for "+ at.getUnqualifiedLabel());
 			}
-
+			
 		}
+
 		DomainClass domainClass = new DomainClass();
 		domainClass.setSchema(currentSchema);
 		domainClass.setClassType(ClassType.ENTITY);
@@ -363,6 +374,7 @@ public class DomainCodeGenerator {
 		domainClass.setSymTable(symTable);
 		domainClass.populateClassVariableDomainClass();
 		entity.setDomainClass(domainClass);
+	
 
 //		File file = new File(packagePrefixDirectory, entity.getUnqualifiedLabel()	+ ".java");
 //		FileWriter fstream = new FileWriter(file);
@@ -634,18 +646,24 @@ public class DomainCodeGenerator {
 	}
 	
 	private void connectLinks()
-	{
+	{	
+		System.out.println("***Connecting Links***");
 		Iterator<DomainClass> domainIter = domainClassList.iterator();
 		while(domainIter.hasNext() )
 		{
+			
+			
 			DomainClass dc = domainIter.next();
+			System.out.println("   "+dc.getIdentifier());
 			Iterator<ClassVariable> cvIter =  dc.getSymTable().iterator();
 			while (cvIter.hasNext())
 			{
 				
 				ClassVariable cv = cvIter.next();
+				System.out.println("      "+cv.getIdentifier());
 				if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE)
 				{
+					System.out.println("         -attribute is foreign");
 					Entity e = cv.getAttribute().getReferencedEntity();//dc.getEntity().getForeignReferenceEntity(cv.getAttribute());
 					if(e != null)
 					{
@@ -661,10 +679,13 @@ public class DomainCodeGenerator {
 				}
 				else if(cv.getAttribType() == AttributeType.CHILD)
 				{
+					System.out.println("         -attribute is child");
 					ClassVariable cvRef = findReferencedClassVariable(cv);
-//					if(cvRef == null)
-//						System.out.println("************** ERROR CONNECTING CLASSVARIABLE");
-					cv.setReferenedClassVariable(cvRef);
+					if(cvRef == null)
+						{
+						System.out.println("************** ERROR CONNECTING CLASSVARIABLE");
+						cv.setReferenedClassVariable(cvRef);
+						}
 						
 				}
 	
@@ -714,13 +735,15 @@ public class DomainCodeGenerator {
 	{
 
 			DomainClass dc = findDomainByIdentifier(cv.getAttribute().getReferencedEntity().getUnqualifiedLabel());
-			
+		
 			
 			Iterator<ClassVariable> cvIter = dc.getSymTable().iterator();
+			
 			while(cvIter.hasNext())
 			{
 				ClassVariable cv1 = cvIter.next();
-				if(cv1.getAttribType() !=  AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel()))
+
+				if(cv1.getAttribute()!= null && cv1.getAttribType() !=  AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel()))
 						return cv1;
 //				else
 //					System.out.println("Error on "+ cv.getIdentifier() +" with "+cv.getIdentifier());
