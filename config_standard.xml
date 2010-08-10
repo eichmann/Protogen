@@ -11,9 +11,7 @@
 	
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
 	
-	<target name="set_workspace_var">
-		  <propertyregex property="workspace" input="${osgi.instance.area}" regexp="file:(.*)" select="\1"/>
-	</target>
+  	<propertyregex property="workspace" input="${osgi.instance.area}" regexp="file:(.*)" select="\1"/>
 
 	
 	
@@ -29,7 +27,7 @@
 	
 	
 	
-	<target name="setup" depends="set_workspace_var,GetProjectName">
+	<target name="setup" depends="GetProjectName">
 		<property name="target.dir" value="/${workspace}/${target.project.name}/" />
 		<property name="taglib.dir" value="/${workspace}/${taglib.project.name}/" />
 		<antcall target="copy_ivy_config" />
