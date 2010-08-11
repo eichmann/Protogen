@@ -278,7 +278,7 @@ public class DomainCodeGenerator {
 					//v = new ClassVariable("private", "Set<"+e.getUnqualifiedLabel()+">", variableName, " = new HashSet<"+e.getUnqualifiedLabel()+">(0)");
 					v = new ClassVariable("private", "Set", variableName, " = new HashSet(0)");
 					if(e.getUnqualifiedLowerLabel().equalsIgnoreCase(entity.getUnqualifiedLowerLabel()))
-						v.getGetterAnnotations().add("@OneToMany(fetch = FetchType.LAZY,   mappedBy = \""+entity.getUnqualifiedLowerLabel()+"\") targetEntity="+e.getUnqualifiedLabel()+".class, cascade=CascadeType.REMOVE)");
+						v.getGetterAnnotations().add("@OneToMany(fetch = FetchType.LAZY,   mappedBy = \""+entity.getUnqualifiedLowerLabel()+"\", targetEntity="+e.getUnqualifiedLabel()+".class, cascade=CascadeType.REMOVE)");
 					else
 						v.getGetterAnnotations().add("@OneToMany(fetch = FetchType.LAZY,   mappedBy = \""+entity.getUnqualifiedLowerLabel()+"\", targetEntity="+e.getUnqualifiedLabel()+".class, cascade=CascadeType.REMOVE)");
 				}
