@@ -31,7 +31,7 @@ password-stores =
 
 ### Section for configuring miscelleneous Subversion options.
 [miscellany]
-global-ignores = *.o *.obj *.pdb *.idb *.exp *.ncb *.suo ~$*.doc *.swp *~ core
+global-ignores = *.o *.obj *.pdb *.idb *.exp *.ncb *.suo ~$*.doc *.swp *~ core .classpath
 # log-encoding = latin1
 # use-commit-times = yes
 # no-unlock = yes
