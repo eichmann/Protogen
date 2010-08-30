@@ -509,11 +509,19 @@ public class TagClassGenerator {
             out.write((attrSeq == 0 ? "" : ",") + theAttribute.getSqlLabel());
             paramBuffer.append((attrSeq == 0 ? "?" : ",?"));
             if (!theAttribute.isPrimary() && theAttribute.isForeign()) {
-                queryBuffer.append("\t\t\tstmt."
-                        + "setNull("
+                queryBuffer.append("\t\t\tif (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + ") {\n");
+                queryBuffer.append("\t\t\t\tstmt.setNull(" + (attrSeq + 1) + ", java.sql.Types.INTEGER"  + ");\n");
+                queryBuffer.append("\t\t\t} else {\n");
+                queryBuffer.append("\t\t\t\tstmt."
+                        + theAttribute.getSQLMethod(false)
+                        + "("
                         + (attrSeq + 1)
-                        + ", java.sql.Types.INTEGER"
+                        + ","
+                        + theAttribute.getLabel()
+                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "")
                         + ");\n");
+                queryBuffer.append("\t\t\t}\n");
             } else {
                 queryBuffer.append("\t\t\tstmt."
                         + theAttribute.getSQLMethod(false)
