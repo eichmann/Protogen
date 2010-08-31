@@ -1705,7 +1705,7 @@ public class TagClassGenerator {
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Vector;\n");
         out.write("import java.io.InputStream;\n");
-        out.write("import java.io.ByteArrayOutputStream;\n");
+        //out.write("import java.io.ByteArrayOutputStream;\n");
         out.write("import java.util.Iterator;\n");
         out.write("import java.util.List;\n");
         out.write("import javax.servlet.http.HttpServletRequest;\n");
