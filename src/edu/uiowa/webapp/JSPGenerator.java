@@ -176,7 +176,7 @@ public class JSPGenerator {
                 out.write("\"><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
             } else {
                 out.write("\t\t\t\t<td>");
-                generateAttributeTag(out, theEntity, theAttribute);
+                generateAttributeTag(true, out, theEntity, theAttribute);
                 out.write("</td>\n");
                //out.write("\t\t\t\t<td><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
             }
@@ -206,8 +206,8 @@ public class JSPGenerator {
         out.close();
     }
     
-    public void generateAttributeTag(BufferedWriter out, Entity theEntity, Attribute theAttribute) throws IOException {
-        if (theEntity.isForeignReference(theAttribute)) {
+    public void generateAttributeTag(Boolean renderForeignLink, BufferedWriter out, Entity theEntity, Attribute theAttribute) throws IOException {
+        if (renderForeignLink && theEntity.isForeignReference(theAttribute)) {
             Entity parentEntity = theEntity.getForeignReferenceEntity(theAttribute);
             out.write("<a href=\"../" + parentEntity.getUnqualifiedLowerLabel() + "/" + parentEntity.getUnqualifiedLowerLabel() + ".jsp?");
             for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
@@ -247,7 +247,7 @@ public class JSPGenerator {
                     + theAttribute.getUpperLabel() + " />");        	
         }
 
-        if (theEntity.isForeignReference(theAttribute)) {
+        if (renderForeignLink && theEntity.isForeignReference(theAttribute)) {
             out.write("</a>");
         }
     }
@@ -315,7 +315,7 @@ public class JSPGenerator {
                 out.write("\"><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
             } else {
                 out.write("\t\t\t\t\t\t<td>");
-                generateAttributeTag(out, theEntity, theAttribute);
+                generateAttributeTag(true, out, theEntity, theAttribute);
                 out.write("</td>\n");
                //out.write("\t\t\t\t<td><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
             }
@@ -521,7 +521,7 @@ public class JSPGenerator {
                 out.write("\t\t\t\t\t<tr>\n");
                 out.write("\t\t\t\t\t\t<th align=left>" + theAttribute.getUpperLabel() + "</th>\n");
                 out.write("\t\t\t\t\t\t<td><input type=\"text\" name=\"" + theAttribute.getLabel() + "\" size=\"40\" value=\"");
-                generateAttributeTag(out, theEntity, theAttribute);
+                generateAttributeTag(false, out, theEntity, theAttribute);
                 out.write("\"></td>\n");
                 out.write("\t\t\t\t\t</tr>\n");
             }
