@@ -49,7 +49,7 @@ public class Generator {
 
 		if(mode.equalsIgnoreCase("tags"))
 		{
-			String packageRoot = args[0] + "."+ args[1];
+			String packageRoot = args[0];
 			TagClassGenerator theGenerator = new TagClassGenerator(pathPrefix + "/" + args[1]+ "/"  + "src", packageRoot, args[1]);
 			theGenerator.generateTagClasses(theDatabase);
 
