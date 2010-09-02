@@ -5,6 +5,7 @@
 SPRING_DEFAULT/Temp.clay -text
 SPRING_DEFAULT/WEB-INF/include.jsp -text
 SPRING_DEFAULT/WEB-INF/jsp/auth/index.jsp -text
+SPRING_DEFAULT/WEB-INF/jsp/custom.jsp svneol=native#text/plain
 SPRING_DEFAULT/WEB-INF/jsp/index.jsp -text
 SPRING_DEFAULT/WEB-INF/jsp/router.jsp -text
 SPRING_DEFAULT/WEB-INF/templates/baseTemplate.jsp -text

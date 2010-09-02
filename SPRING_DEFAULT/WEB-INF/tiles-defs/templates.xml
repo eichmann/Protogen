@@ -35,5 +35,9 @@
    		<put-attribute name="body"   value="/WEB-INF/jsp/router.jsp"/>
    		<put-attribute name="menu"   value="/WEB-INF/jsp/menu.jsp"/>          
  	</definition> 	
+ 	<definition name="custom" extends="baseTemplate">
+   		<put-attribute name="body"   value="/WEB-INF/jsp/custom.jsp"/>
+   		<put-attribute name="menu"   value="/WEB-INF/jsp/menu.jsp"/>          
+ 	</definition> 	
   	
 </tiles-definitions>

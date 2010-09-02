@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
-
 import java.util.Iterator;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 @Controller
@@ -32,6 +34,18 @@ public class DefaultController
 	private static final Log log = LogFactory.getLog(DefaultController.class);
 	
 
+	@RequestMapping(value = "{page}.html", method = RequestMethod.GET)
+	public ModelAndView displayDefault(@PathVariable String page,HttpServletRequest req,HttpServletResponse res)
+	{
+		ModelMap model = new ModelMap();
+		
+		model.addAttribute("pagename",page);
+
+
+
+		return new ModelAndView("custom",model);
+			
+	}
 	@RequestMapping(value = "index.html", method = RequestMethod.GET)
 	public String index(ModelMap model)
 	{
