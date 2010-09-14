@@ -275,8 +275,8 @@ public class DomainCodeGenerator {
 				else	
 				{
 					String variableName= plural(e.getUnqualifiedLowerLabel()) + postfix;
-					//v = new ClassVariable("private", "Set<"+e.getUnqualifiedLabel()+">", variableName, " = new HashSet<"+e.getUnqualifiedLabel()+">(0)");
-					v = new ClassVariable("private", "Set", variableName, " = new HashSet(0)");
+					v = new ClassVariable("private", "Set<"+e.getUnqualifiedLabel()+">", variableName, " = new HashSet<"+e.getUnqualifiedLabel()+">(0)");
+					//v = new ClassVariable("private", "Set", variableName, " = new HashSet(0)");
 					if(e.getUnqualifiedLowerLabel().equalsIgnoreCase(entity.getUnqualifiedLowerLabel()))
 						v.getGetterAnnotations().add("@OneToMany(fetch = FetchType.LAZY,   mappedBy = \""+entity.getUnqualifiedLowerLabel()+"\", targetEntity="+e.getUnqualifiedLabel()+".class, cascade=CascadeType.REMOVE)");
 					else
@@ -587,6 +587,7 @@ public class DomainCodeGenerator {
 		Iterator<Attribute> attribIter = child.getAttributes().iterator();
 		String thisKey="";
 		String thatKey="";
+		String targetEntity="";
 		while(attribIter.hasNext())
 		{
 			Attribute a = attribIter.next();
@@ -600,11 +601,12 @@ public class DomainCodeGenerator {
 			{
 				if(e2 !=null) 
 				{
+					targetEntity = e2.getUpperLabel();
 					System.out.println("HEREEE0");
 					thatKey = a.getSqlLabel();
 					v.setIdentifier(plural(e2.getUnqualifiedLowerLabel()));
-					v.setType("Set");
-					v.setInitializer(" = new HashSet(0)");
+					v.setType("Set<"+targetEntity+">");
+					v.setInitializer(" = new HashSet<"+targetEntity+">(0)");
 //					v.setType("Set<"+e2.getUnqualifiedLabel()+">");
 //					v.setInitializer(" = new HashSet<"+e2.getUnqualifiedLabel()+">(0)");
 				}
@@ -615,7 +617,7 @@ public class DomainCodeGenerator {
 		v.setRelationshipType(RelationshipType.MANYTOMANY);
 		
 		v.setModifier("private");
-		v.getGetterAnnotations().add("@ManyToMany(cascade = CascadeType.ALL)");
+		v.getGetterAnnotations().add("@ManyToMany(cascade = CascadeType.ALL,targetEntity="+targetEntity+".class)");
 		v.getGetterAnnotations().add("@JoinTable(name = \""+currentSchema.getSqlLabel()+"."+child.getSqlLabel()+"\", joinColumns = { @JoinColumn(name = \""+thisKey+"\")}, inverseJoinColumns = { @ JoinColumn(name = \""+thatKey+"\")})");
 
 		return v;
