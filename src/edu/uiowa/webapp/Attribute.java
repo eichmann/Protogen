@@ -1,11 +1,14 @@
 package edu.uiowa.webapp;
 
+import java.util.Vector;
+
 public class Attribute extends ClayElement {
 
     Domain domain = null;
     String sqlType = null;
     String type = null;
     String remarks = null;
+    String origLabel = null;
     boolean mandatory = false;
     boolean primary = false;
     boolean autoIncrement = false;
@@ -17,7 +20,30 @@ public class Attribute extends ClayElement {
     String referencedEntityName = null;
     Entity referencedEntity = null;
     Entity entity = null;
-    
+    Attribute foreignAttribute = null;
+	Vector<Attribute> childAttributes = new Vector<Attribute>();
+	
+
+	public Vector<Attribute> getChildAttributes() {
+		return childAttributes;
+	}
+
+	public void setChildAttributes(Vector<Attribute> childAttributes) {
+		this.childAttributes = childAttributes;
+	}
+
+	public Attribute getParentAttribute() {
+		
+		return foreignAttribute;
+	}
+	public void setParentAttribute(Attribute a)
+	{
+		setForeign(true);
+		foreignAttribute = a ;
+	}
+	public Attribute getForeignAttribute() {
+		return foreignAttribute;
+	}
 
 	public Entity getEntity() {
 		return entity;
@@ -26,12 +52,6 @@ public class Attribute extends ClayElement {
 	public void setEntity(Entity entity) {
 		this.entity = entity;
 	}
-
-	Attribute foreignAttribute = null;
-    
-
-
-
 
 	public Entity getReferencedEntity() {
 		return referencedEntity;
@@ -119,6 +139,8 @@ public class Attribute extends ClayElement {
     }
     
     public Entity getDominantEntity() {
+    	if(dominantEntity==null)
+    		System.out.println("DominantEntity is null");
         return dominantEntity;
     }
 

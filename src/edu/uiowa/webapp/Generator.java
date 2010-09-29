@@ -3,6 +3,13 @@ package edu.uiowa.webapp;
 public class Generator {
 	static String pathPrefix = "/Users/eichmann/Documents/Components/workspace/";
 	static String mode = "tags";
+	static String modelSource = "clay";
+	static String dburl="";
+	static String dbusername="" ;
+	static String dbpassword = "";
+	static String dbdriverclass = "";
+	static String dbschema = "";
+	static boolean dbssl = true;
 
 	/**
 	 * @param args
@@ -33,13 +40,41 @@ public class Generator {
 		if (args.length > 3)
 		{
 			mode = args[3];
+			if (args.length > 3)
+			{
+				modelSource = args[4];
+				if(args.length>8)
+				{
+					dburl=args[5];
+					dbusername=args[6];
+					dbpassword=args[7];
+					dbssl=Boolean.parseBoolean(args[8]);
+					dbdriverclass=args[9];
+					if(args.length>9)
+						dbschema=args[10];
+					
+					
+				}
+
+			}
 
 		}
 		
 		System.out.println("Generator mode:"+ mode);
 
-		DatabaseSchemaLoader theLoader = new ClayLoader();
-		theLoader.run(pathPrefix + args[1] + "/WebContent/resources/" + args[1] + ".clay");
+		DatabaseSchemaLoader theLoader = null;
+		if(modelSource.equalsIgnoreCase("clay"))
+		{
+			theLoader = new ClayLoader();
+			theLoader.run(pathPrefix + args[1] + "/WebContent/resources/" + args[1] + ".clay");
+			
+		}
+		else if(modelSource.equalsIgnoreCase("jdbc"))
+		{
+		
+			theLoader = new JDBCLoader();
+			theLoader.run("database.properties");
+		}
 
 		theDatabase = theLoader.getDatabase();
 		theDatabase.dump();
@@ -74,8 +109,8 @@ public class Generator {
 			JSPCodeGenerator theJSPGenerator = new JSPCodeGenerator(pathPrefix + args[1]+ "/"  + "WebContent/WEB-INF/jsp/");
 			theJSPGenerator.generateAllJSP(theDomainGenerator.getDomainClassList());
 
-			ConfigGenerator configGen = new ConfigGenerator(pathPrefix + args[1]+ "/"  + "src", args[0], args[1]);
-			configGen.generateDispatcher(theDatabase);
+//			ConfigGenerator configGen = new ConfigGenerator(pathPrefix + args[1]+ "/"  + "src", args[0], args[1]);
+//			configGen.generateDispatcher(theDatabase);
 
 		}
 

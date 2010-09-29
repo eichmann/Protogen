@@ -297,6 +297,7 @@ src/dispatcher-servlet.tmplt -text
 src/edu/uiowa/hibernate/CreateDAO.java -text
 src/edu/uiowa/hibernate/CreateJSP.java -text
 src/edu/uiowa/hibernate/FileContents.java -text
+src/edu/uiowa/loaders/DBConnect.java -text
 src/edu/uiowa/loaders/JDBCReader.java -text
 src/edu/uiowa/loaders/PrivateReader.java -text
 src/edu/uiowa/loaders/PropertyLoader.java -text
@@ -317,6 +318,7 @@ src/edu/uiowa/webapp/DomainClass.java -text
 src/edu/uiowa/webapp/DomainCodeGenerator.java -text
 src/edu/uiowa/webapp/Entity.java -text
 src/edu/uiowa/webapp/Generator.java -text
+src/edu/uiowa/webapp/JDBCLoader.java -text
 src/edu/uiowa/webapp/JSPCodeGenerator.java -text
 src/edu/uiowa/webapp/JSPGenerator.java -text
 src/edu/uiowa/webapp/Relationship.java -text

@@ -16,24 +16,30 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.uiowa.webapp.ClassVariable.AttributeType;
 import edu.uiowa.webapp.DomainClass.ClassType;
 
 
 public class JSPCodeGenerator {
 	
+	private static final Log log =LogFactory.getLog(JSPCodeGenerator.class);
 	public String jspRoot;
 
 	
 	public JSPCodeGenerator(String jspRoot)
 	{
 		this.jspRoot = jspRoot;
+
 		
 	}
 	
 	public void generateAllJSP(List<DomainClass> ecList)
-	
 		throws IOException {
+		
+	
 
 
 		generateMenu(ecList);
@@ -85,14 +91,14 @@ public class JSPCodeGenerator {
 			output += spaces(indent) + "<tr>";
 			output += lines(1);
 			ClassVariable cv = cvIter.next();
-			System.out.println("ClassVariable:"+cv.getIdentifier());
+			System.out.println("-ClassVariable:"+cv.getIdentifier());
 			indent +=4;
 			output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
 			output += lines(1);
 			
 			String pkString="";
 
-
+		
 			if(cv.getAttribType() == AttributeType.CHILD && cv.getAttribute().getEntity().getDomainClass() !=null)
 			{
 				System.out.println("isChild");
@@ -133,11 +139,17 @@ public class JSPCodeGenerator {
 		BufferedWriter out = new BufferedWriter(fstream);
 		out.write(output);
 		out.close();
+		System.out.println("Log here");
+
 	}
 	
 	
 	private void generateListJSP(DomainClass ec) throws IOException {
+	
+		System.out.println("GeneratingListJSP:"+ec.getIdentifier());
+		System.out.print("...."+ ec.getIdentifier());
 		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/generated/" + ec.getIdentifier().toLowerCase();
+		
 		(new File(directory )).mkdirs();
 		
 		String jspFile = directory+ "/list.jsp";
@@ -145,7 +157,7 @@ public class JSPCodeGenerator {
 		
 		String output= spaces(indent) + "<%@ include file=\"/WEB-INF/include.jsp\"  %>";
 		output += lines(2);
-		
+
 		output += "<h2>"+ec.getIdentifier()+" List</h2>";
 		output += lines(1);
 		output += spaces(indent) + "<a href=\"add.html\">Add</a>";
@@ -153,7 +165,7 @@ public class JSPCodeGenerator {
 		
 		output += spaces(indent) + "<table class=\"tableData1\">";
 		lines(1);
-		
+	
 		Iterator<ClassVariable> cvIter = ec.listAllIter();
 		output += lines(1);
 		output += spaces(indent) + "<tr>";
@@ -178,6 +190,7 @@ public class JSPCodeGenerator {
 		output += spaces(indent) + "<tr>";
 		output += lines(1);
 		indent +=4;
+
 		while(cvIter.hasNext())
 		{
 			
@@ -208,6 +221,7 @@ public class JSPCodeGenerator {
 		BufferedWriter out = new BufferedWriter(fstream);
 		out.write(output);
 		out.close();
+		System.out.print(".........done");
 	}
 	
 	
@@ -265,10 +279,15 @@ public class JSPCodeGenerator {
 				output += spaces(indent) + "<td><select id=\""+cv.getIdentifier()+"\" name=\""+cv.getAttribute().getReferencedEntity().getDomainClass().getEntity().getLowerLabel()+"Id\" >";
 				output += lines(1);
 				output += spaces(indent) + "<c:forEach items=\"${" + cv.getDomainClass().getLowerIdentifier()+ "List}\" var=\"item\" >";
-				String selected = "<c:if test=\"${";
+				String selected="";
+				if( cv.getDomainClass().getPrimaryKeys().size()>0 && cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().size()>0)
+				{
+					System.out.println("creating select");
+				selected += "<c:if test=\"${";
 				selected += ec.getLowerIdentifier()+"."+cv.getIdentifier()+"." + cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier(); 
 				selected += "== item."+ cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\">selected=\"true\"</c:if>";
 				output += spaces(indent) + "<option "+selected+" value=\"${item."+cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\" >"+ cv.getAttribute().getReferencedEntity().getDomainClass().getSelectBoxLabel()+"</option>";
+				}
 				output += spaces(indent) + "</c:forEach>";
 				output += lines(1);
 				output += spaces(indent) + "</select></td>";

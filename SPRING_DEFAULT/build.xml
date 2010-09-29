@@ -63,6 +63,7 @@
 			<arg value="${current.project.name}"/>
 			<arg value="${generator.workspace.path}"/>
  			<arg value="spring"/>
+ 			<arg value="${model_source}"/>
 			<classpath>
 				
 				<pathelement path="${generator.class.path}"/>
