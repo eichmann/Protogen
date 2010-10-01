@@ -139,25 +139,61 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 		for(Schema s:database.getSchemas())
 		{
-		//	s.relabel();
+			System.out.print("Schema:"+s.getLabel());
+
 			for(Entity e:s.getEntities())
 			{
-				//e.relabel();
+				
+				System.out.print("...Entity:"+e.getLabel());
 				
 				for(Attribute a:e.getAttributes())
 				{
-					a.relabel();
+					String lab = a.getLabel();
+					System.out.print(".....Attribute:"+lab);
+
+					
 					//a.setType(a.getJavaTypeClass());
 	
 					
 				}
+				
+
 				e.generateParentKeys();
 	            e.generateSubKeys();
 	            e.matchRemarks();
 
 				
 			}
+			
+			s.relabel();
+		
 		}
+		for(Schema s:database.getSchemas())
+		{
+			System.out.print("Schema:"+s.getLabel());
+			for(Entity e:s.getEntities())
+			{
+				
+				System.out.print("...Entity:"+e.getLabel());
+				
+				for(Attribute a:e.getAttributes())
+				{
+					String lab = a.getLabel();
+					System.out.print(".....Attribute:"+lab);
+
+					
+					//a.setType(a.getJavaTypeClass());
+	
+					
+				}
+			
+
+
+
+				
+			}
+	}
+		
 	
 		
 	}
@@ -287,8 +323,26 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 			for(Attribute a :e.getAttributes())
 			{
 				if(aLabel.equalsIgnoreCase(a.getLabel()))
+				{
 						a.setPrimary(true);
+						boolean exists = false;
+						for(Attribute aa : e.getPrimaryKeyAttributes())
+						{
+							if(aa.label.equalsIgnoreCase(aa.getLabel()))
+							{
+								exists = true;
+								continue;
+							}
+								
+							
+						}
+						if(!exists)
+							e.getPrimaryKeyAttributes().add(a);
+						
+				}
+				
 			}
+			
 		}
 		
 		return e;

@@ -190,6 +190,7 @@ public class Attribute extends ClayElement {
     }
 
     public void relabel() {
+    	System.out.println("relabeling: label="+label +"   type="+type);
         sqlLabel = label;
         if (label.toLowerCase().equals("id"))
                 label = "ID";
