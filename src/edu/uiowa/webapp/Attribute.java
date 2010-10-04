@@ -220,11 +220,15 @@ public class Attribute extends ClayElement {
             type = "Date";
         else if (type.toLowerCase().equals("timestamp"))
             type = "Date";
+        else if (type.toLowerCase().equals("timestamptz"))
+            type = "Date";
         else if (type.toLowerCase().equals("double precision"))
             type = "double";
         else if (type.toLowerCase().equals("float"))
             type = "double";
         else if (type.toLowerCase().equals("boolean"))
+            type = "boolean";
+        else if (type.toLowerCase().equals("bool"))
             type = "boolean";
         else if (type.toLowerCase().equals("real"))
             type = "float";
@@ -296,8 +300,12 @@ public class Attribute extends ClayElement {
             return (get ? "get" : "set") + "Int";
         else if (sqlType.toLowerCase().equals("decimal"))
             return (get ? "get" : "set") + "Int";
+        else if (sqlType.toLowerCase().equals("bool"))
+            return (get ? "get" : "set") + "Boolean";
         else if (sqlType.toLowerCase().equals("bytea"))
             return (get ? "get" : "set") + "Bytes";
+        else if (sqlType.toLowerCase().equals("timestamptz"))
+            return (get ? "get" : "set") + "Date";
         else
             return (get ? "get" : "set") + sqlType;
     }

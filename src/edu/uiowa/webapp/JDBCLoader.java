@@ -47,6 +47,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		
 		setupDatabase(dbMeta);
 		
+		
 		/*
 		 * if schema is defined, use;otherwise run on all schemas
 		 */
@@ -71,8 +72,6 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		}
 		
 		updateForeignKeys(dbMeta);
-	//	database.relabel();
-		updateLabels();
 	
 	}
 	
@@ -133,70 +132,6 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 	}
 	
 	
-	private void updateLabels() throws SQLException
-	{
-		System.out.println("updating labels");
-
-		for(Schema s:database.getSchemas())
-		{
-			System.out.print("Schema:"+s.getLabel());
-
-			for(Entity e:s.getEntities())
-			{
-				
-				System.out.print("...Entity:"+e.getLabel());
-				
-				for(Attribute a:e.getAttributes())
-				{
-					String lab = a.getLabel();
-					System.out.print(".....Attribute:"+lab);
-
-					
-					//a.setType(a.getJavaTypeClass());
-	
-					
-				}
-				
-
-				e.generateParentKeys();
-	            e.generateSubKeys();
-	            e.matchRemarks();
-
-				
-			}
-			
-			s.relabel();
-		
-		}
-		for(Schema s:database.getSchemas())
-		{
-			System.out.print("Schema:"+s.getLabel());
-			for(Entity e:s.getEntities())
-			{
-				
-				System.out.print("...Entity:"+e.getLabel());
-				
-				for(Attribute a:e.getAttributes())
-				{
-					String lab = a.getLabel();
-					System.out.print(".....Attribute:"+lab);
-
-					
-					//a.setType(a.getJavaTypeClass());
-	
-					
-				}
-			
-
-
-
-				
-			}
-	}
-		
-	
-		
-	}
 	
 	
 
@@ -249,6 +184,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		System.out.println("Database");
 		while(rs.next())
 		{
+			System.out.println(""+rs.getString(1));
 			database.setLabel(rs.getString(1));
 		}
 		

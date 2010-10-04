@@ -41,7 +41,6 @@
 	</target>
 
 	
-	
 	<target name="check-clay">
 	    <available file="${target.dir}/WebContent/resources/${target.project.name}.clay" property="clay.exists"/>
 	</target>

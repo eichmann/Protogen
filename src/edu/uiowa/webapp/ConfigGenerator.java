@@ -48,7 +48,7 @@ public class ConfigGenerator {
 		config.genModelList(db.getSchemas());
 		config.setDatabaseName(db.getSqlLabel());
 		
-
+		System.out.println("Here:");
 		
 		File file = new File(projectPath, "..//WebContent/WEB-INF/dispatcher-servlet.xml");
 		

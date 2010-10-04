@@ -31,6 +31,19 @@
 		<antcall target="run_target_generator" />
 		
 	</target>
+	
+	<target name="setup_nogen" depends="GetProjectName">
+		<antcall target="copy_ivy_config" />
+		<antcall target="copy_src" />
+		<antcall target="copy_spring_config" />
+		<antcall target="copy_default_build_files" />
+		<antcall target="copy_default_properties" />
+		<antcall target="copy_clay" />
+		<antcall target="copy_user_props" />
+		<eclipse.refreshLocal resource="${spring_target.project.name}"/>
+		<ant antfile="build.xml"  dir="../${spring_target.project.name}" target="resolve-dependencies_sync" inheritall="false"/>
+		
+	</target>
 
 	
 	<target name="copy_user_props">

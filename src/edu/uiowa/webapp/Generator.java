@@ -74,6 +74,8 @@ public class Generator {
 		
 			theLoader = new JDBCLoader();
 			theLoader.run("database.properties");
+			theLoader.getDatabase().setLabel(args[1]);
+			theLoader.getDatabase().relabel();
 		}
 
 		theDatabase = theLoader.getDatabase();
@@ -109,8 +111,8 @@ public class Generator {
 			JSPCodeGenerator theJSPGenerator = new JSPCodeGenerator(pathPrefix + args[1]+ "/"  + "WebContent/WEB-INF/jsp/");
 			theJSPGenerator.generateAllJSP(theDomainGenerator.getDomainClassList());
 
-//			ConfigGenerator configGen = new ConfigGenerator(pathPrefix + args[1]+ "/"  + "src", args[0], args[1]);
-//			configGen.generateDispatcher(theDatabase);
+			ConfigGenerator configGen = new ConfigGenerator(pathPrefix + args[1]+ "/"  + "src", args[0], args[1]);
+			configGen.generateDispatcher(theDatabase);
 
 		}
 

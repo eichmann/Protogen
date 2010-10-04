@@ -47,16 +47,19 @@ public class SpringConfiguration {
 	}
 	
 	public void genModelList(List<Schema> schemaList)
-	{
+	{	
+		System.out.println("");
+		System.out.println("genMOdelList");
 		
 		Iterator<Schema> schemaIter =  schemaList.iterator();
 		while(schemaIter.hasNext())
 		{
 			Schema schema = schemaIter.next();
+			System.out.println("schem:"+schema.getLabel());
 			springComponents += "<context:component-scan base-package=\""+ packageRoot +"." +schema.getUnqualifiedLabel()+ "\" />\n     ";
 			hibernatePackages += "<value>"+packageRoot +"." +schema.getUnqualifiedLabel()+"</value>\n     ";
 		}
-
+		System.out.println("..done");
 	}
 
 
