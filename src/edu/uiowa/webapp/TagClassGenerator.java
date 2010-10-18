@@ -593,7 +593,13 @@ public class TagClassGenerator {
         if (!primary)
             out.write("\t\tcommitNeeded = true;\n");
         out.write("\t}\n");    	
-    }
+
+        // generate look-aside method for actual value
+        out.write("\n\tpublic " + (domain == null ? type : domain.getJavaType()) + " getActual" + Character.toUpperCase(label.charAt(0))
+                + label.substring(1) + " () {\n");
+        out.write("\t\treturn " + label + ";\n");
+        out.write("\t}\n");
+}
     
     private void generateSetterNow(String type, String label, Domain domain, boolean primary, BufferedWriter out) throws IOException {
         // generate setter method for current time
