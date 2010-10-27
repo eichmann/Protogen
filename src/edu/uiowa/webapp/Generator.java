@@ -40,7 +40,7 @@ public class Generator {
 		if (args.length > 3)
 		{
 			mode = args[3];
-			if (args.length > 3)
+			if (args.length > 4)
 			{
 				modelSource = args[4];
 				if(args.length>8)
