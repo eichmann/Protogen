@@ -472,7 +472,7 @@ public class DomainCodeGenerator {
 	private void generateSetter(BufferedWriter out, Attribute attrib)
 	throws IOException {
 		spaces(out, 4);
-		out.write("public void set" + attrib.getUnqualifiedLabel() + "("	+ attrib.getType() + " " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
+		out.write("public void set" + attrib.getUpperLabel() + "("	+ attrib.getType() + " " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
 		spaces(out, 4);
 		out.write("{\n");
 		spaces(out, 8);
@@ -488,7 +488,7 @@ public class DomainCodeGenerator {
 		spaces(out, 4);
 		out.write("@Column(name = \""+attrib.getSqlLabel()+"\""+ (attrib.isPrimary() ? ", nullable = false":"")+ ")\n" );
 		spaces(out, 4);
-		out.write("public "+attrib.getType()+" get" + attrib.getUnqualifiedLabel() + "()\n");
+		out.write("public "+attrib.getType()+" get" + attrib.getUpperLabel() + "()\n");
 		spaces(out, 4);
 		out.write("{\n");
 		spaces(out, 8);
