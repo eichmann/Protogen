@@ -163,7 +163,7 @@ public class JSPCodeGenerator {
 		output += spaces(indent) + "<a href=\"add.html\">Add</a>";
 		output += lines(1);
 		
-		output += spaces(indent) + "<table class=\"tableData1\">";
+		output += spaces(indent) + "<table class=\"tableData1\">\n<thead>";
 		lines(1);
 	
 		Iterator<ClassVariable> cvIter = ec.listAllIter();
@@ -181,12 +181,12 @@ public class JSPCodeGenerator {
 			
 		}
 		indent -=4;
-		output += spaces(indent) + "</tr>";
+		output += spaces(indent) + "</tr>\n</thead>";
 		output += lines(1);
 		indent -=4;
 		
 		cvIter = ec.listAllIter();
-		output += spaces(indent) + "<c:forEach items=\"${"+ec.getLowerIdentifier()+"List}\" var=\""+ec.getLowerIdentifier()+"\"  varStatus=\"status\">";
+		output += spaces(indent) + "<tbody>\n<c:forEach items=\"${"+ec.getLowerIdentifier()+"List}\" var=\""+ec.getLowerIdentifier()+"\"  varStatus=\"status\">";
 		output += spaces(indent) + "<tr>";
 		output += lines(1);
 		indent +=4;
@@ -212,7 +212,7 @@ public class JSPCodeGenerator {
 		output += spaces(indent) + "</c:forEach>";
 		indent -=4;
 		
-		output += spaces(indent) + "</table>";
+		output += spaces(indent) + "\n</tbody>\n</table>";
 		output += lines(1);
 		
 	
