@@ -384,9 +384,10 @@ public class TagClassGenerator {
         
         out.write("\t\t} catch (SQLException e) {\n");
         out.write("\t\t\te.printStackTrace();\n");
-        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: JDBC error retrieving " + keyAttribute.getLabel() + " \" + "
                 + keyAttribute.getLabel() + ");\n");
+        out.write("\t\t} finally {\n");
+        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t}\n");
         out.write("\t\treturn EVAL_PAGE;\n");
         out.write("\t}\n");
@@ -449,10 +450,11 @@ public class TagClassGenerator {
         out.write("\t\t\t}\n");
         out.write("\t\t} catch (SQLException e) {\n");
         out.write("\t\t\te.printStackTrace();\n");
-        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
+        out.write("\t\t} finally {\n");
+        out.write("\t\t\tclearServiceState();\n");
+        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t}\n");
-        out.write("\t\tclearServiceState();\n");
         out.write("\t\treturn super.doEndTag();\n");
         out.write("\t}\n");
     }
@@ -550,8 +552,9 @@ public class TagClassGenerator {
         out.write("\t\t\tstmt.close();\n");
         out.write("\t\t} catch (SQLException e) {\n");
         out.write("\t\t\te.printStackTrace();\n");
-        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
+        out.write("\t\t} finally {\n");
+        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t}\n");
         out.write("\t}\n");
     }
@@ -906,8 +909,10 @@ public class TagClassGenerator {
                 + "            }\n"
                 + "        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
-                + "            freeConnection();\n"
+                + "            clearServiceState();\n"
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString());\n"
+                + "        } finally {\n"
+                + "            freeConnection();\n"
                 + "        }\n"
                 + "\n"
                 + "        return SKIP_BODY;\n"
@@ -975,11 +980,11 @@ public class TagClassGenerator {
                 + "            }\n"
                 + "        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
-                + "            freeConnection();\n"
                 + "            throw new JspTagException(\"Error: JDBC error iterating across " + theEntity.getLabel() + "\");\n"
+                + "        } finally {\n"
+                + "            clearServiceState();\n"
+                + "            freeConnection();\n"
                 + "        }\n"
-                + "        clearServiceState();\n"
-                + "        freeConnection();\n"
                 + "        return SKIP_BODY;\n"
                 + "    }\n"
                 + "\n"
@@ -1147,8 +1152,10 @@ public class TagClassGenerator {
         
         out.write("        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
-                + "            freeConnection();\n"
+                + "            clearServiceState();\n"
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " deleter\");\n"
+                + "        } finally {\n"
+                + "            freeConnection();\n"
                 + "        }\n"
                 + "\n"
                 + "        return SKIP_BODY;\n"
