@@ -724,11 +724,11 @@ public class TagClassGenerator {
             out.write("\t\t\t\tcount = crs.getInt(1);\n"
                     + "\t\t\t}\n"
                     + "\t\t\tstat.close();\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t} catch (SQLException e) {\n"
                     + "\t\t\te.printStackTrace();\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
+                    + "\t\t} finally {\n"
+                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t}\n");
             out.write("\t\treturn \"\" + count;\n");
             out.write("\t}\n\n");
@@ -763,11 +763,11 @@ public class TagClassGenerator {
             out.write("\t\t\t\tcount = crs.getInt(1);\n"
                     + "\t\t\t}\n"
                     + "\t\t\tstat.close();\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t} catch (SQLException e) {\n"
                     + "\t\t\te.printStackTrace();\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
+                    + "\t\t} finally {\n"
+                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t}\n");
             out.write("\t\treturn \"\" + count;\n");
             out.write("\t}\n\n");
@@ -808,11 +808,11 @@ public class TagClassGenerator {
             out.write("\t\t\t\tcount = crs.getInt(1);\n"
                     + "\t\t\t}\n"
                     + "\t\t\tstat.close();\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t} catch (SQLException e) {\n"
                     + "\t\t\te.printStackTrace();\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
+                    + "\t\t} finally {\n"
+                    + "\t\t\ttheIterator.freeConnection();\n"
                     + "\t\t}\n");
             out.write("\t\treturn count > 0;\n");
             out.write("\t}\n\n");
@@ -859,11 +859,11 @@ public class TagClassGenerator {
                 out.write("\t\t\t\tcount = crs.getInt(1);\n"
                         + "\t\t\t}\n"
                         + "\t\t\tstat.close();\n"
-                        + "\t\t\ttheIterator.freeConnection();\n"
                         + "\t\t} catch (SQLException e) {\n"
                         + "\t\t\te.printStackTrace();\n"
-                        + "\t\t\ttheIterator.freeConnection();\n"
                         + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
+                        + "\t\t} finally {\n"
+                        + "\t\t\ttheIterator.freeConnection();\n"
                         + "\t\t}\n");
                 out.write("\t\treturn count > 0;\n");
                 out.write("\t}\n\n");
@@ -910,9 +910,8 @@ public class TagClassGenerator {
                 + "        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
                 + "            clearServiceState();\n"
-                + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString());\n"
-                + "        } finally {\n"
                 + "            freeConnection();\n"
+                + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString());\n"
                 + "        }\n"
                 + "\n"
                 + "        return SKIP_BODY;\n"
@@ -1332,8 +1331,9 @@ public class TagClassGenerator {
         
         out.write("        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
-                + "            freeConnection();\n"
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " deleter\");\n"
+                + "        } finally {\n"
+                + "            freeConnection();\n"
                 + "        }\n"
                 + "\n"
                 + "        return SKIP_BODY;\n"
@@ -1911,11 +1911,11 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\t\t\tcount = crs.getInt(1);\n"
                 + "\t\t\t\t\t\t}\n"
                 + "\t\t\t\t\t\tstat.close();\n"
-                + "\t\t\t\t\t\tfreeConnection();\n"
                 + "\t\t\t\t\t} catch (SQLException e) {\n"
                 + "\t\t\t\t\t\te.printStackTrace();\n"
-                + "\t\t\t\t\t\tfreeConnection();\n"
                 + "\t\t\t\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " object count\");\n"
+                + "\t\t\t\t\t} finally {\n"
+                + "\t\t\t\t\t\tfreeConnection();\n"
                 + "\t\t\t\t\t}\n");
 
         out.write("\t\t\t\t\tif (count == 0)\n");
@@ -2055,9 +2055,10 @@ public class TagClassGenerator {
         
         out.write("\t\t} catch (SQLException e) {\n");
         out.write("\t\t\te.printStackTrace();\n");
-        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: JDBC error retrieving " + keyAttribute.getLabel() + " \" + "
                 + keyAttribute.getLabel() + ");\n");
+        out.write("\t\t} finally {\n");
+        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t}\n");
         out.write("\t\treturn EVAL_PAGE;\n");
         out.write("\t}\n");
@@ -2125,14 +2126,14 @@ public class TagClassGenerator {
         out.write("\t\t\t}\n");
         out.write("\t\t} catch (SQLException e) {\n");
         out.write("\t\t\te.printStackTrace();\n");
-        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: SQLException while writing to the user\");\n");
         if (theEntity.hasBinaryDomainAttribute()) {
             out.write("\t\t} catch (IOException e) {\n");
             out.write("\t\t\te.printStackTrace();\n");
-            out.write("\t\t\tfreeConnection();\n");
             out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
         }
+        out.write("\t\t} finally {\n");
+        out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t}\n");
         out.write("\t\tclearServiceState();\n");
         out.write("\t\treturn super.doEndTag();\n");
