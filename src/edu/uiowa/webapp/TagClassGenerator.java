@@ -695,7 +695,8 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\n    ResultSet rs = null;\n"
+        out.write("\n    PreparedStatement stat = null;\n"
+                + "    ResultSet rs = null;\n"
                 + "    String sortCriteria = null;\n"
                 + "    int limitCriteria = 0;\n"
                 + "    String var = null;\n"
@@ -872,8 +873,7 @@ public class TagClassGenerator {
         
         out.write("    public int doStartTag() throws JspException {\n");
         generateParentEntityReferences(out, theEntity, "\t\t");
-        out.write("\n        PreparedStatement stat = null;\n"
-                + "        try {\n"
+        out.write("\n      try {\n"
                 + "            int webapp_keySeq = 1;\n"
                 + "            stat = getConnection().prepareStatement(\"SELECT ");
         for (int i = 0; i < primaryKeys.size(); i++) {
@@ -979,13 +979,26 @@ public class TagClassGenerator {
                 + "            }\n"
                 + "        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
+                + "            clearServiceState();\n"
+                + "            freeConnection();\n"
                 + "            throw new JspTagException(\"Error: JDBC error iterating across " + theEntity.getLabel() + "\");\n"
+                + "        }\n"
+                + "        return SKIP_BODY;\n"
+                + "    }\n"
+                + "\n");
+        out.write("    public int doEndTag() throws JspTagException, JspException {\n"
+                + "        try {\n"
+                + "            rs.close();\n"
+                + "            stat.close();\n"
+                + "        } catch (SQLException e) {\n"
+                + "            e.printStackTrace();\n"
+                + "            throw new JspTagException(\"Error: JDBC error ending " + theEntity.getLabel() + " iterator\");\n"
                 + "        } finally {\n"
                 + "            clearServiceState();\n"
                 + "            freeConnection();\n"
                 + "        }\n"
-                + "        return SKIP_BODY;\n"
-                + "    }\n"
+                + "        return super.doEndTag();\n"
+               + "    }\n"
                 + "\n"
                 + "    private void clearServiceState() {\n");
         for (int i = 0; i < primaryKeys.size(); i++) {
@@ -994,6 +1007,7 @@ public class TagClassGenerator {
         }
         out.write("        parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         out.write("        this.rs = null;\n"
+                + "        this.stat = null;\n"
                 + "        this.sortCriteria = null;\n"
                 + "        this.var = null;\n"
                 + "        this.rsCount = 0;\n"
