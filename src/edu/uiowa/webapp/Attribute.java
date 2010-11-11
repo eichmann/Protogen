@@ -208,13 +208,15 @@ public class Attribute extends ClayElement {
             type = "int";
         else if (type.toLowerCase().equals("numeric"))
             type = "int";
+        else if (type.toLowerCase().equals("number"))
+            type = "int";
         else if (type.toLowerCase().equals("decimal"))
             type = "int";
         else if (type.toLowerCase().equals("text"))
             type = "String";
         else if (type.toLowerCase().equals("char"))
             type = "String";
-        else if (type.toLowerCase().equals("varchar"))
+        else if (type.toLowerCase().equals("varchar") || type.toLowerCase().equals("varchar2") || type.toLowerCase().equals("clob") || type.toLowerCase().equals("char"))
             type = "String";
         else if (type.toLowerCase().equals("date"))
             type = "Date";

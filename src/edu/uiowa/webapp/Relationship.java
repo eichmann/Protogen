@@ -81,4 +81,12 @@ public class Relationship extends ClayElement {
         System.out.println("\t\tsource entity: " + sourceEntity + "\ttarget entity: " + targetEntity + "\tuid: " + uid);
         System.out.println("\t\tsource entity: " + sourceEntity.getLabel() + "\ttarget entity: " + targetEntity.getLabel() + "\tuid: " + uid);
     }
+
+	@Override
+	public String toString() {
+		return "Relationship [sourceEntity=" + sourceEntity
+				+ ", sourceEntityName=" + sourceEntityName + ", targetEntity="
+				+ targetEntity + "]";
+	}
+    
 }
