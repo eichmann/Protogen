@@ -14,6 +14,13 @@
 	<property name="generator.workspace.path" value="${user.home}/workspace"/>
 	
 	
+
+	<target name="CreateJarsDir" >
+		<mkdir dir="${BUILD}/webapp" />
+	</target>
+	
+	
+	
 	<path id="ext_jars">
 		<fileset dir="${required_jars}" includes="*.jar"/>
 	</path>
@@ -37,6 +44,14 @@
 	</path>
 	
 	<target name="init" >
+		
+		<copy includeemptydirs="false" todir="${TMPDIR}/${target.project.name}" verbose="true">
+			<fileset dir="./WebContent/" />
+		</copy>
+		<copy includeemptydirs="false" todir="${TMPDIR}/${target.project.name}/src" verbose="true">
+			<fileset dir="./src" />
+		</copy>
+		
 		<mkdir dir="${TMPDIR}/${current.project.name}" />
 		<mkdir dir="${TMPDIR}/${current.project.name}/META-INF" />
 		<mkdir dir="${TMPDIR}/${current.project.name}/edu" />
@@ -153,5 +168,31 @@
 		<eclipse.refreshLocal resource="${target.project.name}"/> 
 	</target>
 	
+	<target name="jar_classes" depends="compile">
+		
+		 <jar basedir="${TMPDIR}/${current.project.name}/bin"
+			jarfile="${TMPDIR}/${current.project.name}/WEB-INF/lib/${current.project.name}.jar" duplicate="preserve"
+		 	includes="**/*.class" />
+		
+	</target>
+	
+	
+	 <target name="war" depends="init,compile,CreateJarsDir,jar_classes">
+	 		<delete dir="${TMPDIR}/${target.project.name}/bin" />
+	 		<delete dir="${TMPDIR}/${target.project.name}/src" />
+	 		
+	         <delete file="${BUILD}/webapp/${target.project.name}.war" verbose="true"/>
+	         <war warfile="${BUILD}/webapp/${target.project.name}.war" 
+	         	webxml="${TMPDIR}/${target.project.name}/WEB-INF/web.xml" duplicate="preserve"
+	         	manifest="${TMPDIR}/${target.project.name}/META-INF/MANIFEST.MF" >
+	                <metainf dir="${TMPDIR}/${target.project.name}/META-INF/"/>
+	                <webinf dir="${TMPDIR}/${target.project.name}/WEB-INF/" />
+	                <fileset dir="${TMPDIR}/${target.project.name}/">
+						<exclude name="META-INF" />
+						<exclude name="WEB-INF" />
+	            	</fileset>
+		    </war>
+	 </target>
+
 </project> 
 
