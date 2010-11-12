@@ -8,6 +8,7 @@ import java.lang.reflect.*;
 
 
 import edu.uiowa.webapp.ClassVariable.AttributeType;
+import edu.uiowa.webapp.ClassVariable.RelationshipType;
 
 public class DomainClass
 {
@@ -25,6 +26,7 @@ public class DomainClass
 	private ClassType classType;
 	private Entity entity=null;
 	private Schema schema=null;
+
 
 	
 	
@@ -103,6 +105,7 @@ public class DomainClass
 		
 		listAllSym.addAll(getPrimaryKeys());
 		listAllSym.addAll(getNonKeys());
+	
 		
 		return listAllSym.iterator();
 	}
@@ -316,8 +319,9 @@ public class DomainClass
 		while(symIter.hasNext())
 		{
 			ClassVariable cv = symIter.next();
-			if(cv.isPrimary())
+			if(cv.isPrimary() )//&& cv.getAttribType() != AttributeType.FOREIGNPRIMARYKEY)
 				cvList.add(cv);
+			
 			
 			
 			
@@ -343,11 +347,12 @@ public class DomainClass
 	
 	public List<ClassVariable> getNonKeys() {
 		List<ClassVariable> cvList = new ArrayList<ClassVariable>();
-		Iterator<ClassVariable> symIter = symTable.iterator();
-		while(symIter.hasNext())
+	
+		
+		
+		for(ClassVariable cv: symTable)
 		{
-			ClassVariable cv = symIter.next();
-			if(!cv.isPrimary())
+			if(!cv.isPrimary() )
 				cvList.add(cv);
 		
 		}

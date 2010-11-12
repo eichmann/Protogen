@@ -391,20 +391,27 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 				if(aLabel.equalsIgnoreCase(a.getLabel()))
 				{
 					a.setPrimary(true);
+					System.out.println("..........is primary");
 					boolean exists = false;
 					for(Attribute aa : e.getPrimaryKeyAttributes())
 					{
-						if(aa.label.equalsIgnoreCase(aa.getLabel()))
+						
+						if(aa.getLabel().equalsIgnoreCase(aLabel))
 						{
-							System.out.println("..........is primary");
-							exists = true;
+							
+							exists=true;
 							continue;
 						}
 
 
 					}
 					if(!exists)
+					{
+						System.out.println("................adding");
 						e.getPrimaryKeyAttributes().add(a);
+					}
+					
+						
 
 				}
 

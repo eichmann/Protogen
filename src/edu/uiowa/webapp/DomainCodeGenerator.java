@@ -170,7 +170,7 @@ public class DomainCodeGenerator {
 		}
 
 		//If only primary key
-		if (entity.getPrimaryKeyAttributes().size() ==1)
+		else if (entity.getPrimaryKeyAttributes().size() ==1)
 		{
 
 			Iterator<Attribute> attribIter1 = entity.getPrimaryKeyAttributes().iterator();
@@ -184,7 +184,7 @@ public class DomainCodeGenerator {
 //					attrib = entity.getAttributeByLabel(attrib.getUnqualifiedLabel());
 					
 					Entity parent = attrib.getReferencedEntity();//entity.getForeignReferenceEntity(attrib);
-					
+
 					v.setAttribType(AttributeType.FOREIGNPRIMARYKEY);
 					v.setRelationshipType(RelationshipType.ONETOONE);
 
@@ -334,7 +334,7 @@ public class DomainCodeGenerator {
 					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size()==1)
 					{
 						v.setRelationshipType(RelationshipType.ONETOONE);
-						v.getGetterAnnotations().add("@OneToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
+						v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
 						v.getGetterAnnotations().add("@PrimaryKeyJoinColumn");
 					}
 					else
