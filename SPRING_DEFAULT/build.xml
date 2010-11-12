@@ -59,7 +59,7 @@
 	<target name="compile" depends="init">
 		<javac destdir="${TMPDIR}/${current.project.name}/"  >
 
-			 <src path="../${current.project.name}/src"/>
+			 <src path="./src"/>
 			 <classpath refid="WebAppLib"/>
 
 		</javac>
