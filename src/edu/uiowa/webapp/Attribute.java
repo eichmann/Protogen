@@ -111,7 +111,7 @@ public class Attribute extends ClayElement {
     }
     
     public String getInitializer() {
-        if (isInt())
+        if (isInt() || isLong())
             return "0";
         else if (isDouble())
             return "0.0";
@@ -124,6 +124,8 @@ public class Attribute extends ClayElement {
     public String getDefaultValue() {
         if (isInt())
             return "Sequence.generateID()";
+        else if (isLong())
+            return "0";
         else if (isDouble())
             return "0.0";
         else if (isDateTime())
@@ -212,6 +214,10 @@ public class Attribute extends ClayElement {
             type = "int";
         else if (type.toLowerCase().equals("decimal"))
             type = "int";
+        else if (type.toLowerCase().equals("bigint"))
+            type = "long";
+        else if (type.toLowerCase().equals("int8"))
+            type = "long";
         else if (type.toLowerCase().equals("text"))
             type = "String";
         else if (type.toLowerCase().equals("char"))
@@ -240,6 +246,10 @@ public class Attribute extends ClayElement {
     
     public boolean isInt() {
         return type.equals("int");
+    }
+    
+    public boolean isLong() {
+        return type.equals("long");
     }
     
     public boolean isText() {
@@ -280,6 +290,8 @@ public class Attribute extends ClayElement {
     public String getJavaTypeClass() {
         if (isInt())
             return "Integer";
+        if (isLong())
+            return "Long";
         if (isText())
             return "String";
         if (isBoolean())
@@ -300,6 +312,8 @@ public class Attribute extends ClayElement {
             return (get ? "get" : "set") + "String";
         else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("smallint"))
             return (get ? "get" : "set") + "Int";
+        else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
+            return (get ? "get" : "set") + "Long";
         else if (sqlType.toLowerCase().equals("decimal"))
             return (get ? "get" : "set") + "Int";
         else if (sqlType.toLowerCase().equals("bool"))
@@ -325,6 +339,8 @@ public class Attribute extends ClayElement {
             return label;
         else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("int") || sqlType.toLowerCase().equals("smallint"))
             return "Integer.parseInt(" + label + ")";
+        else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
+            return "Long.parseLong(" + label + ")";
         else if (sqlType.toLowerCase().equals("decimal"))
             return "Integer.parseInt(" + label + ")";
         else if (sqlType.toLowerCase().equals("boolean"))        	
