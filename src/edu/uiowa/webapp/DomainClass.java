@@ -26,11 +26,21 @@ public class DomainClass
 	private ClassType classType;
 	private Entity entity=null;
 	private Schema schema=null;
+	private boolean usesCompositeKey;
+	
+	
+	
 
 
 	
 	
 
+	public boolean isUsesCompositeKey() {
+		return usesCompositeKey;
+	}
+	public void setUsesCompositeKey(boolean usesCompositeKey) {
+		this.usesCompositeKey = usesCompositeKey;
+	}
 	public Schema getSchema() {
 		return schema;
 	}

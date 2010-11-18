@@ -105,6 +105,7 @@ public class DomainCodeGenerator {
 			return null;
 		}
 	
+		boolean usesComposite=false;
 		HashMap<String,Attribute> foreignAndPrimaryKeysAttributes = getHashFromAttributesFtPt(entity.getAttributes().iterator());	
 		HashMap<String,Attribute> foreignAndNotPrimaryKeysAttributes = getHashFromAttributesFtPf(entity.getAttributes().iterator());
 		HashMap<String,Attribute> notForeignAndPrimaryKeysAttributes = getHashFromAttributesFfPt(entity.getAttributes().iterator());
@@ -147,6 +148,7 @@ public class DomainCodeGenerator {
 		if (entity.getPrimaryKeyAttributes().size()>1)
 		{
 			generateCompositeIdClassForEntity(entity);
+			usesComposite=true;
 
 			ClassVariable v =new ClassVariable("private", entity.getUnqualifiedLabel()+"Id", entity.getUnqualifiedLowerLabel() + "Id");
 
@@ -222,8 +224,13 @@ public class DomainCodeGenerator {
 		{	
 
 			Attribute attrib = attribIter.next();
-			if(!attrib.isForeign())
+			if(!attrib.isForeign() )
 			{
+				
+				//don't add attribute if its part of the composite key
+				if (attrib.isPrimary() && usesComposite==true)
+					continue;
+					
 			ClassVariable v = new ClassVariable("private", attrib.getType(), attrib.getUnqualifiedLowerLabel());
 
 			v.setAttribType(AttributeType.LOCALATTRIBUTE);
@@ -363,6 +370,7 @@ public class DomainCodeGenerator {
 		}
 
 		DomainClass domainClass = new DomainClass();
+		domainClass.setUsesCompositeKey(usesComposite);
 		domainClass.setSchema(currentSchema);
 		domainClass.setClassType(ClassType.ENTITY);
 		domainClass.setPackageName(currentPackageName);
