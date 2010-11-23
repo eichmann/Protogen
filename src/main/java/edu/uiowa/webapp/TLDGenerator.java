@@ -13,6 +13,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class TLDGenerator {
 
     String webAppPath = null;
@@ -22,6 +25,9 @@ public class TLDGenerator {
     File theTLD = null;
     BufferedWriter out = null;
 
+	private static final Log log =LogFactory.getLog(TLDGenerator.class);
+
+	
     File packagePrefixDirectory = null;
     File tagDirectory = null;
 
@@ -34,11 +40,11 @@ public class TLDGenerator {
         this.packagePrefix = packagePrefix;
         this.projectName = projectName;
         
-        System.out.println(webAppPath + "\t" + packagePrefix + "\t" + projectName);
+        log.debug(webAppPath + "\t" + packagePrefix + "\t" + projectName);
     }
 
     public void generateTLD(Database theDatabase) throws IOException {
-        theTLD = new File(webAppPath + "WEB-INF/" + projectName + ".tld");
+        theTLD = new File(webAppPath);
         FileWriter fstream = new FileWriter(theTLD);
         out = new BufferedWriter(fstream);
 //        <?xml version="1.0" encoding="ISO-8859-1" ?>

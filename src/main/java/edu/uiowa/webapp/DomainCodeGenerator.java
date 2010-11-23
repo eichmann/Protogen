@@ -16,6 +16,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 
 
@@ -38,6 +41,7 @@ public class DomainCodeGenerator {
 	private List<DomainClass> domainClassList = new ArrayList<DomainClass>();
 	
 	private Schema currentSchema;
+	private static final Log log =LogFactory.getLog(DomainCodeGenerator.class);
 
 
 	public List<DomainClass> getDomainClassList() {
@@ -87,7 +91,7 @@ public class DomainCodeGenerator {
 			DomainClass ec = generateDomainCodeForEntity(schema.getEntities().elementAt(i));
 			if(ec != null)
 				domainClassList.add(ec);		
-			System.out.println("check:"+i+" -"+schema.getEntities().elementAt(i).getLabel());
+			log.debug("check:"+i+" -"+schema.getEntities().elementAt(i).getLabel());
 		}
 		
 		connectLinks();
@@ -101,7 +105,7 @@ public class DomainCodeGenerator {
 		
 		if(isManyToMany(entity))
 		{
-			System.out.println("Entity is manyToMany.  Not Creating Class");
+			log.debug("Entity is manyToMany.  Not Creating Class");
 			return null;
 		}
 	
@@ -111,7 +115,7 @@ public class DomainCodeGenerator {
 		HashMap<String,Attribute> notForeignAndPrimaryKeysAttributes = getHashFromAttributesFfPt(entity.getAttributes().iterator());
 		HashMap<String,Attribute> notForeignAndNotPrimaryKeysAttributes = getHashFromAttributesFfPf(entity.getAttributes().iterator());
 	
-		System.out.println("******** Entity = " + entity.getSqlLabel());
+		log.debug("******** Entity = " + entity.getSqlLabel());
 
 
 		/***Domain Class components***/
@@ -247,7 +251,7 @@ public class DomainCodeGenerator {
 		}
 
 		//Find Child Variables
-		System.out.println("*************Entity:"+ entity.getSqlLabel() + " ---Count:" + entity.getChildren().size() );
+		log.debug("*************Entity:"+ entity.getSqlLabel() + " ---Count:" + entity.getChildren().size() );
 		Iterator<Relationship> iter = entity.getChildren().iterator();
 		HashMap<String, Integer> checkExists = new HashMap<String,Integer>();
 		while (iter.hasNext()) {
@@ -259,7 +263,7 @@ public class DomainCodeGenerator {
 			{
 
 				Attribute attrib = attribIter3.next();
-				System.out.println("*************Entity:"+ entity.getSqlLabel() + " ---Attrib:" + attrib.getUnqualifiedLabel() );
+				log.debug("*************Entity:"+ entity.getSqlLabel() + " ---Attrib:" + attrib.getUnqualifiedLabel() );
 				String postfix="";
 				if(checkExists.containsKey(e.getUnqualifiedLabel()))
 				{
@@ -276,7 +280,7 @@ public class DomainCodeGenerator {
 				if(isManyToMany(e))
 				{
 					 v=getManyToManyVariable(entity, e);
-					 System.out.println("************** " + e.getUnqualifiedLabel() + " is ManyToMany Table" );
+					 log.debug("************** " + e.getUnqualifiedLabel() + " is ManyToMany Table" );
 
 				}
 				else	
@@ -302,19 +306,19 @@ public class DomainCodeGenerator {
 
 		attribList.addAll(foreignAndNotPrimaryKeysAttributes.values());
 		attribList.addAll(foreignAndPrimaryKeysAttributes.values());
-		System.out.println("***CREATING ForeignRefCode on Entity:"+ entity.getSqlLabel() + " ---Count:" + attribList.size() );
+		log.debug("***CREATING ForeignRefCode on Entity:"+ entity.getSqlLabel() + " ---Count:" + attribList.size() );
 		Iterator<Attribute> iter2 = attribList.iterator();
 		checkExists = new HashMap<String,Integer>();
 		while (iter2.hasNext()) {
 	
 			Attribute at = iter2.next();
-			System.out.println("***Attribute:"+at.getUnqualifiedLabel());
+			log.debug("***Attribute:"+at.getUnqualifiedLabel());
 			Entity e = at.getReferencedEntity();//entity.getForeignReferenceEntity(at);
 			
 			if(e != null)
 			{
 				
-				System.out.println("***Current:"+entity.getUnqualifiedLabel()+" **PARENT ENTITY = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
+				log.debug("***Current:"+entity.getUnqualifiedLabel()+" **PARENT ENTITY = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
 					String postfix="";
 
@@ -328,7 +332,7 @@ public class DomainCodeGenerator {
 					else
 					{
 						
-						System.out.println("************EXISTS = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
+						log.debug("************EXISTS = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
 						checkExists.put(e.getUnqualifiedLabel(),0);
 						
@@ -364,7 +368,7 @@ public class DomainCodeGenerator {
 			}
 			else
 			{
-				System.out.println("************PARENT ENTITY = NULL for "+ at.getUnqualifiedLabel());
+				log.debug("************PARENT ENTITY = NULL for "+ at.getUnqualifiedLabel());
 			}
 			
 		}
@@ -419,7 +423,7 @@ public class DomainCodeGenerator {
 		
 		if(file.exists())
 		{
-			System.out.println("" + file.getCanonicalPath() + " Exists. Not Overwriting");
+			log.debug("" + file.getCanonicalPath() + " Exists. Not Overwriting");
 			return;
 		}
 		
@@ -556,14 +560,14 @@ public class DomainCodeGenerator {
 
 	private List<Attribute> getHashOfAttributesToEntity(Entity parent, Entity child)
 	{
-		System.out.println("*******parent:"+ parent.getUnqualifiedLowerLabel() + " ****child:" + child.getUnqualifiedLowerLabel());
+		log.debug("*******parent:"+ parent.getUnqualifiedLowerLabel() + " ****child:" + child.getUnqualifiedLowerLabel());
 		
 		List<Attribute> hash = new ArrayList<Attribute>();
 		Iterator<Attribute> attribIter = child.getAttributes().iterator();
 		while(attribIter.hasNext())
 		{
 			Attribute a = attribIter.next();
-			System.out.println("*******atter:"+ a.getUnqualifiedLowerLabel());
+			log.debug("*******atter:"+ a.getUnqualifiedLowerLabel());
 			if(a.isForeign())
 			{
 				
@@ -571,12 +575,12 @@ public class DomainCodeGenerator {
 				
 				Entity e2 = a.getReferencedEntity();
 				
-				System.out.println("*******foreign:"+ a.getUnqualifiedLowerLabel() + " ****e2label" + (e2!=null?e2.getUnqualifiedLabel():"none"));
+				log.debug("*******foreign:"+ a.getUnqualifiedLowerLabel() + " ****e2label" + (e2!=null?e2.getUnqualifiedLabel():"none"));
 
 
 				if(e2 != null && parent.getUnqualifiedLabel().equalsIgnoreCase(e2.getUnqualifiedLabel()))
 				{
-					System.out.println("*******foreign:DINGDINGDING");
+					log.debug("*******foreign:DINGDINGDING");
 					hash.add(a);
 					
 				}
@@ -610,7 +614,7 @@ public class DomainCodeGenerator {
 				if(e2 !=null) 
 				{
 					targetEntity = e2.getUpperLabel();
-					System.out.println("HEREEE0");
+					log.debug("HEREEE0");
 					thatKey = a.getSqlLabel();
 					v.setIdentifier(plural(e2.getUnqualifiedLowerLabel()));
 					v.setType("Set<"+targetEntity+">");
@@ -634,11 +638,11 @@ public class DomainCodeGenerator {
 
 	private boolean isManyToMany(Entity child)
 	{		
-		System.out.println("**************Checking if child table is ManyToMany " + child.getUnqualifiedLabel());
-		System.out.println( "* total attributes:" + child.getAttributes().size());
-		System.out.println( "* primary keys:" + child.getPrimaryKeyAttributes().size());
-		System.out.println( "* parent keys:" + child.getParentKeyAttributes().size());
-		System.out.println( "* childern:" + child.getChildren().size());
+		log.debug("**************Checking if child table is ManyToMany " + child.getUnqualifiedLabel());
+		log.debug( "* total attributes:" + child.getAttributes().size());
+		log.debug( "* primary keys:" + child.getPrimaryKeyAttributes().size());
+		log.debug( "* parent keys:" + child.getParentKeyAttributes().size());
+		log.debug( "* childern:" + child.getChildren().size());
 	
 		if(child.getAttributes().size()==2 && child.getPrimaryKeyAttributes().size() == 2 && child.getParentKeyAttributes().size()==2 && child.getChildren().size() ==0)
 			return true;
@@ -657,43 +661,43 @@ public class DomainCodeGenerator {
 	
 	private void connectLinks()
 	{	
-		System.out.println("***Connecting Links***");
+		log.debug("***Connecting Links***");
 		Iterator<DomainClass> domainIter = domainClassList.iterator();
 		while(domainIter.hasNext() )
 		{
 			
 			
 			DomainClass dc = domainIter.next();
-			System.out.println("   "+dc.getIdentifier());
+			log.debug("   "+dc.getIdentifier());
 			Iterator<ClassVariable> cvIter =  dc.getSymTable().iterator();
 			while (cvIter.hasNext())
 			{
 				
 				ClassVariable cv = cvIter.next();
-				System.out.println("      "+cv.getIdentifier());
+				log.debug("      "+cv.getIdentifier());
 				if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE)
 				{
-					System.out.println("         -attribute is foreign");
+					log.debug("         -attribute is foreign");
 					Entity e = cv.getAttribute().getReferencedEntity();//dc.getEntity().getForeignReferenceEntity(cv.getAttribute());
 					if(e != null)
 					{
 					DomainClass c = findDomainByIdentifier(e.getUnqualifiedLabel());
 					if(c == null)
-						System.out.println("************** cannot find DomainClass:"+cv.getType());
+						log.debug("************** cannot find DomainClass:"+cv.getType());
 					cv.setDomainClass(c);
 					}
 					else
-						System.out.println("************** cannot getEntity from attribute:"+cv.getIdentifier());
+						log.debug("************** cannot getEntity from attribute:"+cv.getIdentifier());
 					
 
 				}
 				else if(cv.getAttribType() == AttributeType.CHILD)
 				{
-					System.out.println("         -attribute is child");
+					log.debug("         -attribute is child");
 					ClassVariable cvRef = findReferencedClassVariable(cv);
 					if(cvRef == null)
 						{
-						System.out.println("************** ERROR CONNECTING CLASSVARIABLE");
+						log.debug("************** ERROR CONNECTING CLASSVARIABLE");
 						cv.setReferenedClassVariable(cvRef);
 						}
 						
@@ -722,7 +726,7 @@ public class DomainCodeGenerator {
 		out.close();
 		}
 		else
-			System.out.println("" + file.getCanonicalPath() + " Exists. Not Overwriting");
+			log.debug("" + file.getCanonicalPath() + " Exists. Not Overwriting");
 
 
 	}
@@ -756,7 +760,7 @@ public class DomainCodeGenerator {
 				if(cv1.getAttribute()!= null && cv1.getAttribType() !=  AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel()))
 						return cv1;
 //				else
-//					System.out.println("Error on "+ cv.getIdentifier() +" with "+cv.getIdentifier());
+//					log.debug("Error on "+ cv.getIdentifier() +" with "+cv.getIdentifier());
 			}
 
 		return null;

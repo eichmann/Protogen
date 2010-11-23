@@ -9,10 +9,11 @@ package edu.uiowa.webapp;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.spring.CreateController;
 
@@ -30,6 +31,9 @@ public class ControllerGenerator {
 
 	Schema theSchema = null;
 
+	private static final Log log =LogFactory.getLog(ControllerGenerator.class);
+
+	
 	public ControllerGenerator(String projectPath, String packageRoot, String projectName) {
 		this.projectPath = projectPath;
 		this.packageRoot = packageRoot;
@@ -80,7 +84,7 @@ public class ControllerGenerator {
 		out.close();
 		}
 		else
-			System.out.println("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
+			log.debug("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
 
 
 

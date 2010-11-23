@@ -73,7 +73,7 @@ public class JSPCodeGenerator {
 		while(cvIter.hasNext())
 		{
 			ClassVariable cv = cvIter.next();
-			System.out.println("ClassVariable:"+cv.getIdentifier());
+			log.debug("ClassVariable:"+cv.getIdentifier());
 			output += "<p>"+cv.getUpperIdentifier() + ":${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</p>";
 			output += lines(1);
 			
@@ -91,7 +91,7 @@ public class JSPCodeGenerator {
 			output += spaces(indent) + "<tr>";
 			output += lines(1);
 			ClassVariable cv = cvIter.next();
-			System.out.println("-ClassVariable:"+cv.getIdentifier());
+			log.debug("-ClassVariable:"+cv.getIdentifier());
 			indent +=4;
 			output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
 			output += lines(1);
@@ -101,7 +101,7 @@ public class JSPCodeGenerator {
 		
 			if(cv.getAttribType() == AttributeType.CHILD && cv.getAttribute().getEntity().getDomainClass() !=null)
 			{
-				System.out.println("isChild");
+				log.debug("isChild");
 				Iterator<ClassVariable> pkIter = cv.getAttribute().getEntity().getDomainClass().getPrimaryKeys().iterator();
 				while(pkIter.hasNext())
 				{
@@ -139,15 +139,15 @@ public class JSPCodeGenerator {
 		BufferedWriter out = new BufferedWriter(fstream);
 		out.write(output);
 		out.close();
-		System.out.println("Log here");
+		log.debug("Log here");
 
 	}
 	
 	
 	private void generateListJSP(DomainClass ec) throws IOException {
 	
-		System.out.println("GeneratingListJSP:"+ec.getIdentifier());
-		System.out.print("...."+ ec.getIdentifier());
+		log.debug("GeneratingListJSP:"+ec.getIdentifier());
+		log.debug("...."+ ec.getIdentifier());
 		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/generated/" + ec.getIdentifier().toLowerCase();
 		
 		(new File(directory )).mkdirs();
@@ -221,7 +221,7 @@ public class JSPCodeGenerator {
 		BufferedWriter out = new BufferedWriter(fstream);
 		out.write(output);
 		out.close();
-		System.out.print(".........done");
+		log.debug(".........done");
 	}
 	
 	
@@ -282,7 +282,7 @@ public class JSPCodeGenerator {
 				String selected="";
 				if( cv.getDomainClass().getPrimaryKeys().size()>0 && cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().size()>0)
 				{
-					System.out.println("creating select");
+					log.debug("creating select");
 				selected += "<c:if test=\"${";
 				selected += ec.getLowerIdentifier()+"."+cv.getIdentifier()+"." + cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier(); 
 				selected += "== item."+ cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\">selected=\"true\"</c:if>";

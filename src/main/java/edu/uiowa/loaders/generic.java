@@ -1,7 +1,12 @@
 package edu.uiowa.loaders;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
+
+import edu.uiowa.webapp.TLDGenerator;
+
 import java.io.*;
 import java.util.zip.*;
 import java.net.*;
@@ -25,6 +30,9 @@ public class generic extends DefaultHandler {
 		handler.run(args);
 	}
 	
+	
+	private static final Log log =LogFactory.getLog(generic.class);
+
 	public void run(String args[]) throws Exception {
 		xr = XMLReaderFactory.createXMLReader();
 		xr.setContentHandler(this);
@@ -41,18 +49,18 @@ public class generic extends DefaultHandler {
                 if (args[i].startsWith("-wrapper=")) {
                     wrapWithTag = true;
                     wrapperTag = args[i].substring(args[i].indexOf('=')+1);
-                    if (debug) System.out.println("wrapper tag:" + wrapperTag);
+                    if (log.isDebugEnabled()) log.debug("wrapper tag:" + wrapperTag);
                 } else {
                     if (wrapWithTag) {
-                        System.out.println("Reading with wrapper " + wrapperTag + "  " + args[i]);
+                        log.debug("Reading with wrapper " + wrapperTag + "  " + args[i]);
                         processFileWithWrapper(args[i]);
                     } else {
-                        System.out.println("Reading " + args[i]);
+                        log.debug("Reading " + args[i]);
                         try {
                             processFile(args[i]);
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            log.error("Failed Reading", e);
                         }
                     }
                 }
@@ -62,12 +70,12 @@ public class generic extends DefaultHandler {
 			BufferedReader IODesc = new BufferedReader(new InputStreamReader(System.in));
 			String current = null;
 			while ((current = IODesc.readLine()) != null) {
-				System.out.println("processing : " + current);
+				log.debug("processing : " + current);
 				try {
                     processFile(current);
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    log.error("Faild Processing File", e);
                 }
 			}
 		}
@@ -79,7 +87,7 @@ public class generic extends DefaultHandler {
 		xr.setErrorHandler(this);
 		xr.setFeature("http://xml.org/sax/features/validation", false);
 
-		if (verbose) System.out.println("Reading " + arg);
+		if (verbose) log.info("Reading " + arg);
 		processFile(arg);
     }
     
@@ -88,7 +96,7 @@ public class generic extends DefaultHandler {
 		if (file.indexOf("://") < 0) {
             IODesc = new BufferedReader(new FileReader(file));
         } else if (file.startsWith("https:")) {
-            System.out.println("trying ssl connection...");
+            log.debug("trying ssl connection...");
             System.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
             HttpsURLConnection conn = (HttpsURLConnection)(new URL(file)).openConnection();
             IODesc = new BufferedReader(new InputStreamReader(conn.getInputStream()), 200000);
@@ -122,21 +130,21 @@ public class generic extends DefaultHandler {
 
 
     public void startDocument () {
-		if (debug) System.out.println("Start document");
+		if (log.isDebugEnabled()) log.debug("Start document");
     }
 
 
     public void endDocument () {
-		if (debug) System.out.println("End document");
+		if (log.isDebugEnabled()) log.debug("End document");
     }
 
 
     public void startElement (String uri, String name, String qName, Attributes atts) {
-		if (debug) {
+		if (log.isDebugEnabled()) {
 			//if ("".equals (uri))
-			    System.out.println("Start element: " + qName);
+			    log.debug("Start element: " + qName);
 			for (int i = 0; i < atts.getLength(); i++)
-				System.out.println("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
+				log.debug("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
 			//else
 			//    System.out.println("Start element: {" + uri + "}" + name + " " + atts);
 		}
@@ -144,9 +152,9 @@ public class generic extends DefaultHandler {
 
 
     public void endElement (String uri, String name, String qName) {
-		if (debug) {
+		if (log.isDebugEnabled()) {
 			//if ("".equals (uri))
-			    System.out.println("End element: " + qName);
+			    log.debug("End element: " + qName);
 			//else
 			//    System.out.println("End element:   {" + uri + "}" + name);
 		}
@@ -156,31 +164,32 @@ public class generic extends DefaultHandler {
 
     public void characters (char ch[], int start, int length) {
     	buffer.append(ch,start,length);
-		if (debug) {
-			System.out.print("Characters:    \"");
+		if (log.isDebugEnabled()) {
+			//log.debug();
+			StringBuffer temp = new StringBuffer("Characters:    \"");
 			for (int i = start; i < start + length; i++) {
 			    switch (ch[i]) {
 				    case '\\':
-						System.out.print("\\\\");
+						temp.append("\\\\");
 						break;
 				    case '"':
-						System.out.print("\\\"");
+				    	temp.append("\\\"");
 						break;
 				    case '\n':
-						System.out.print("\\n");
+				    	temp.append("\\n");
 						break;
 				    case '\r':
-						System.out.print("\\r");
+				    	temp.append("\\r");
 						break;
 				    case '\t':
-						System.out.print("\\t");
+				    	temp.append("\\t");
 						break;
 				    default:
-						System.out.print(ch[i]);
+				    	temp.append(ch[i]);
 						break;
 			    }
 			}
-			System.out.print("\"\n");
+			log.debug(temp + "\"\n");
 		}
     }
     

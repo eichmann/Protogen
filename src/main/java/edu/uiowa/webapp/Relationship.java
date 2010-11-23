@@ -2,6 +2,9 @@ package edu.uiowa.webapp;
 
 import java.util.Hashtable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Relationship extends ClayElement {
 
 	Entity sourceEntity = null;
@@ -13,6 +16,8 @@ public class Relationship extends ClayElement {
 		ONE_TO_ONE, ONE_TO_MANY, ONE, MANY
 	};
 
+	private static final Log log =LogFactory.getLog(Relationship.class);
+
 	CardinalityEnum relationshipCardinality = CardinalityEnum.ONE_TO_MANY;
 	CardinalityEnum sourceEntityCardinality = CardinalityEnum.ONE;
 	CardinalityEnum targetEntityCardinality = CardinalityEnum.MANY;
@@ -22,7 +27,7 @@ public class Relationship extends ClayElement {
 	}
 
 	public void setSourceEntity(Entity sourceEntity) {
-        System.out.println("setting source entity: " + sourceEntity);
+        log.debug("setting source entity: " + sourceEntity);
 		this.sourceEntity = sourceEntity;
 	}
 
@@ -68,7 +73,7 @@ public class Relationship extends ClayElement {
 	}
 	
 	public void setForeignReferencedAttributeMapping(String foreignAttribute, String referencedAttribute) {
-	    System.out.println(sourceEntity + " " + referencedAttribute + " --> " + targetEntity + " " + foreignAttribute);
+	    log.debug(sourceEntity + " " + referencedAttribute + " --> " + targetEntity + " " + foreignAttribute);
 	    attributeMap.put(referencedAttribute, foreignAttribute);
 	//TODO    if (!referencedAttribute.equals(foreignAttribute)) targetEntity.getAttributeByLabel(foreignAttribute).setForeignAttribute(sourceEntity.getAttributeByLabel(referencedAttribute));
 	}
@@ -78,8 +83,8 @@ public class Relationship extends ClayElement {
 	}
 
     public void dump() {
-        System.out.println("\t\tsource entity: " + sourceEntity + "\ttarget entity: " + targetEntity + "\tuid: " + uid);
-        System.out.println("\t\tsource entity: " + sourceEntity.getLabel() + "\ttarget entity: " + targetEntity.getLabel() + "\tuid: " + uid);
+        log.debug("\t\tsource entity: " + sourceEntity + "\ttarget entity: " + targetEntity + "\tuid: " + uid);
+        log.debug("\t\tsource entity: " + sourceEntity.getLabel() + "\ttarget entity: " + targetEntity.getLabel() + "\tuid: " + uid);
     }
 
 	@Override

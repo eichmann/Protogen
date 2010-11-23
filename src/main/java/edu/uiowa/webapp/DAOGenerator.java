@@ -8,12 +8,12 @@ package edu.uiowa.webapp;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.hibernate.CreateDAO;
 
@@ -28,6 +28,8 @@ public class DAOGenerator {
 	String projectName = null;
 
 	DomainClass currentDomainClass = null;
+
+	private static final Log log =LogFactory.getLog(DAOGenerator.class);
 
 
 	public DAOGenerator(String projectPath, String packageRoot, String projectName) {
@@ -77,7 +79,7 @@ public class DAOGenerator {
 		out.write(genDao.get());
 		out.close();
 		} else 
-			System.out.println("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
+			log.debug("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
 	}
 	
 	private void copyGenericDao() throws Exception {
@@ -93,7 +95,7 @@ public class DAOGenerator {
 		out.write(genDao.get());
 		out.close();
 		} else 
-			System.out.println("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
+			log.debug("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
 	}
 
 	private void generateDaoClass(DomainClass dc) throws Exception {
@@ -113,7 +115,7 @@ public class DAOGenerator {
 
 		out.write(homeDao.get());
 		out.close();
-		} else System.out.println("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
+		} else log.debug("" + domainFile.getCanonicalPath() + " Exists. Not Overwriting");
 		
 		CreateDAO serviceDao = new CreateDAO("Service");
 		serviceDao.setProjectName(currentPackageName);
@@ -127,7 +129,7 @@ public class DAOGenerator {
 		outService.close();
 		}
 		else
-			System.out.println("" + domainFileService.getCanonicalPath() + " Exists. Not Overwriting");
+			log.debug("" + domainFileService.getCanonicalPath() + " Exists. Not Overwriting");
 
 
 	}

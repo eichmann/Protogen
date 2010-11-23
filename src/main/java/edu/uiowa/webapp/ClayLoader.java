@@ -1,5 +1,7 @@
 package edu.uiowa.webapp;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.Attributes;
 
 import edu.uiowa.loaders.generic;
@@ -14,6 +16,8 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 	Attribute currentAttribute = null;
 	Relationship currentRelationship = null;
 	
+	private static final Log log =LogFactory.getLog(ClayLoader.class);
+
 	mode currentMode = mode.DOMAIN;
 	private String referencedEntityName;
 	
@@ -25,9 +29,9 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 
     public void startElement (String uri, String name, String qName, Attributes atts) {
 		if (debug) {
-			System.out.println("Start element: " + name);
+			log.debug("Start element: " + name);
 			for (int i = 0; i < atts.getLength(); i++)
-				System.out.println("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
+				log.debug("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
 		}
 		if (qName.equals("database-model")) {
 			currentDatabase = new Database();
@@ -36,20 +40,20 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 			currentDatabase.setLabel(getAttByName(atts, "name"));
 			currentDatabase.setUid(getAttByName(atts, "uid"));
 			if (verbose)
-			    System.out.println("database: " + currentDatabase.getLabel() + "\tuid: " + currentDatabase.getUid());
+			    log.debug("database: " + currentDatabase.getLabel() + "\tuid: " + currentDatabase.getUid());
 		} else if (qName.equals("schema")) {
 			currentSchema = new Schema();
 			currentSchema.setLabel(getAttByName(atts,"name"));
 			currentSchema.setUid(getAttByName(atts, "uid"));
 			if (verbose)
-                System.out.println("\tschema: " + currentSchema.getLabel() + "\tuid: " + currentSchema.getUid());
+                log.debug("\tschema: " + currentSchema.getLabel() + "\tuid: " + currentSchema.getUid());
 			currentDatabase.getSchemas().add(currentSchema);
 		} else if (qName.equals("domain")) {
 		    currentDomain = new Domain();
 		    currentDomain.setLabel(getAttByName(atts,"name"));
 			currentDomain.setUid(getAttByName(atts, "uid"));
 			if (verbose)
-                System.out.println("\t\tentity: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid());
+                log.debug("\t\tentity: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid());
 			currentSchema.getDomains().add(currentDomain);
 			currentMode = mode.DOMAIN;
         } else if (qName.equals("table")) {
@@ -58,7 +62,7 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
             currentEntity.setLabel(getAttByName(atts,"name"));
             currentEntity.setUid(getAttByName(atts, "uid"));
             if (verbose)
-                System.out.println("\t\tentity: " + currentEntity.getLabel() + "\tuid: " + currentEntity.getUid());
+                log.debug("\t\tentity: " + currentEntity.getLabel() + "\tuid: " + currentEntity.getUid());
             currentSchema.getEntities().add(currentEntity);
             currentMode = mode.TABLE;
 		} else if (qName.equals("column")) {
@@ -73,24 +77,24 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
             if (getAttByName(atts,"auto-increment").equals("true"))
                 currentAttribute.setAutoIncrement(true);
 			if (debug)
-                System.out.println("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\tauto-increment: " + currentAttribute.isAutoIncrement() + "\tdomain: " + currentAttribute.getDomain());
+                log.debug("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\tauto-increment: " + currentAttribute.isAutoIncrement() + "\tdomain: " + currentAttribute.getDomain());
 			currentEntity.getAttributes().add(currentAttribute);
 		} else if (qName.equals("data-type")) {
 			if (currentMode == mode.TABLE) {
 			    currentAttribute.setType(getAttByName(atts,"name"));
 			    if (verbose)
-			        System.out.println("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\ttype: " + currentAttribute.getType());
+			        log.debug("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\ttype: " + currentAttribute.getType());
 			} else {
 			    currentDomain.setType(getAttByName(atts,"name"));
                 if (verbose)
-                    System.out.println("\t\t\tdomain: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid() + "\tmandatory: " + currentDomain.isMandatory() + "\ttype: " + currentDomain.getType());
+                    log.debug("\t\t\tdomain: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid() + "\tmandatory: " + currentDomain.isMandatory() + "\ttype: " + currentDomain.getType());
 			}
 		} else if (qName.equals("primary-key-column")) {
 		    currentAttribute = currentEntity.getAttributeByLabel(getAttByName(atts,"name"));
 		    currentAttribute.setPrimary(true);
 		    currentEntity.getPrimaryKeyAttributes().add(currentAttribute);
 		    if (verbose)
-                System.out.println("\t\t\tprimary key: " + currentAttribute.getLabel());
+                log.debug("\t\t\tprimary key: " + currentAttribute.getLabel());
         } else if (qName.equals("foreign-key")) {
         	Schema targetSchema = currentDatabase.getSchemaByName(getAttByName(atts, "referenced-table-schema"));
             currentRelationship = new Relationship();
@@ -102,7 +106,7 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
             currentEntity.setParent(currentRelationship);
             currentSchema.getRelationships().add(currentRelationship);
             if (verbose)
-                System.out.println("\t\t\tforeign key: " + getAttByName(atts,"name")  + "\tuid: " + getAttByName(atts, "uid")  + "\treferenced table: " + getAttByName(atts, "referenced-table"));
+                log.debug("\t\t\tforeign key: " + getAttByName(atts,"name")  + "\tuid: " + getAttByName(atts, "uid")  + "\treferenced table: " + getAttByName(atts, "referenced-table"));
         } else if (qName.equals("foreign-key-column")) {
         	
             currentRelationship.setForeignReferencedAttributeMapping(getAttByName(atts,"column-name"), getAttByName(atts, "referenced-key-column-name"));
@@ -111,13 +115,13 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
             referencedEntityName = null;
             
             if (verbose)
-                System.out.println("\t\t\tforeign key column: " + getAttByName(atts,"column-name")  + "\treferenced column: " + getAttByName(atts, "referenced-key-column-name"));
+                log.debug("\t\t\tforeign key column: " + getAttByName(atts,"column-name")  + "\treferenced column: " + getAttByName(atts, "referenced-key-column-name"));
 		}
     }
     
     public void endElement(String uri, String name, String qName) {
         if (debug) {
-            System.out.println("End element: " + name);
+            log.debug("End element: " + name);
         }
         if (qName.equals("database-model")) {
             // clean up forward references in the foreign key declarations
@@ -127,7 +131,7 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
                     currentRelationship = currentSchema.getRelationships().elementAt(i);
                     if (currentRelationship.sourceEntity == null) {
                         if (debug)
-                            System.out.println("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + currentSchema.getEntityByLabel(currentRelationship.getSourceEntityName()));
+                            log.debug("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + currentSchema.getEntityByLabel(currentRelationship.getSourceEntityName()));
                         currentRelationship.setSourceEntity(currentSchema.getEntityByLabel(currentRelationship.getSourceEntityName()));
                     }
                     currentRelationship.getSourceEntity().setChild(currentRelationship);

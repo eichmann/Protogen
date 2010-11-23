@@ -13,8 +13,14 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class JSPGenerator {
 
+	private static final Log log =LogFactory.getLog(JSPGenerator.class);
+
+	
     String webAppPath = null;
     String packagePrefix = null;
     String projectName = null;
@@ -415,7 +421,7 @@ public class JSPGenerator {
             
             Vector<Entity> ancestors = theEntity.getAncestors();
             for (int i = 0; i < ancestors.size(); i++) {
-                System.out.println("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
+                log.debug("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
                 Attribute ancestorKey = null;
                 if (ancestors.elementAt(i).getSubKeyAttributes().size() > 0)
                     ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();
@@ -552,7 +558,7 @@ public class JSPGenerator {
         
         Vector<Entity> ancestors = theEntity.getAncestors();
         for (int i = 0; i < ancestors.size(); i++) {
-            System.out.println("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
+            log.debug("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
             Attribute ancestorKey = null;
             if (ancestors.elementAt(i).getSubKeyAttributes().size() > 0)
                 ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();

@@ -2,6 +2,9 @@ package edu.uiowa.webapp;
 
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Entity extends ClayElement {
 	
     Schema schema = null;
@@ -15,6 +18,9 @@ public class Entity extends ClayElement {
 	
 	private DomainClass domainClass;
 
+	private static final Log log =LogFactory.getLog(Entity.class);
+
+	
 	public Schema getSchema() {
         return schema;
     }
@@ -58,10 +64,10 @@ public class Entity extends ClayElement {
 	public Vector<Entity> getAncestors() {
 	    Vector<Entity> ancestors = new Vector<Entity>();
 	    Vector<Relationship> currentParents = parents;
-	    System.out.println("starting ancestor chain for " + this);
+	    log.debug("starting ancestor chain for " + this);
 	    while (currentParents.size() > 0) {
 	        //TODO for now, just pick the first parent in the vector - we'll worry about multipaths later
-	        System.out.println("\tancestor: "  + currentParents.firstElement().getSourceEntity());
+	        log.debug("\tancestor: "  + currentParents.firstElement().getSourceEntity());
 	        ancestors.insertElementAt(currentParents.firstElement().getSourceEntity(), 0);
 	        currentParents = ancestors.firstElement().getParents();
 	    }
@@ -91,7 +97,7 @@ public class Entity extends ClayElement {
         Attribute target = null;
         
         for (int i = 0; i < attributes.size(); i++) {
-            System.out.println(attributes.elementAt(i).getLabel());
+            log.debug(attributes.elementAt(i).getLabel());
             if (attributes.elementAt(i).getSqlLabel().equals(label))
                 return attributes.elementAt(i);
         }
@@ -173,25 +179,25 @@ public class Entity extends ClayElement {
     }
 
     protected void generateParentKeys() {
-        System.out.println("\n" + this + " primary keys: " + getPrimaryKeyAttributes());
+        log.debug("\n" + this + " primary keys: " + getPrimaryKeyAttributes());
         for (int i = 0; i < getParents().size(); i++) {
             Entity theSourceEntity = getParents().elementAt(i).getSourceEntity();
             Vector<Attribute> parentKeys = theSourceEntity.getPrimaryKeyAttributes();
-            System.out.println("\t" + theSourceEntity + " primary keys: " + parentKeys);
+            log.debug("\t" + theSourceEntity + " primary keys: " + parentKeys);
             parentLoop : for (int j = 0; j < parentKeys.size(); j++) {
                 Attribute parentKey = parentKeys.elementAt(j);
                 if (parentKeyAttributes.size() == 0)
                     parentKeyAttributes.addElement(parentKey);
                 for (int k = 0; k < parentKeyAttributes.size(); k++) {
-                    System.out.println("\t\tcomparing " + parentKey + " to " + parentKeyAttributes.elementAt(k));
+                    log.debug("\t\tcomparing " + parentKey + " to " + parentKeyAttributes.elementAt(k));
                     if (parentKey.getLabel().equals(parentKeyAttributes.elementAt(k).getLabel()))
                         continue parentLoop;
                 }
-                System.out.println("\t\tadding " + parentKey);
+                log.debug("\t\tadding " + parentKey);
                 parentKeyAttributes.addElement(parentKey);
             }
         }
-        System.out.println(this + " parent keys: " + parentKeyAttributes);
+        log.debug(this + " parent keys: " + parentKeyAttributes);
     }
 
     protected void generateSubKeys() {
@@ -204,7 +210,7 @@ public class Entity extends ClayElement {
             subKeyAttributes.addElement(primaryKey);
         }
 
-        System.out.println(this + " sub keys: " + subKeyAttributes);
+        log.debug(this + " sub keys: " + subKeyAttributes);
     }
     
     public boolean isPrimaryReference(Attribute theAttribute) {
@@ -255,9 +261,9 @@ public class Entity extends ClayElement {
     }
 
     public void dump() {
-        System.out.println("\t\tentity: " + label + "\tuid: " + uid);
+        log.debug("\t\tentity: " + label + "\tuid: " + uid);
         for (int i = 0; i < children.size(); i++)
-            System.out.println("\t\t\tchild " + children.elementAt(i).targetEntity.getLabel());
+            log.debug("\t\t\tchild " + children.elementAt(i).targetEntity.getLabel());
         for (int i = 0; i < attributes.size(); i++)
             attributes.elementAt(i).dump();
     }

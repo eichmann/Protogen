@@ -6,6 +6,11 @@ import java.net.*;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import edu.uiowa.webapp.Generator;
+
 public class PrivateReader extends Reader {
 	protected static boolean debug = false;
 	protected Reader internal = null;
@@ -14,13 +19,16 @@ public class PrivateReader extends Reader {
 	String header = null;
 	String footer = null;
 	
+	
+	private static final Log log =LogFactory.getLog(PrivateReader.class);
+
 	public PrivateReader(String file, String head, String foot) throws MalformedURLException, IOException {
 		header = head;
 		footer = foot;
 		if (file.indexOf("://") < 0) {
 		    internal = new BufferedReader(new FileReader(file));
         } else if (file.startsWith("https:")) {
-            System.out.println("trying ssl connection...");
+            log.debug("trying ssl connection...");
             System.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
             HttpsURLConnection conn = (HttpsURLConnection)(new URL(file)).openConnection();
             internal = new BufferedReader(new InputStreamReader(conn.getInputStream()), 200000);
@@ -31,9 +39,9 @@ public class PrivateReader extends Reader {
 	}
 	
 	public int read(char[] theChars, int offset, int length) throws IOException {
-		if (debug) System.out.println("read called: offset = " + offset + ", length = " + length);
+		if (log.isDebugEnabled()) log.debug("read called: offset = " + offset + ", length = " + length);
 		if (first) {
-			if (debug) System.out.println(header);
+			if (log.isDebugEnabled()) log.debug(header);
 			first = false;
 			for (int i = 0; i < header.length(); i++)
 				theChars[i] = header.charAt(i);
@@ -42,7 +50,7 @@ public class PrivateReader extends Reader {
 			if (last) return -1;
 			
 			int cnt = internal.read(theChars, offset, length);
-			if (debug) System.out.println(theChars);
+			if (log.isDebugEnabled()) log.debug(theChars);
 			if (cnt == -1) {
 				for (int i = offset; i < footer.length() + offset; i++)
 					theChars[i] = footer.charAt(i - offset);

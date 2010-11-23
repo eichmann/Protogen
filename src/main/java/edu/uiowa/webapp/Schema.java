@@ -3,14 +3,18 @@ package edu.uiowa.webapp;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sun.xml.internal.ws.streaming.Attributes;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class Schema extends ClayElement {
 
     Vector<Domain> domains = new Vector<Domain>();
     Vector<Entity> entities = new Vector<Entity>();
     Vector<Relationship> relationships = new Vector<Relationship>();
+    
+	private static final Log log =LogFactory.getLog(Schema.class);
 
+    
     public Vector<Domain> getDomains() {
         return domains;
     }
@@ -102,7 +106,7 @@ public class Schema extends ClayElement {
     }
 
     public void dump() {
-        System.out.println("\tschema: " + label + "\tuid: " + uid);
+        log.debug("\tschema: " + label + "\tuid: " + uid);
         for (int i = 0; i < entities.size(); i++)
             entities.elementAt(i).dump();
         for (int i = 0; i < relationships.size(); i++)

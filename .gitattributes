@@ -2,6 +2,8 @@
 /.classpath -text
 /.project -text
 .settings/org.eclipse.jdt.core.prefs -text
+.settings/org.eclipse.wst.common.component -text
+.settings/org.eclipse.wst.common.project.facet.core.xml svneol=native#text/xml
 .settings/org.maven.ide.eclipse.prefs -text
 SPRING_DEFAULT/Temp.clay -text
 SPRING_DEFAULT/WEB-INF/include.jsp -text
@@ -293,6 +295,7 @@ required_jars/xmlParserAPIs.jar -text
 /setup_protogen.xml -text
 src/main/java/GenericDao.tmplt -text
 src/main/java/GenericDaoInterface.tmplt -text
+src/main/java/META-INF/MANIFEST.MF svneol=native#text/plain
 src/main/java/TABLENAMEController.tmplt -text
 src/main/java/TABLENAMEHome.tmplt -text
 src/main/java/TABLENAMEService.tmplt -text

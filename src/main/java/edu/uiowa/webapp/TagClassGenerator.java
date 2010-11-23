@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class TagClassGenerator {
 
     String projectPath = null;
@@ -54,7 +57,8 @@ public class TagClassGenerator {
     }
 
     private void generateSourceDirectoryRoot(String projectPath) throws IOException {
-        sourceRootDirectory = new File((projectPath.endsWith("/src") ? projectPath : projectPath + "/src"));
+        //sourceRootDirectory = new File((projectPath.endsWith("/src") ? projectPath : projectPath + "/src"));
+    	sourceRootDirectory = new File(projectPath);
         if (sourceRootDirectory.exists()) {
             if (sourceRootDirectory.isFile())
                 throw new IOException("project source directory a normal file");
@@ -165,6 +169,9 @@ public class TagClassGenerator {
         out.write("import java.sql.ResultSet;\n");
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Vector;\n");
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+        
         if (theEntity.hasDateTime())
             out.write("import java.util.Date;\n");
 //        if (theEntity.hasImage())
@@ -187,6 +194,7 @@ public class TagClassGenerator {
         out.write("\tstatic " + theEntity.getUnqualifiedLabel() + " currentInstance = null;\n");
         out.write("\tboolean commitNeeded = false;\n");
         out.write("\tboolean newRecord = false;\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
 
         // declare attributes
@@ -256,7 +264,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t// no " + keyAttribute.getLabel() + " was provided - the default is to assume that it is a new "
                 + theEntity.getLabel() + " and to generate a new " + keyAttribute.getLabel() + "\n");
         out.write("\t\t\t\t" + keyAttribute.getLabel() + " = " + keyAttribute.getDefaultValue() + ";\n");
-        out.write("\t\t\t\tSystem.out.println(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()
+        out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()
                 + ");\n");
         out.write("\t\t\t\tinsertEntity();\n");
         
@@ -496,7 +504,7 @@ public class TagClassGenerator {
             } else if (theAttribute.isPrimary() && !theEntity.isForeignReference(theAttribute) && theAttribute.isInt()) {
                 out.write("\t\t\tif (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + ") {\n");
                 out.write("\t\t\t\t" + theAttribute.getLabel() + " = " + theAttribute.getDefaultValue() + ";\n");
-                out.write("\t\t\t\tSystem.out.println(\"generating new " + theEntity.getLabel() + " \" + " + theAttribute.getLabel() + ");\n");
+                out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + theAttribute.getLabel() + ");\n");
                 out.write("\t\t\t}\n\n");
             }
         }   
@@ -670,6 +678,8 @@ public class TagClassGenerator {
                 + "import java.sql.ResultSet;\n"
                 + "import java.sql.SQLException;\n"
                 + "import java.util.Vector;\n");
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
         if (theEntity.hasDateTime())
             out.write("import java.util.Date;\n");
 //        if (theEntity.hasImage())
@@ -694,6 +704,8 @@ public class TagClassGenerator {
                 out.write("    " + theKey.getType() + " " + theKey.getLabel() + " = " + theKey.getInitializer() + ";\n");
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
+        
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
         
         out.write("\n    PreparedStatement stat = null;\n"
                 + "    ResultSet rs = null;\n"
@@ -1837,7 +1849,7 @@ public class TagClassGenerator {
 //        out.write("\t\t\t\t// no " + keyAttribute.getLabel() + " was provided - the default is to assume that it is a new "
 //                + theEntity.getLabel() + " and to generate a new " + keyAttribute.getLabel() + "\n");
 //        out.write("\t\t\t\t" + keyAttribute.getLabel() + " = " + keyAttribute.getDefaultValue() + ";\n");
-//        out.write("\t\t\t\tSystem.out.println(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()
+//        out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()
 //                + ");\n");
 //        out.write("\t\t\t\tinsertEntity();\n");
         out.write("\t\t\t\tHttpServletRequest theRequest = (HttpServletRequest) pageContext.getRequest();\n");
@@ -1863,7 +1875,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\t\tif (item.isFormField()) {\n");
         out.write("\t\t\t\t\t\t\tString name = item.getFieldName();\n");
         out.write("\t\t\t\t\t\t\tString value = item.getString();\n");
-        out.write("\t\t\t\t\t\t\tSystem.out.println(\"field: \" + name + \"\tvalue: \" + value);\n");
+        out.write("\t\t\t\t\t\t\tlog.debug(\"field: \" + name + \"\tvalue: \" + value);\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (!theAttribute.isImage() && !theAttribute.isBinaryDomain()) {
@@ -1885,7 +1897,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\t\t\tString fieldName = item.getFieldName();\n");
         out.write("\t\t\t\t\t\t\tString contentType = item.getContentType();\n");
         out.write("\t\t\t\t\t\t\tfileName = item.getName();\n");
-        out.write("\t\t\t\t\t\t\tSystem.out.println(\"field: \" + fieldName + \"\tfile: \" + fileName + \"\tcontentType: \" + contentType);\n");
+        out.write("\t\t\t\t\t\t\tlog.debug(\"field: \" + fieldName + \"\tfile: \" + fileName + \"\tcontentType: \" + contentType);\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isImage() ||theAttribute.isBinaryDomain()) {
@@ -2167,7 +2179,9 @@ public class TagClassGenerator {
                 + "import javax.servlet.jsp.JspException;\n"
                 + "import javax.servlet.jsp.JspTagException;\n" 
                 + "import javax.servlet.jsp.tagext.BodyTagSupport;\n"
-                + "import javax.sql.DataSource;\n" 
+                + "import javax.sql.DataSource;\n"
+                + "import org.apache.commons.logging.Log;\n"
+                + "import org.apache.commons.logging.LogFactory;\n"
                 + "\n" 
                 + "@SuppressWarnings(\"serial\")\n" 
                 + "\n"
@@ -2180,6 +2194,8 @@ public class TagClassGenerator {
                 + "        super();\n" 
                 + "    }\n" 
                 + "\n" 
+                + "    private static final Log log =LogFactory.getLog("+ projectName + "BodyTagSupport.class);\n"
+                + "\n"
                 + "    @Override\n"
                 + "    public int doEndTag() throws JspException {\n" 
                 + "    	freeConnection();\n"
@@ -2190,7 +2206,7 @@ public class TagClassGenerator {
                 + "        if (theDataSource == null) try {\n"
                 + "            theDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n"
                 + "        } catch (Exception e) {\n"
-                + "            System.err.println(\"Error in database initialization: \" + e);\n" 
+                + "            log.error(\"Error in database initialization\", e);\n" 
                 + "        }\n" 
                 + " \n"
                 + "        return theDataSource;\n" 
@@ -2224,17 +2240,23 @@ public class TagClassGenerator {
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("package " + packagePrefix + ";\n" + "\n" + "import java.sql.Connection;\n" + "import java.sql.SQLException;\n" + "\n"
                 + "import javax.naming.InitialContext;\n" + "import javax.servlet.jsp.JspException;\n"
-                + "import javax.servlet.jsp.JspTagException;\n" + "import javax.servlet.jsp.tagext.TagSupport;\n"
-                + "import javax.sql.DataSource;\n" + "\n" + "@SuppressWarnings(\"serial\")\n" + "\n"
+                + "import javax.servlet.jsp.JspTagException;\n" 
+                + "import javax.servlet.jsp.tagext.TagSupport;\n"
+                + "import javax.sql.DataSource;\n" 
+                + "import org.apache.commons.logging.Log;\n"
+                + "import org.apache.commons.logging.LogFactory;\n"
+                + "\n" + "@SuppressWarnings(\"serial\")\n" + "\n"
                 + "public class " + projectName + "TagSupport extends TagSupport {\n" + "\n" + "    protected DataSource theDataSource = null;\n"
-                + "    protected Connection theConnection = null;\n" + "\n" + "    public " + projectName + "TagSupport() {\n"
+                + "    protected Connection theConnection = null;\n"
+                + "    private static final Log log =LogFactory.getLog("+ projectName + "TagSupport.class);\n"
+                + "\n" + "    public " + projectName + "TagSupport() {\n"
                 + "        super();\n" + "    }\n" + "\n" + "    @Override\n" + "    public int doEndTag() throws JspException {\n"
                 + "    	freeConnection();\n"
                 + "    	return super.doEndTag();\n" + "    }\n" + "    \n" + "    public DataSource getDataSource() {\n"
                 + "        if (theDataSource == null) try {\n"
                 + "            theDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n"
                 + "        } catch (Exception e) {\n"
-                + "            System.err.println(\"Error in database initialization: \" + e);\n" + "        }\n" + " \n"
+                + "            log.error(\"Error in database initialization: \" + e);\n" + "        }\n" + " \n"
                 + "        return theDataSource;\n" + "    }\n" + "    \n"
                 + "    public Connection getConnection() throws SQLException {\n" + "        if (theConnection == null)\n"
                 + "        	theConnection = getDataSource().getConnection();\n" + "        return theConnection;\n" + "    }\n\n"
@@ -2265,6 +2287,9 @@ public class TagClassGenerator {
         out.write("import java.sql.ResultSet;\n");
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Hashtable;\n");
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+        
         out.write("\n");
         out.write("import javax.servlet.jsp.JspException;\n");
         out.write("\n");
@@ -2281,6 +2306,9 @@ public class TagClassGenerator {
         out.write("\t\ttheDriverHash.put(\"PostgreSQL\", Driver.POSTGRESQL);\n");
         out.write("\t\ttheDriverHash.put(\"Microsoft SQL Server\", Driver.SQLSERVER);\n");
         out.write("\t}\n");
+        
+        out.write("\tprivate static final Log log =LogFactory.getLog(Sequence.class);\n\n");
+
         out.write("\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\tpageContext.setAttribute(var, generateID());\n");
         out.write("\t\treturn SKIP_BODY;\n");
@@ -2302,7 +2330,7 @@ public class TagClassGenerator {
         out.write("\t\t\tconn = (new Sequence()).getConnection();\n");
         out.write("\t\t\tif (theDriver == Driver.UNKNOWN) {\n");
         out.write("\t\t\t\ttheDriverString = conn.getMetaData().getDatabaseProductName();\n");
-        out.write("\t\t\t\tSystem.out.println(\"'\" + theDriverString + \"'\");\n");
+        out.write("\t\t\t\tlog.debug(\"'\" + theDriverString + \"'\");\n");
         out.write("\t\t\t\ttheDriver = theDriverHash.get(theDriverString);\n");
         out.write("\t\t\t}\n");
         out.write("\n");
@@ -2350,12 +2378,15 @@ public class TagClassGenerator {
         		+ "import java.sql.Statement;"+ "\n"
         		+ "import javax.servlet.jsp.JspException;"+ "\n"
         		+ "import javax.servlet.jsp.JspTagException;" + "\n"
+                + "import org.apache.commons.logging.Log;\n"
+                + "import org.apache.commons.logging.LogFactory;\n"
         		+ "\n"
         		+ "\n"
         		+ "@SuppressWarnings(\"serial\")" + "\n"
         		+ "public class DBTest extends "  
         		+ this.projectName + "BodyTagSupport {" + "\n"
         		+ "\n"
+        		+ "private static final Log log =LogFactory.getLog(DBTest.class);\n\n"
         		+ "		public int doStartTag() throws JspException {" + "\n"
         		+ "			try { \n" 
         		+ "				JspWriter out = pageContext.getOut();" + "\n"
@@ -2364,7 +2395,7 @@ public class TagClassGenerator {
         		+ "				if (rs) { out.print(\"SUCCESS\");  }" + "\n"
         		+ "				else { out.print(\"FAILED\");}" + "\n"
         		+ "			} catch (Exception e) {" + "\n"
-        		+ "				e.printStackTrace();\n"
+        		+ "				log.error(\"Connection Failed\", e);\n"
         		+ "				throw new JspTagException(\"Connection Failed: \" + e); }" + "\n"
         		+ "			finally { freeConnection();  }" + "\n"
         		+ "			return SKIP_BODY;\n"

@@ -4,15 +4,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.uiowa.hibernate.FileContents;
 import edu.uiowa.webapp.DomainClass;
 import edu.uiowa.webapp.Entity;
+import edu.uiowa.webapp.JSPGenerator;
 import edu.uiowa.webapp.Relationship;
 import edu.uiowa.webapp.Schema;
 
 public class SpringConfiguration {
 
 	
+	private static final Log log =LogFactory.getLog(SpringConfiguration.class);
+
 	private String templateFile = "";
 	
 	private String springComponentsToken = "@springcomponents@";
@@ -48,18 +54,18 @@ public class SpringConfiguration {
 	
 	public void genModelList(List<Schema> schemaList)
 	{	
-		System.out.println("");
-		System.out.println("genMOdelList");
+		log.debug("");
+		log.debug("genMOdelList");
 		
 		Iterator<Schema> schemaIter =  schemaList.iterator();
 		while(schemaIter.hasNext())
 		{
 			Schema schema = schemaIter.next();
-			System.out.println("schem:"+schema.getLabel());
+			log.debug("schem:"+schema.getLabel());
 			springComponents += "<context:component-scan base-package=\""+ packageRoot +"." +schema.getUnqualifiedLabel()+ "\" />\n     ";
 			hibernatePackages += "<value>"+packageRoot +"." +schema.getUnqualifiedLabel()+"</value>\n     ";
 		}
-		System.out.println("..done");
+		log.debug("..done");
 	}
 
 

@@ -1,8 +1,12 @@
 package edu.uiowa.hibernate;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class CreateDAO {
 
-	
+	private static final Log log =LogFactory.getLog(CreateDAO.class);
+
 	private String templateFile = "";
 
 	private String TABLENAME = "@TABLENAME@";
@@ -55,7 +59,7 @@ public class CreateDAO {
 		
 		String template = FileContents.getContents(templateFile);
 		template = template.replaceAll(TABLENAME, tableName);
-		System.out.println("projectName: " +  projectName);
+		log.debug("projectName: " +  projectName);
 		template = template.replaceAll(PROGNAME, projectName);
 		template = template.replaceAll(tablename, tableName.toLowerCase());
 		return template;

@@ -2,6 +2,9 @@ package edu.uiowa.webapp;
 
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Attribute extends ClayElement {
 
     Domain domain = null;
@@ -22,6 +25,9 @@ public class Attribute extends ClayElement {
     Entity entity = null;
     Attribute foreignAttribute = null;
 	Vector<Attribute> childAttributes = new Vector<Attribute>();
+	
+	private static final Log log =LogFactory.getLog(Attribute.class);
+
 	
 
 	public Vector<Attribute> getChildAttributes() {
@@ -100,8 +106,8 @@ public class Attribute extends ClayElement {
             counter = true;
             String schemaName = remarks.substring(remarks.indexOf(' ') + 1, remarks.indexOf('.'));
             String entityName = remarks.substring(remarks.indexOf('.') + 1);
-            System.out.println("schema: " + schemaName + " - " + Generator.getDatabase().getSchemaByName(schemaName));
-            System.out.println("entity: " + entityName + " - " + Generator.getDatabase().getSchemaByName(schemaName).getEntityByLabel(entityName));
+            log.debug("schema: " + schemaName + " - " + Generator.getDatabase().getSchemaByName(schemaName));
+            log.debug("entity: " + entityName + " - " + Generator.getDatabase().getSchemaByName(schemaName).getEntityByLabel(entityName));
             dominantEntity = Generator.getDatabase().getSchemaByName(schemaName).getEntityByLabel(entityName);
         }
         else if (remarks.startsWith("sequence ")) {
@@ -142,7 +148,7 @@ public class Attribute extends ClayElement {
     
     public Entity getDominantEntity() {
     	if(dominantEntity==null)
-    		System.out.println("DominantEntity is null");
+    		log.debug("DominantEntity is null");
         return dominantEntity;
     }
 
@@ -192,7 +198,7 @@ public class Attribute extends ClayElement {
     }
 
     public void relabel() {
-    	System.out.println("relabeling: label="+label +"   type="+type);
+    	log.debug("relabeling: label="+label +"   type="+type);
         sqlLabel = label;
         if (label.toLowerCase().equals("id"))
                 label = "ID";
@@ -354,7 +360,7 @@ public class Attribute extends ClayElement {
     }
 
     public void dump() {
-        System.out.println("\t\t\tattribute: " + label + "\tuid: " + uid + "\ttype: " + type + "\tmandatory: " + mandatory + "\tprimary: " + primary + "\tauto-increment: " + autoIncrement + "\tremarks: " + remarks + "\tcounter: " + counter + "\tsequence: " + sequence + "\tsequence name: " + sequenceName);
+        log.debug("\t\t\tattribute: " + label + "\tuid: " + uid + "\ttype: " + type + "\tmandatory: " + mandatory + "\tprimary: " + primary + "\tauto-increment: " + autoIncrement + "\tremarks: " + remarks + "\tcounter: " + counter + "\tsequence: " + sequence + "\tsequence name: " + sequenceName);
     }
 
 

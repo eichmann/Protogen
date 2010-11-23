@@ -15,8 +15,7 @@ public class Generator {
 	//static String dbpassword = "";
 	///static String dbdriverclass = "";
 	//static String dbschema = "";
-
-	static boolean dbssl = true;
+	//static boolean dbssl = true;
 
 	private static final Log log =LogFactory.getLog(Generator.class);
 	/**
@@ -75,31 +74,36 @@ public class Generator {
 		if(mode.equalsIgnoreCase("tags"))
 		{
 			String packageRoot = packageName;
-			String tagLocation = props.getProperty("tag.file.location",
-					pathPrefix + "/" + projectName+ "/"  + "src");
-			TagClassGenerator theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName);
-			try {
-				theGenerator.generateTagClasses(theDatabase);
-			} catch (IOException e2) {
-				log.error("Could not generate Tag Classes: " + tagLocation, e2);
+			if (Boolean.parseBoolean(props.getProperty("generate.tags", "true"))) {
+				String tagLocation = props.getProperty("tag.file.location",
+						pathPrefix + "/" + projectName+ "/"  + "src");
+				TagClassGenerator theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName);
+				try {
+					theGenerator.generateTagClasses(theDatabase);
+				} catch (IOException e2) {
+					log.error("Could not generate Tag Classes: " + tagLocation, e2);
+				}
 			}
-
-			String tldLocation = props.getProperty("tld.file.location", 
-					pathPrefix + projectName + "/WebContent/");
-			
-			TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
-			try {
-				theTLDgenerator.generateTLD(theDatabase);
-			} catch (IOException e1) {
-				log.error("Could not generate TLD File: " + tldLocation, e1);
+			if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
+				String tldLocation = props.getProperty("tld.file.location", 
+						pathPrefix + projectName + "/WebContent/WEB-INF/" + projectName +".tld");
+				
+				TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
+				try {
+					theTLDgenerator.generateTLD(theDatabase);
+				} catch (IOException e1) {
+					log.error("Could not generate TLD File: " + tldLocation, e1);
+				}
 			}
-			String jspLocation = props.getProperty("jsp.file.location", 
-					pathPrefix + projectName + "/WebContent/");
-			JSPGenerator theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
-			try {
-				theJSPgenerator.generateJSPs(theDatabase);
-			} catch (IOException e) {
-				log.error("Could not generate JSP Files: " + jspLocation, e);
+			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
+				String jspLocation = props.getProperty("jsp.file.location", 
+						pathPrefix + projectName + "/WebContent/");
+				JSPGenerator theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
+				try {
+					theJSPgenerator.generateJSPs(theDatabase);
+				} catch (IOException e) {
+					log.error("Could not generate JSP Files: " + jspLocation, e);
+				}
 			}
 		}
 		else
