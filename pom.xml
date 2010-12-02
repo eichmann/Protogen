@@ -2,13 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.uiowa.icts</groupId>
   <artifactId>Protogen</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.2</version>
   <name>Protogen</name>
   <description>Code generation project.</description>
   <scm>
-  	<connection>scm:svn:https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/branches/maven/</connection>
-  	<developerConnection>scm:svn:https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/branches/maven/</developerConnection>
-  	<url>https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/branches/maven/</url>
+  	<connection>scm:svn:https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/tags/Protogen-0.0.2</connection>
+  	<developerConnection>scm:svn:https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/tags/Protogen-0.0.2</developerConnection>
+  	<url>https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/tags/Protogen-0.0.2</url>
   </scm>
   
   <distributionManagement>
