@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +23,7 @@ public class TLDGenerator {
     String packagePrefix = null;
     String projectName = null;
 
+    Properties props = null;
     File theTLD = null;
     BufferedWriter out = null;
 
@@ -43,6 +45,15 @@ public class TLDGenerator {
         log.debug(webAppPath + "\t" + packagePrefix + "\t" + projectName);
     }
 
+    
+    public TLDGenerator(Properties props) {
+        this.props = props;
+        this.webAppPath = props.getProperty("tld.file.location");
+        this.packagePrefix =  props.getProperty("package.name");
+        this.projectName = props.getProperty("project.name");
+        
+        log.debug(webAppPath + "\t" + packagePrefix + "\t" + projectName);
+    }
     public void generateTLD(Database theDatabase) throws IOException {
         theTLD = new File(webAppPath);
         FileWriter fstream = new FileWriter(theTLD);
@@ -357,7 +368,12 @@ public class TLDGenerator {
 
     private void generateSupplementalEntry(String prefix, String type) {
         String buffer = null;
-        File tagFile = new File(prefix + "resources/" + type + ".tld");
+        File tagFile = null;
+        if (props.getProperty(type + ".file.location") != null) {
+        	tagFile = new File (props.getProperty(type + ".file.location"));
+        } else {
+        	tagFile = new File(prefix + "resources/" + type + ".tld");
+        }
 
         if (!tagFile.exists())
             return;

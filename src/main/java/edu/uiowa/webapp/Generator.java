@@ -85,14 +85,14 @@ public class Generator {
 				}
 			}
 			if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
-				String tldLocation = props.getProperty("tld.file.location", 
-						pathPrefix + projectName + "/WebContent/WEB-INF/" + projectName +".tld");
+
 				
-				TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
+				//TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
+				TLDGenerator theTLDgenerator = new TLDGenerator(props);
 				try {
 					theTLDgenerator.generateTLD(theDatabase);
 				} catch (IOException e1) {
-					log.error("Could not generate TLD File: " + tldLocation, e1);
+					log.error("Could not generate TLD File: " +  props.getProperty("tld.file.location"), e1);
 				}
 			}
 			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
