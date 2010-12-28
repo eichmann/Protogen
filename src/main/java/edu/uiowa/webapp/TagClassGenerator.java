@@ -1744,6 +1744,9 @@ public class TagClassGenerator {
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Vector;\n");
         out.write("import java.io.InputStream;\n");
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+        
         if (theEntity.hasImage()) {
             out.write("import java.io.ByteArrayOutputStream;\n");
         }
@@ -1783,6 +1786,9 @@ public class TagClassGenerator {
         out.write("\tboolean commitNeeded = false;\n");
         out.write("\tboolean newRecord = false;\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
+        
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        
 
         // declare attributes
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
