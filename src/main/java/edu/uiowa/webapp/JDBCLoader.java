@@ -31,13 +31,10 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		return database;
 	}
 
-
-	public void run(String filename) throws Exception {
-
+	public void run(Properties prop) throws Exception {
 
 
 
-		Properties prop = PropertyLoader.loadProperties(filename);
 		String schema= prop.getProperty("db.schema");
 
 
@@ -100,6 +97,20 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		}
 
 		conn.close();
+	}
+
+	public void run(String filename) throws Exception {
+
+
+
+
+		Properties prop = PropertyLoader.loadProperties(filename);
+		run(prop);
+
+
+
+
+		
 	}
 
 	private void updateForeignKeys(DatabaseMetaData dbMeta) throws SQLException
