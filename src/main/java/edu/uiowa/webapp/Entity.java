@@ -5,6 +5,8 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiowa.icts.protogen.springhibernate.DomainClass;
+
 public class Entity extends ClayElement {
 	
     Schema schema = null;

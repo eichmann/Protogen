@@ -1,8 +1,10 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.springhibernate;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import edu.uiowa.webapp.Attribute;
 
 public class ClassVariable
 	{
@@ -72,7 +74,7 @@ public class ClassVariable
 		
 		
 
-		ClassVariable()
+		public ClassVariable()
 		{
 			this.modifier = "";
 			this.type = "";
@@ -81,7 +83,7 @@ public class ClassVariable
 
 		}
 
-		ClassVariable(String modifier, String type, String identifier, String initializer)
+		public ClassVariable(String modifier, String type, String identifier, String initializer)
 		{
 			this.modifier = modifier;
 			setType(type);
@@ -90,7 +92,7 @@ public class ClassVariable
 
 		}
 
-		ClassVariable(String modifier, String type, String identifier)
+		public ClassVariable(String modifier, String type, String identifier)
 		{
 			this.modifier = modifier;
 			setType(type);
@@ -180,22 +182,22 @@ public class ClassVariable
 			this.domainClass = domainClass;
 		}
 
-		String getUpperIdentifier()
+		public String getUpperIdentifier()
 		{
 			return identifier.substring(0, 1).toUpperCase() + identifier.substring(1);
 		}
-		String getLowerIdentifier()
+		public String getLowerIdentifier()
 		{
 			return identifier.substring(0, 1).toLowerCase() + identifier.substring(1);
 		}
 
-		String toDeclaration()
+		public String toDeclaration()
 		{
 			
 			return modifier + " " + type + " " + identifier +initializer+";\n";
 		}
 		
-		String toAnnotationDeclaration()
+		public String toAnnotationDeclaration()
 		{
 			String annotation = "";
 			if (type.equals("Date")) {
@@ -210,7 +212,7 @@ public class ClassVariable
 			}
 			return annotation;
 		}
-		String getterAnnotationsToString(String indent)
+		public String getterAnnotationsToString(String indent)
 		{
 			String output = "";
 			Iterator<String> iter = getterAnnotations.iterator();

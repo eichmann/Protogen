@@ -4,12 +4,8 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.springhibernate;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,102 +15,106 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
+import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
+import edu.uiowa.icts.protogen.springhibernate.DomainClass.ClassType;
+import edu.uiowa.webapp.Attribute;
+import edu.uiowa.webapp.Database;
+import edu.uiowa.webapp.Entity;
+import edu.uiowa.webapp.Relationship;
+import edu.uiowa.webapp.Schema;
 
 
+/*
+ * Completes the database model created previously to support Spring and Hibernate code generation
+ * ...used by classes that extend AbstractSpringHiberernateCodeGenerator.java 
+ * 
+ * @author bkusenda
+ * 
+ */
 
-import edu.uiowa.webapp.ClassVariable.AttributeType;
-import edu.uiowa.webapp.ClassVariable.RelationshipType;
-import edu.uiowa.webapp.DomainClass.ClassType;
+public class SpringHibernateModel {
 
-
-public class DomainCodeGenerator {
-
-	private String projectPath = null;
 
 	private String packageRoot = null;
 
-	private String projectName = null;
-
-	private String currentPackageDirectory = null;
-	private String currentPackageName = null;
-
 	private List<DomainClass> domainClassList = new ArrayList<DomainClass>();
-	
-	private Schema currentSchema;
-	private static final Log log =LogFactory.getLog(DomainCodeGenerator.class);
+	private HashMap<Schema, List<DomainClass> > schemaMap;
+	//private Schema currentSchema;
+	private static final Log log =LogFactory.getLog(SpringHibernateModel.class);
 
 
 	public List<DomainClass> getDomainClassList() {
 		return domainClassList;
 	}
+	
 
 	public void setDomainClassList(List<DomainClass> domainClassList) {
 		this.domainClassList = domainClassList;
 	}
 
-	public DomainCodeGenerator(String projectPath, String packageRoot, String projectName) 
+	public HashMap<Schema, List<DomainClass>> getSchemaMap() {
+		return schemaMap;
+	}
+
+	public SpringHibernateModel(Database theDatabase, String packageRoot)  
 	{
-		this.projectPath = projectPath;
 		this.packageRoot = packageRoot;
-		this.projectName = projectName;
+		loadDatabase(theDatabase);
 
 	}
 
-	public void generateDomainCodeForDatabase(Database theDatabase)
-	throws IOException {
-		
-		Iterator<Schema> schemaIter = theDatabase.getSchemas().iterator();
-		
-		while(schemaIter.hasNext())
+	private void loadDatabase(Database theDatabase)
+	{
+		schemaMap = new HashMap<Schema,List<DomainClass> >();
+
+		for(Schema schema: theDatabase.getSchemas())
 		{
-			currentSchema = schemaIter.next();
-			currentPackageName = packageRoot + "." + currentSchema.getUnqualifiedLabel() + "." + "domain";
-			currentPackageDirectory = projectPath + "/"	+ currentPackageName.replaceAll("\\.", "/");
-			(new File(currentPackageDirectory)).mkdirs();
+			schema.populateEntityAttributeForeignReference();
+			if(!schemaMap.containsKey(schema))
+				schemaMap.put(schema, new ArrayList<DomainClass>());
 			
-			currentSchema.populateEntityAttributeForeignReference();
-			generateDomainCodeForSchema(currentSchema);
-	
-			
+			loadSchema(schema);
 		}
-		
-	
+
+
 
 	}
 
-	private void generateDomainCodeForSchema(Schema schema) throws IOException {
+	private void loadSchema(Schema schema) {
 
+		
 		for (int i = 0; i < schema.getEntities().size(); i++)
 		{
 
-			
-			DomainClass ec = generateDomainCodeForEntity(schema.getEntities().elementAt(i));
+
+			DomainClass ec = loadEntity(schema.getEntities().elementAt(i));
 			if(ec != null)
-				domainClassList.add(ec);		
+			{
+				domainClassList.add(ec);
+				schemaMap.get(schema).add(ec);
+			}
 			log.debug("check:"+i+" -"+schema.getEntities().elementAt(i).getLabel());
 		}
-		
+
 		connectLinks();
-		writeFiles();
 
 	}
-	
 
 
-	private DomainClass generateDomainCodeForEntity(Entity entity) throws IOException {
-		
+
+	private DomainClass loadEntity(Entity entity) {
+
 		if(isManyToMany(entity))
 		{
 			log.debug("Entity is manyToMany.  Not Creating Class");
 			return null;
 		}
-	
+
 		boolean usesComposite=false;
 		HashMap<String,Attribute> foreignAndPrimaryKeysAttributes = getHashFromAttributesFtPt(entity.getAttributes().iterator());	
 		HashMap<String,Attribute> foreignAndNotPrimaryKeysAttributes = getHashFromAttributesFtPf(entity.getAttributes().iterator());
-		HashMap<String,Attribute> notForeignAndPrimaryKeysAttributes = getHashFromAttributesFfPt(entity.getAttributes().iterator());
-		HashMap<String,Attribute> notForeignAndNotPrimaryKeysAttributes = getHashFromAttributesFfPf(entity.getAttributes().iterator());
-	
+
 		log.debug("******** Entity = " + entity.getSqlLabel());
 
 
@@ -123,6 +123,10 @@ public class DomainCodeGenerator {
 		List<ClassVariable> symTable = new ArrayList<ClassVariable>();
 		List<String> importList = new ArrayList<String>();
 
+		/*
+		 * build imports list
+		 * 
+		 */
 		importList.add("java.util.Set");
 		importList.add("java.util.*");
 		importList.add("java.text.DateFormat");
@@ -130,7 +134,7 @@ public class DomainCodeGenerator {
 		importList.add("java.text.ParseException");
 		importList.add("java.util.Date");
 
-		
+
 		importList.add("javax.persistence.*");
 		importList.add("javax.persistence.Entity");
 		importList.add("javax.persistence.Table");
@@ -140,18 +144,18 @@ public class DomainCodeGenerator {
 		importList.add("javax.persistence.FetchType");
 		importList.add("javax.persistence.JoinColumn");
 		importList.add("javax.persistence.ManyToOne");
-		
-		
+
+
 		importList.add("org.springframework.format.annotation.DateTimeFormat");
 		importList.add("org.hibernate.annotations.*");
 		importList.add("javax.persistence.CascadeType");
-		importList.add(currentPackageName + ".*");
+		importList.add(packageRoot + ".*");
 
 
 		//If entity's primary key's are composite, create class and attribute for composite ID
 		if (entity.getPrimaryKeyAttributes().size()>1)
 		{
-			generateCompositeIdClassForEntity(entity);
+			//generateCompositeIdClassForEntity(entity);
 			usesComposite=true;
 
 			ClassVariable v =new ClassVariable("private", entity.getUnqualifiedLabel()+"Id", entity.getUnqualifiedLowerLabel() + "Id");
@@ -167,7 +171,7 @@ public class DomainCodeGenerator {
 				v.getGetterAnnotations().add("@AttributeOverride(name = \""+a.getUnqualifiedLabel()+"\", column = @Column(name = \""+a.getSqlLabel()+"\", nullable = false))");
 				if(at.hasNext())
 					v.getGetterAnnotations().add(",");;
-					
+
 			}
 			v.getGetterAnnotations().add("})");
 			symTable.add(v);
@@ -187,8 +191,8 @@ public class DomainCodeGenerator {
 				ClassVariable v = new ClassVariable("private", attrib.getType(), attrib.getUnqualifiedLowerLabel());
 				if(attrib.isForeign())
 				{
-//					attrib = entity.getAttributeByLabel(attrib.getUnqualifiedLabel());
-					
+					//					attrib = entity.getAttributeByLabel(attrib.getUnqualifiedLabel());
+
 					Entity parent = attrib.getReferencedEntity();//entity.getForeignReferenceEntity(attrib);
 
 					v.setAttribType(AttributeType.FOREIGNPRIMARYKEY);
@@ -206,10 +210,10 @@ public class DomainCodeGenerator {
 				{
 					v.setAttribType(AttributeType.PRIMARYKEY);
 					v.setRelationshipType(RelationshipType.NONE);
-					
+
 					v.setAttribute(attrib);
 					v.setComment("Primary key");
-					v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+currentSchema.getUnqualifiedLabel()+".seqnum\",allocationSize=1)");
+					v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getUnqualifiedLabel()+".seqnum\",allocationSize=1)");
 					v.getGetterAnnotations().add("@Id");
 					v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.SEQUENCE,generator=\"gen\")");
 					v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\", unique = true, nullable = false)");		
@@ -230,22 +234,22 @@ public class DomainCodeGenerator {
 			Attribute attrib = attribIter.next();
 			if(!attrib.isForeign() )
 			{
-				
+
 				//don't add attribute if its part of the composite key
 				if (attrib.isPrimary() && usesComposite==true)
 					continue;
-					
-			ClassVariable v = new ClassVariable("private", attrib.getType(), attrib.getUnqualifiedLowerLabel());
 
-			v.setAttribType(AttributeType.LOCALATTRIBUTE);
-			v.setRelationshipType(RelationshipType.NONE);
-			
-			v.setAttribute(attrib);
-			v.setComment("Local Attribute");
-			v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\")");
+				ClassVariable v = new ClassVariable("private", attrib.getType(), attrib.getUnqualifiedLowerLabel());
 
-			if(!symTableHash.contains(v.getIdentifier()))
-				symTable.add(v);
+				v.setAttribType(AttributeType.LOCALATTRIBUTE);
+				v.setRelationshipType(RelationshipType.NONE);
+
+				v.setAttribute(attrib);
+				v.setComment("Local Attribute");
+				v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\")");
+
+				if(!symTableHash.contains(v.getIdentifier()))
+					symTable.add(v);
 			}
 
 		}
@@ -258,7 +262,7 @@ public class DomainCodeGenerator {
 			Relationship r = iter.next();
 			Entity e = r.getTargetEntity();
 			Iterator<Attribute> attribIter3 = getHashOfAttributesToEntity(entity,e).iterator();
-			
+
 			while(attribIter3.hasNext())
 			{
 
@@ -273,14 +277,14 @@ public class DomainCodeGenerator {
 				}
 				else
 				{	checkExists.put(e.getUnqualifiedLabel(),0);
-				
+
 				}
 
 				ClassVariable v=null;
 				if(isManyToMany(e))
 				{
-					 v=getManyToManyVariable(entity, e);
-					 log.debug("************** " + e.getUnqualifiedLabel() + " is ManyToMany Table" );
+					v=getManyToManyVariable(entity, e);
+					log.debug("************** " + e.getUnqualifiedLabel() + " is ManyToMany Table" );
 
 				}
 				else	
@@ -310,74 +314,75 @@ public class DomainCodeGenerator {
 		Iterator<Attribute> iter2 = attribList.iterator();
 		checkExists = new HashMap<String,Integer>();
 		while (iter2.hasNext()) {
-	
+
 			Attribute at = iter2.next();
 			log.debug("***Attribute:"+at.getUnqualifiedLabel());
 			Entity e = at.getReferencedEntity();//entity.getForeignReferenceEntity(at);
-			
+
 			if(e != null)
 			{
-				
+
 				log.debug("***Current:"+entity.getUnqualifiedLabel()+" **PARENT ENTITY = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
-					String postfix="";
+				String postfix="";
 
-					if(checkExists.containsKey(e.getUnqualifiedLabel()))
-					{
+				if(checkExists.containsKey(e.getUnqualifiedLabel()))
+				{
 
-						int counter = (checkExists.get(e.getUnqualifiedLabel()));
-						postfix = "By" + at.getUnqualifiedLabel().substring(0, at.getUnqualifiedLabel().length()-2)+ ""+ (counter>0?counter:"");
-						checkExists.put(e.getUnqualifiedLabel(),counter+1);
-					}
-					else
-					{
-						
-						log.debug("************EXISTS = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
+					int counter = (checkExists.get(e.getUnqualifiedLabel()));
+					postfix = "By" + at.getUnqualifiedLabel().substring(0, at.getUnqualifiedLabel().length()-2)+ ""+ (counter>0?counter:"");
+					checkExists.put(e.getUnqualifiedLabel(),counter+1);
+				}
+				else
+				{
 
-						checkExists.put(e.getUnqualifiedLabel(),0);
-						
-					
-					}
+					log.debug("************EXISTS = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
-					String variableName= e.getUnqualifiedLowerLabel()+"" + postfix;
-					ClassVariable v = new ClassVariable("private", ""+e.getUnqualifiedLabel()+"", variableName);
-					
-					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size()==1)
-					{
-						v.setRelationshipType(RelationshipType.ONETOONE);
-						v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
-						v.getGetterAnnotations().add("@PrimaryKeyJoinColumn");
-					}
-					else
-					{
+					checkExists.put(e.getUnqualifiedLabel(),0);
+
+
+				}
+
+				String variableName= e.getUnqualifiedLowerLabel()+"" + postfix;
+				ClassVariable v = new ClassVariable("private", ""+e.getUnqualifiedLabel()+"", variableName);
+
+				if(at.isPrimary() && entity.getPrimaryKeyAttributes().size()==1)
+				{
+					v.setRelationshipType(RelationshipType.ONETOONE);
+					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
+					v.getGetterAnnotations().add("@PrimaryKeyJoinColumn");
+				}
+				else
+				{
 					v.setRelationshipType(RelationshipType.MANYTOONE);
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
 					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() >1)
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)");
 					else
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false)");//, insertable = false, updatable = false)");
-					}
-					v.setAttribute(at);
-					v.setAttribType(AttributeType.FOREIGNATTRIBUTE);
-					
-					symTable.add(v);
-					symTableHash.add(v.getIdentifier());
+				}
+				v.setAttribute(at);
+				v.setAttribType(AttributeType.FOREIGNATTRIBUTE);
 
-					
-				
+				symTable.add(v);
+				symTableHash.add(v.getIdentifier());
+
+
+
 			}
 			else
 			{
 				log.debug("************PARENT ENTITY = NULL for "+ at.getUnqualifiedLabel());
 			}
-			
+
 		}
+		String packageName = packageRoot + "." + entity.getSchema().getUnqualifiedLabel()  + ".domain";
 
 		DomainClass domainClass = new DomainClass();
 		domainClass.setUsesCompositeKey(usesComposite);
-		domainClass.setSchema(currentSchema);
+		domainClass.setSchema(entity.getSchema());
 		domainClass.setClassType(ClassType.ENTITY);
-		domainClass.setPackageName(currentPackageName);
+		domainClass.setPackageName(packageName);
 		domainClass.setModifier("public");
 		domainClass.setIdentifier(entity.getUnqualifiedLabel());
 		domainClass.setTableName(entity.getSqlLabel());
@@ -386,129 +391,30 @@ public class DomainCodeGenerator {
 		domainClass.setSymTable(symTable);
 		domainClass.populateClassVariableDomainClass();
 		entity.setDomainClass(domainClass);
-	
 
-//		File file = new File(packagePrefixDirectory, entity.getUnqualifiedLabel()	+ ".java");
-//		FileWriter fstream = new FileWriter(file);
-//		BufferedWriter out = new BufferedWriter(fstream);
-//		out.write(domainClass.toString());
-//		out.close();
-//		
 		return domainClass;
 
 	}
-	
-	
-	
-	
 
-	
+
+
+
+
+
 	public String plural(String st)
 	{
 		return st+"s";
-//		if (st.charAt(st.length()) == 's')
-//			return st;
-//		else if (st.charAt(st.length()-1) == 'y')
-//			return st.substring(0, st.length()) + "ies";
-//		else
-//			return st + "s";
-		
-		
-	}
+		//		if (st.charAt(st.length()) == 's')
+		//			return st;
+		//		else if (st.charAt(st.length()-1) == 'y')
+		//			return st.substring(0, st.length()) + "ies";
+		//		else
+		//			return st + "s";
 
-	private void generateCompositeIdClassForEntity(Entity entity) throws IOException {
-		
-
-		File file = new File(currentPackageDirectory, entity.getUnqualifiedLabel()	+ "Id.java");
-		
-		if(file.exists())
-		{
-			log.debug("" + file.getCanonicalPath() + " Exists. Not Overwriting");
-			return;
-		}
-		
-		FileWriter fstream = new FileWriter(file);
-		BufferedWriter out = new BufferedWriter(fstream);
-
-		out.write("package " + currentPackageName + ";\n");
-		List<String> importList = new ArrayList<String>();
-		importList.add("import java.util.Set;");
-		importList.add("import java.util.*;");
-		importList.add("import " + currentPackageName + ".*;");
-		importList.add("import javax.persistence.*;");
-		importList.add("import java.io.Serializable;");
-
-		Iterator<String> importIter = importList.iterator();
-
-		lines(out, 1);
-
-		while (importIter.hasNext())
-			out.write(importIter.next() + "\n");
-		lines(out, 2);
-		out.write("@Embeddable\n");
-		out.write("public class " + entity.getUnqualifiedLabel() + "Id implements Serializable\n");
-		out.write("{\n");
-		lines(out, 2);
-		spaces(out, 4);
-		out.write("//Table attribute definitions\n");
-		Iterator<Attribute> attribIter0 = entity.getPrimaryKeyAttributes().iterator();
-		while(attribIter0.hasNext())
-		{
-			Attribute attrib = attribIter0.next();
-			String field = "";
-			field = "private " + attrib.getType() + " "	+ attrib.getUnqualifiedLowerLabel() + ";\n";
-			spaces(out, 4);
-			out.write(field);
-
-		}
-		lines(out, 4);
-		spaces(out, 4);
-		out.write("//Table attribute definitions\n");
-		attribIter0 = entity.getPrimaryKeyAttributes().iterator();
-		while(attribIter0.hasNext())
-		{
-
-			Attribute attrib = attribIter0.next();
-			generateGetter(out, attrib, false);
-			lines(out, 1);
-			generateSetter(out, attrib);
-			lines(out, 1);
-
-
-		}
-
-		out.write("}");
-		out.close();
-	}
-
-	private void generateSetter(BufferedWriter out, Attribute attrib)
-	throws IOException {
-		spaces(out, 4);
-		out.write("public void set" + attrib.getUpperLabel() + "("	+ attrib.getType() + " " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
-		spaces(out, 4);
-		out.write("{\n");
-		spaces(out, 8);
-		out.write("this." + attrib.getUnqualifiedLowerLabel() + " = "	+ attrib.getUnqualifiedLowerLabel() + ";\n");
-		spaces(out, 4);
-		out.write("}\n");
 
 	}
 
-	private void generateGetter(BufferedWriter out, Attribute attrib, boolean primaryAnnotations)
-	throws IOException {
-		
-		spaces(out, 4);
-		out.write("@Column(name = \""+attrib.getSqlLabel()+"\""+ (attrib.isPrimary() ? ", nullable = false":"")+ ")\n" );
-		spaces(out, 4);
-		out.write("public "+attrib.getType()+" get" + attrib.getUpperLabel() + "()\n");
-		spaces(out, 4);
-		out.write("{\n");
-		spaces(out, 8);
-		out.write("return " + attrib.getUnqualifiedLowerLabel() + ";\n");
-		spaces(out, 4);
-		out.write("}\n");
 
-	}
 
 	private HashMap<String,Attribute> getHashFromAttributesFtPt(Iterator<Attribute> attribIter)
 	{
@@ -561,7 +467,7 @@ public class DomainCodeGenerator {
 	private List<Attribute> getHashOfAttributesToEntity(Entity parent, Entity child)
 	{
 		log.debug("*******parent:"+ parent.getUnqualifiedLowerLabel() + " ****child:" + child.getUnqualifiedLowerLabel());
-		
+
 		List<Attribute> hash = new ArrayList<Attribute>();
 		Iterator<Attribute> attribIter = child.getAttributes().iterator();
 		while(attribIter.hasNext())
@@ -570,11 +476,11 @@ public class DomainCodeGenerator {
 			log.debug("*******atter:"+ a.getUnqualifiedLowerLabel());
 			if(a.isForeign())
 			{
-				
-				
-				
+
+
+
 				Entity e2 = a.getReferencedEntity();
-				
+
 				log.debug("*******foreign:"+ a.getUnqualifiedLowerLabel() + " ****e2label" + (e2!=null?e2.getUnqualifiedLabel():"none"));
 
 
@@ -582,7 +488,7 @@ public class DomainCodeGenerator {
 				{
 					log.debug("*******foreign:DINGDINGDING");
 					hash.add(a);
-					
+
 				}
 
 			}
@@ -619,18 +525,18 @@ public class DomainCodeGenerator {
 					v.setIdentifier(plural(e2.getUnqualifiedLowerLabel()));
 					v.setType("Set<"+targetEntity+">");
 					v.setInitializer(" = new HashSet<"+targetEntity+">(0)");
-//					v.setType("Set<"+e2.getUnqualifiedLabel()+">");
-//					v.setInitializer(" = new HashSet<"+e2.getUnqualifiedLabel()+">(0)");
+					//					v.setType("Set<"+e2.getUnqualifiedLabel()+">");
+					//					v.setInitializer(" = new HashSet<"+e2.getUnqualifiedLabel()+">(0)");
 				}
 			}
 		}
 		v.setAttribType(AttributeType.FOREIGNATTRIBUTE);
-		
+
 		v.setRelationshipType(RelationshipType.MANYTOMANY);
-		
+
 		v.setModifier("private");
 		v.getGetterAnnotations().add("@ManyToMany(cascade = CascadeType.ALL,targetEntity="+targetEntity+".class)");
-		v.getGetterAnnotations().add("@JoinTable(name = \""+currentSchema.getSqlLabel()+"."+child.getSqlLabel()+"\", joinColumns = { @JoinColumn(name = \""+thisKey+"\")}, inverseJoinColumns = { @ JoinColumn(name = \""+thatKey+"\")})");
+		v.getGetterAnnotations().add("@JoinTable(name = \""+child.getSchema().getSqlLabel()+"."+child.getSqlLabel()+"\", joinColumns = { @JoinColumn(name = \""+thisKey+"\")}, inverseJoinColumns = { @ JoinColumn(name = \""+thatKey+"\")})");
 
 		return v;
 
@@ -643,36 +549,70 @@ public class DomainCodeGenerator {
 		log.debug( "* primary keys:" + child.getPrimaryKeyAttributes().size());
 		log.debug( "* parent keys:" + child.getParentKeyAttributes().size());
 		log.debug( "* childern:" + child.getChildren().size());
-	
+
 		if(child.getAttributes().size()==2 && child.getPrimaryKeyAttributes().size() == 2 && child.getParentKeyAttributes().size()==2 && child.getChildren().size() ==0)
 			return true;
 		return false;
 	}
 
-	private void lines(BufferedWriter out, int num) throws IOException {
-		for (int i = 0; i < num; i++)
-			out.write("\n");
+
+
+	private ClassVariable findReferencedClassVariable(ClassVariable cv)
+	{
+
+		DomainClass dc = findDomainByIdentifier(cv.getAttribute().getReferencedEntity().getUnqualifiedLabel());
+
+
+		Iterator<ClassVariable> cvIter = dc.getSymTable().iterator();
+
+		while(cvIter.hasNext())
+		{
+			ClassVariable cv1 = cvIter.next();
+
+			if(cv1.getAttribute()!= null && cv1.getAttribType() !=  AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel()))
+				return cv1;
+			//				else
+				//					log.debug("Error on "+ cv.getIdentifier() +" with "+cv.getIdentifier());
+		}
+
+		return null;
+
 	}
 
-	private void spaces(BufferedWriter out, int num) throws IOException {
-		for (int i = 0; i < num; i++)
-			out.write(" ");
+	private DomainClass findDomainByIdentifier(String ident)
+	{
+		Iterator<DomainClass> domainIter = domainClassList.iterator();
+
+		while(domainIter.hasNext() )
+		{
+			DomainClass dc = domainIter.next();
+			if(dc.getIdentifier().equalsIgnoreCase(ident))
+				return dc;
+
+		}
+		return null;
+
 	}
-	
+
+
+	/*
+	 * Link DomainClass Objects that have foreign key references
+	 * 
+	 */
 	private void connectLinks()
 	{	
 		log.debug("***Connecting Links***");
 		Iterator<DomainClass> domainIter = domainClassList.iterator();
 		while(domainIter.hasNext() )
 		{
-			
-			
+
+
 			DomainClass dc = domainIter.next();
 			log.debug("   "+dc.getIdentifier());
 			Iterator<ClassVariable> cvIter =  dc.getSymTable().iterator();
 			while (cvIter.hasNext())
 			{
-				
+
 				ClassVariable cv = cvIter.next();
 				log.debug("      "+cv.getIdentifier());
 				if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE)
@@ -681,14 +621,14 @@ public class DomainCodeGenerator {
 					Entity e = cv.getAttribute().getReferencedEntity();//dc.getEntity().getForeignReferenceEntity(cv.getAttribute());
 					if(e != null)
 					{
-					DomainClass c = findDomainByIdentifier(e.getUnqualifiedLabel());
-					if(c == null)
-						log.debug("************** cannot find DomainClass:"+cv.getType());
-					cv.setDomainClass(c);
+						DomainClass c = findDomainByIdentifier(e.getUnqualifiedLabel());
+						if(c == null)
+							log.debug("************** cannot find DomainClass:"+cv.getType());
+						cv.setDomainClass(c);
 					}
 					else
 						log.debug("************** cannot getEntity from attribute:"+cv.getIdentifier());
-					
+
 
 				}
 				else if(cv.getAttribType() == AttributeType.CHILD)
@@ -696,95 +636,27 @@ public class DomainCodeGenerator {
 					log.debug("         -attribute is child");
 					ClassVariable cvRef = findReferencedClassVariable(cv);
 					if(cvRef == null)
-						{
+					{
 						log.debug("************** ERROR CONNECTING CLASSVARIABLE");
 						cv.setReferenedClassVariable(cvRef);
-						}
-						
+					}
+
 				}
-	
+
 			}
-			
-			
-			
+
+
+
 		}
-		
-	}
-	
-	/************************************/
-	private void writeToFile(DomainClass domainClass) throws IOException {
-		
-		String packageDirectory = 	projectPath + "/"	+ domainClass.getPackageName().replaceAll("\\.", "/");
-
-
-		File file = new File(packageDirectory, domainClass.getIdentifier()	+ ".java");
-		if(!file.exists())
-		{
-		FileWriter fstream = new FileWriter(file);
-		BufferedWriter out = new BufferedWriter(fstream);
-		out.write(domainClass.toString());
-		out.close();
-		}
-		else
-			log.debug("" + file.getCanonicalPath() + " Exists. Not Overwriting");
-
 
 	}
+
 	/**
-	 * @throws IOException **********************************/
-	
-	private void writeFiles() throws IOException
-	{
-		Iterator<DomainClass> domainIter = domainClassList.iterator();
-		while(domainIter.hasNext() )
-		{
-			DomainClass dc = domainIter.next();
-			writeToFile(dc);
-				
-		}
-		
+	 * @return
+	 */
+	public String getPackageRoot() {
+		return packageRoot;
 	}
-	
-	private ClassVariable findReferencedClassVariable(ClassVariable cv)
-	{
-
-			DomainClass dc = findDomainByIdentifier(cv.getAttribute().getReferencedEntity().getUnqualifiedLabel());
-		
-			
-			Iterator<ClassVariable> cvIter = dc.getSymTable().iterator();
-			
-			while(cvIter.hasNext())
-			{
-				ClassVariable cv1 = cvIter.next();
-
-				if(cv1.getAttribute()!= null && cv1.getAttribType() !=  AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel()))
-						return cv1;
-//				else
-//					log.debug("Error on "+ cv.getIdentifier() +" with "+cv.getIdentifier());
-			}
-
-		return null;
-		
-	}
-	
-	private DomainClass findDomainByIdentifier(String ident)
-	{
-		Iterator<DomainClass> domainIter = domainClassList.iterator();
-		
-		while(domainIter.hasNext() )
-		{
-			DomainClass dc = domainIter.next();
-			if(dc.getIdentifier().equalsIgnoreCase(ident))
-				return dc;
-	
-		}
-		return null;
-		
-	}
-
-
-
-
 
 
 }

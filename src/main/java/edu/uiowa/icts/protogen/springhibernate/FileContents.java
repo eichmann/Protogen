@@ -1,4 +1,4 @@
-package edu.uiowa.hibernate;
+package edu.uiowa.icts.protogen.springhibernate;
 
 import java.io.BufferedReader;
 import java.io.File;

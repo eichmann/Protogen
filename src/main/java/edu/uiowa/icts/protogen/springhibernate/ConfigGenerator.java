@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.springhibernate;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,7 +13,8 @@ import java.io.FileWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.uiowa.spring.SpringConfiguration;
+import edu.uiowa.webapp.Database;
+import edu.uiowa.webapp.Schema;
 
 public class ConfigGenerator {
 

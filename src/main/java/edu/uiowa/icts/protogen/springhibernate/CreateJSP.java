@@ -1,4 +1,4 @@
-package edu.uiowa.hibernate;
+package edu.uiowa.icts.protogen.springhibernate;
 
 public class CreateJSP {
 

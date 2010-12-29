@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.springhibernate;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,29 +15,27 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.uiowa.spring.CreateController;
+import edu.uiowa.webapp.Schema;
 
-public class ControllerGenerator {
+public class ControllerCodeGenerator {
 
 
 
-	private String projectPath = null;
+	private String pathBase = null;
 	private String packageRoot = null;
 
 	private String currentPackageDirectory = null;
 	private String currentPackageName = null;
 
-	String projectName = null;
 
 	Schema theSchema = null;
 
-	private static final Log log =LogFactory.getLog(ControllerGenerator.class);
+	private static final Log log =LogFactory.getLog(ControllerCodeGenerator.class);
 
 	
-	public ControllerGenerator(String projectPath, String packageRoot, String projectName) {
-		this.projectPath = projectPath;
+	public ControllerCodeGenerator(String pathBase, String packageRoot) {
+		this.pathBase = pathBase;
 		this.packageRoot = packageRoot;
-		this.projectName = projectName;
 	}
 
 	public void generateControllerClasses(List<DomainClass> dcList) throws Exception {
@@ -49,7 +47,7 @@ public class ControllerGenerator {
 		{
 			DomainClass dc = dcIter.next();
 			currentPackageName = packageRoot + "." + dc.getSchema().getLabel() + "";
-			currentPackageDirectory = projectPath + "/"	+ currentPackageName.replaceAll("\\.", "/") + "/controller";
+			currentPackageDirectory = pathBase + "/"	+ currentPackageName.replaceAll("\\.", "/") + "/controller";
 			(new File(currentPackageDirectory)).mkdirs();
 
 			generateControllerClass(dc);

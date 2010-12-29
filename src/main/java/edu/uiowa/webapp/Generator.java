@@ -1,10 +1,18 @@
 package edu.uiowa.webapp;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import edu.uiowa.icts.protogen.springhibernate.ConfigGenerator;
+import edu.uiowa.icts.protogen.springhibernate.DAOCodeGenerator;
+import edu.uiowa.icts.protogen.springhibernate.JSPCodeGenerator;
+import edu.uiowa.icts.protogen.springhibernate.DomainCodeGenerator;
+import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
+import edu.uiowa.icts.protogen.springhibernate.SpringHibernateModel;
 
 public class Generator {
 	static String pathPrefix = "/Users/eichmann/Documents/Components/workspace/";
@@ -29,15 +37,15 @@ public class Generator {
 
 	static Database theDatabase = null;
 
-	
-	
-	public void runGenerator(Properties props) {
+
+
+	public int runGenerator(Properties props) {
 		String projectName=props.getProperty("project.name");
 		String packageName=props.getProperty("package.name");
-		
+
 		String modelSource=props.getProperty("model.source", "clay");
 		String mode=props.getProperty("mode", "tags");
-		
+
 		DatabaseSchemaLoader theLoader = null;
 		if(modelSource.equalsIgnoreCase("clay"))
 		{
@@ -49,12 +57,13 @@ public class Generator {
 				theLoader.run(clayFile);
 			} catch (Exception e) {
 				log.error("Could not parse clay file: " + clayFile, e);
+				return 1;
 			}
-			
+
 		}
 		else if(modelSource.equalsIgnoreCase("jdbc"))
 		{
-		
+
 			theLoader = new JDBCLoader();
 			try {
 				theLoader.run("database.properties");
@@ -82,17 +91,19 @@ public class Generator {
 					theGenerator.generateTagClasses(theDatabase);
 				} catch (IOException e2) {
 					log.error("Could not generate Tag Classes: " + tagLocation, e2);
+						return 1;
 				}
 			}
 			if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
 
-				
+
 				//TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
 				TLDGenerator theTLDgenerator = new TLDGenerator(props);
 				try {
 					theTLDgenerator.generateTLD(theDatabase);
 				} catch (IOException e1) {
 					log.error("Could not generate TLD File: " +  props.getProperty("tld.file.location"), e1);
+						return 1;
 				}
 			}
 			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
@@ -103,73 +114,106 @@ public class Generator {
 					theJSPgenerator.generateJSPs(theDatabase);
 				} catch (IOException e) {
 					log.error("Could not generate JSP Files: " + jspLocation, e);
+						return 1;
 				}
 			}
 		}
 		else
 		{
 
-			String domainPath = props.getProperty("domain.file.location",
-					pathPrefix + projectName+ "/"  + "src")	;
-			DomainCodeGenerator theDomainGenerator = new DomainCodeGenerator(domainPath, packageName, projectName);
-			try {
-				theDomainGenerator.generateDomainCodeForDatabase(theDatabase);
-			} catch (IOException e4) {
-				log.error("Could not generate Code for Database: " + domainPath, e4);
+			SpringHibernateModel model = new SpringHibernateModel(theDatabase, packageName);
+
+			/*
+			 * generate.domain = true 
+			 * 
+			 */
+			if (Boolean.parseBoolean(props.getProperty("generate.domain", "true"))) {
+				String domainPath = props.getProperty("domain.file.location",pathPrefix + projectName+ "/"  + "src");
+				DomainCodeGenerator codeGen = new DomainCodeGenerator(model,domainPath,packageName);
+					try {
+						log.debug("***********Writing domain code*****************");
+						codeGen.generate();
+					} catch (IOException e) {
+						log.debug("Error writing domain code");
+						e.printStackTrace();
+						return 1;
+					}
 			}
 
-			String daoPath = props.getProperty("dao.file.location",
-					pathPrefix +projectName+ "/"  + "src");
-			DAOGenerator theDaoGenerator = new DAOGenerator(daoPath,packageName, projectName);
-			try {
-				theDaoGenerator.generateDaoClasses(theDomainGenerator.getDomainClassList());
-			} catch (Exception e3) {
-				log.error("Could not generate DAO Classes: " +daoPath, e3);
+			/*
+			 * generate.dao = true 
+			 * 
+			 */
+			if (Boolean.parseBoolean(props.getProperty("generate.dao", "true"))) {
+				String daoPath = props.getProperty("dao.file.location",	pathPrefix +projectName+ "/"  + "src");
+				DAOCodeGenerator codeGen = new DAOCodeGenerator(model,daoPath,packageName);
+				try {
+					
+					codeGen.generate();
+				} catch (Exception e3) {
+					log.error("Could not generate DAO Classes: " +daoPath, e3);
+				}
 			}
 
-			String controllerPath = props.getProperty("controller.file.location", 
-					pathPrefix + projectName+ "/"  + "src");
-			ControllerGenerator theControllerGenerator = new ControllerGenerator(controllerPath, packageName, projectName);
-			try {
-				theControllerGenerator.generateControllerClasses(theDomainGenerator.getDomainClassList());
-			} catch (Exception e2) {
-				log.error("Could not generate Controller Classes: " +controllerPath, e2);
-			}
+			/*
+			 * generate.controller = true 
+			 * 
+			 */
+//			if (Boolean.parseBoolean(props.getProperty("generate.controller", "true"))) {
+//				String controllerPath = props.getProperty("controller.file.location",pathPrefix + projectName+ "/"  + "src");
+//				try {
+//					codeGenerator.generateControllerCode(controllerPath);
+//				} catch (Exception e2) {
+//					log.error("Could not generate Controller Classes: " +controllerPath, e2);
+//				}
+//			}
 
-			String jspLocation = props.getProperty("jsp.file.location", 
-					pathPrefix + projectName+ "/"  + "WebContent/WEB-INF/jsp/");
-			JSPCodeGenerator theJSPGenerator = new JSPCodeGenerator(jspLocation);
-			try {
-				theJSPGenerator.generateAllJSP(theDomainGenerator.getDomainClassList());
-			} catch (IOException e1) {
-				log.error("Could not generate All JSP Files: " + jspLocation, e1);
+			/*
+			 * generate.jsp = true 
+			 * 
+			 */
+//			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
+//				String jspLocation = props.getProperty("jsp.file.location",	pathPrefix + projectName+ "/"  + "WebContent/WEB-INF/jsp/");
+//				JSPCodeGenerator theJSPGenerator = new JSPCodeGenerator(jspLocation);
+//				try {
+//					theJSPGenerator.generateAllJSP(theDomainGenerator.getDomainClassList());
+//				} catch (IOException e1) {
+//					log.error("Could not generate All JSP Files: " + jspLocation, e1);
+//
+//				}
+//			}
 
-			}
-
-			String configLocation = props.getProperty("config.file.location",
-					pathPrefix + projectName+ "/"  + "src");
-			ConfigGenerator configGen = new ConfigGenerator(configLocation,packageName, projectName);
-			try {
-				configGen.generateDispatcher(theDatabase);
-			} catch (Exception e) {
-				log.error("Could not generate Dispatcher: " + configLocation, e);
-
-			}
+			/*
+			 * generate.config = true 
+			 * 
+			 */
+//			if (Boolean.parseBoolean(props.getProperty("generate.config", "true"))) {
+//				String configLocation = props.getProperty("config.file.location",
+//						pathPrefix + projectName+ "/"  + "src");
+//				ConfigGenerator configGen = new ConfigGenerator(configLocation,packageName, projectName);
+//				try {
+//					configGen.generateDispatcher(theDatabase);
+//				} catch (Exception e) {
+//					log.error("Could not generate Dispatcher: " + configLocation, e);
+//
+//				}
+//			}
 
 		}
 
 
+		return 0;
 
-		
+
 	}
 	public static void main(String[] args) throws Exception {
 		Properties myProps = new Properties();
-		
+
 
 		if (args.length > 2)
 		{
 			pathPrefix = args[2];
-			
+
 
 		}
 		else
@@ -180,7 +224,7 @@ public class Generator {
 		if (!pathPrefix.endsWith("/"))
 			pathPrefix += "/";
 		myProps.setProperty("path.prefix", pathPrefix);
-		
+
 		if (args.length > 3)
 		{
 			//mode = args[3];
@@ -195,7 +239,7 @@ public class Generator {
 					myProps.setProperty("db.url", args[5]);
 					//dbusername=args[6];
 					myProps.setProperty("db.username", args[6]);
-					
+
 					//dbpassword=args[7];
 					myProps.setProperty("db.password", args[7]);
 					//dbssl=Boolean.parseBoolean(args[8]);
@@ -204,9 +248,9 @@ public class Generator {
 					myProps.setProperty("db.driver.class", args[9]);
 					if(args.length>9)
 						myProps.setProperty("db.schema", args[10]);
-						//dbschema=args[10];
-					
-					
+					//dbschema=args[10];
+
+
 				}
 
 			}
@@ -214,7 +258,7 @@ public class Generator {
 		}
 		Generator gen = new Generator();
 		gen.runGenerator(myProps);
-		
+
 		System.out.println("Generator mode:"+ myProps.getProperty("mode"));
 	}
 

@@ -1,11 +1,9 @@
-package edu.uiowa.spring;
+package edu.uiowa.icts.protogen.springhibernate;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.uiowa.hibernate.FileContents;
-import edu.uiowa.webapp.DomainClass;
 import edu.uiowa.webapp.Entity;
 import edu.uiowa.webapp.Relationship;
 
