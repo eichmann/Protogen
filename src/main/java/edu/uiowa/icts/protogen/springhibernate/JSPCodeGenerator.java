@@ -22,17 +22,28 @@ import org.apache.commons.logging.LogFactory;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 
 
-public class JSPCodeGenerator {
+public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 	
+	/**
+	 * @param model
+	 * @param pathBase
+	 * @param packageRoot
+	 */
+	public JSPCodeGenerator(SpringHibernateModel model, String pathBase,
+			String packageRoot) {
+		super(model, pathBase, packageRoot);
+		jspRoot = pathBase;
+		// TODO Auto-generated constructor stub
+	}
+
 	private static final Log log =LogFactory.getLog(JSPCodeGenerator.class);
 	public String jspRoot;
 
-	
-	public JSPCodeGenerator(String jspRoot)
-	{
-		this.jspRoot = jspRoot;
 
+	public void generate() throws IOException
+	{
 		
+		generateAllJSP(model.getDomainClassList());
 	}
 	
 	public void generateAllJSP(List<DomainClass> ecList)
@@ -57,7 +68,7 @@ public class JSPCodeGenerator {
 	}
 
 	private void generateShowJSP(DomainClass ec) throws IOException {
-		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/generated/" + ec.getIdentifier().toLowerCase();
+		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
 		(new File(directory )).mkdirs();
 		String jspFile = directory +"/show.jsp";
 		int indent = 0;
@@ -147,7 +158,7 @@ public class JSPCodeGenerator {
 	
 		log.debug("GeneratingListJSP:"+ec.getIdentifier());
 		log.debug("...."+ ec.getIdentifier());
-		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/generated/" + ec.getIdentifier().toLowerCase();
+		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
 		
 		(new File(directory )).mkdirs();
 		
@@ -227,7 +238,7 @@ public class JSPCodeGenerator {
 	
 
 	private void generateEditJSP(DomainClass ec) throws IOException {
-		String directory =  jspRoot + "/" +ec.getSchema().getUnqualifiedLabel() + "/generated/" + ec.getIdentifier().toLowerCase();
+		String directory =  jspRoot + "/" +ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
 		(new File(directory )).mkdirs();
 		
 		String jspFile = directory + "/edit.jsp";

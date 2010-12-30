@@ -75,6 +75,49 @@ public abstract class AbstractSpringHibernateCodeGenerator {
 		this.overwrite = overwrite;
 	}
 	
+	public String createGetter(String type,String variableName,int indent)
+	{
+		String sig = "";
+		if(variableName.length()>1)
+			sig = "public " + type +" get"+variableName.substring(0, 1).toUpperCase()+variableName.substring(1,variableName.length());
+		else 
+			sig = "public " + type +" get"+variableName.substring(0, 1).toUpperCase();
+		
+		StringBuffer output = new StringBuffer(); 
+		output.append(indent(indent) + sig + "()\n");
+		output.append(indent(indent) +"{\n");
+		output.append(indent(indent*2) +"return " + variableName+";\n");
+		output.append(indent(indent) +"}\n");
+		
+		return output.toString();
+	}
+	
+	public String createSetter(String type,String variableName,int indent)
+	{
+		String sig = "";
+		if(variableName.length()>1)
+			sig = "public void set"+variableName.substring(0, 1).toUpperCase()+variableName.substring(1,variableName.length());
+		else 
+			sig = "public void set"+variableName.substring(0, 1).toUpperCase();
+		
+		StringBuffer output = new StringBuffer(); 
+		output.append(indent(indent) + sig + "("+type+" "+variableName+")\n");
+		output.append(indent(indent) +"{\n");
+		output.append(indent(indent*2) + "this."+variableName+" = " + variableName+";\n");
+		output.append(indent(indent) +"}\n");
+		
+		return output.toString();
+	}
+	
+	public String indent(int indent)
+	{
+		String output ="";
+		for (int i=0;i<indent;i++)
+		{
+			output +=" ";
+		}
+		return output;
+	}
 
 	
 

@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.ConfigGenerator;
+import edu.uiowa.icts.protogen.springhibernate.ControllerCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.DAOCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.JSPCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.DomainCodeGenerator;
@@ -42,6 +43,9 @@ public class Generator {
 	public int runGenerator(Properties props) {
 		String projectName=props.getProperty("project.name");
 		String packageName=props.getProperty("package.name");
+		if(props.getProperty("pathPrefix")!=null)
+			pathPrefix = props.getProperty("path.prefix");
+			
 
 		String modelSource=props.getProperty("model.source", "clay");
 		String mode=props.getProperty("mode", "tags");
@@ -155,6 +159,40 @@ public class Generator {
 				}
 			}
 
+			
+
+			/*
+			 * generate.controller = true 
+			 * 
+			 */
+			if (Boolean.parseBoolean(props.getProperty("generate.controller", "true"))) {
+				String controllerPath = props.getProperty("controller.file.location",	pathPrefix +projectName+ "/"  + "src");
+				ControllerCodeGenerator codeGen = new ControllerCodeGenerator(model,controllerPath,packageName);
+				try {
+					
+					codeGen.generate();
+				} catch (Exception e3) {
+					log.error("Could not generate Controller Classes: " +controllerPath, e3);
+				}
+			}
+			
+			
+			/*
+			 * generate.jsps = true 
+			 * 
+			 */
+			if (Boolean.parseBoolean(props.getProperty("generate.jsp", "true"))) {
+				String jspPath = props.getProperty("jsp.file.location",	pathPrefix +projectName+ "/"  + "src");
+				JSPCodeGenerator codeGen = new JSPCodeGenerator(model,jspPath,packageName);
+				try {
+					
+					codeGen.generate();
+				} catch (Exception e3) {
+					log.error("Could not generate Controller Classes: " +jspPath, e3);
+				}
+			}
+			
+			
 			/*
 			 * generate.controller = true 
 			 * 
