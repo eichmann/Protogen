@@ -30,6 +30,9 @@ public class DomainClass
 	private Entity entity=null;
 	private Schema schema=null;
 	private boolean usesCompositeKey;
+	private boolean nullablePrimitives = true;
+	private boolean defaultToLong;//not implemented
+	
 	
 	
 	
@@ -38,6 +41,18 @@ public class DomainClass
 	
 	
 
+	public boolean isDefaultToLong() {
+		return defaultToLong;
+	}
+	public void setDefaultToLong(boolean defaultToLong) {
+		this.defaultToLong = defaultToLong;
+	}
+	public boolean isNullablePrimitives() {
+		return nullablePrimitives;
+	}
+	public void setNullablePrimitives(boolean nullablePrimitives) {
+		this.nullablePrimitives = nullablePrimitives;
+	}
 	public boolean isUsesCompositeKey() {
 		return usesCompositeKey;
 	}
@@ -186,6 +201,7 @@ public class DomainClass
 		{
 			ClassVariable cv = cvIter.next();
 			String init = "";
+			
 			if(cv.getInitializer().isEmpty())
 			{
 				if(cv.getType().equals("String"))
@@ -193,17 +209,17 @@ public class DomainClass
 				else if (cv.getType().equals("int"))
 					init = " = 0";
 				else if (cv.getType().equals("long"))
-					init = " = 0";
+					init = " = 0L";
 				else if (cv.getType().equals("float"))
-					init = " = 0";
+					init = " = 0f";
 				else if (cv.getType().equals("double"))
-					init = " = 0";
+					init = " = 0d";
 
 				else if (cv.getType().equals("boolean"))
 					init = " = false";
 
 				else
-					init = ""; 
+					init = " = null"; 
 			}
 			else 
 				init = cv.getInitializer();
@@ -343,6 +359,10 @@ public class DomainClass
 		}
 		
 		return cvList;
+	}
+	
+	public ClassVariable getPrimaryKey() {
+		return getPrimaryKeys().iterator().next();
 	}
 	
 	public List<ClassVariable> getForeignClassVariables() {

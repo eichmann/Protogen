@@ -213,7 +213,7 @@ public class SpringHibernateModel {
 
 					v.setAttribute(attrib);
 					v.setComment("Primary key");
-					v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getUnqualifiedLabel()+".seqnum\",allocationSize=1)");
+					v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getSqlLabel()+".seqnum\",allocationSize=1)");
 					v.getGetterAnnotations().add("@Id");
 					v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.SEQUENCE,generator=\"gen\")");
 					v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\", unique = true, nullable = false)");		
@@ -355,11 +355,11 @@ public class SpringHibernateModel {
 				else
 				{
 					v.setRelationshipType(RelationshipType.MANYTOONE);
-					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
+					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class,cascade=CascadeType.ALL )");
 					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() >1)
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)");
 					else
-						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false)");//, insertable = false, updatable = false)");
+						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = true)");//, insertable = false, updatable = false)");
 				}
 				v.setAttribute(at);
 				v.setAttribType(AttributeType.FOREIGNATTRIBUTE);
@@ -597,8 +597,11 @@ public class SpringHibernateModel {
 
 	/*
 	 * Link DomainClass Objects that have foreign key references
+	 *
 	 * 
+	 * this all needs updated and is inconsistant
 	 */
+	
 	private void connectLinks()
 	{	
 		log.debug("***Connecting Links***");
@@ -615,6 +618,8 @@ public class SpringHibernateModel {
 
 				ClassVariable cv = cvIter.next();
 				log.debug("      "+cv.getIdentifier());
+				
+				//finds the class of the parent
 				if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE)
 				{
 					log.debug("         -attribute is foreign");
@@ -631,6 +636,7 @@ public class SpringHibernateModel {
 
 
 				}
+				//finds the class of the children
 				else if(cv.getAttribType() == AttributeType.CHILD)
 				{
 					log.debug("         -attribute is child");

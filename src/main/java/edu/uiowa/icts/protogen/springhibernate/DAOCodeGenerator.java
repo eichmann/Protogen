@@ -13,15 +13,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.uiowa.webapp.Schema;
 
 public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
+	protected static final Log log =LogFactory.getLog(DAOCodeGenerator.class);
 	
 	private String interfaceSuffix="Service";
 	private String impleSuffix="Home";
 	public DAOCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {
 		super(model, pathBase, packageRoot);
+		(new File(packageRootPath)).mkdirs();
 	}
 
 
@@ -173,7 +178,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		spaces(out, 4);
 		out.write("{");
 		spaces(out, 8);
-		out.write("setDomainName(\""+dc.getPackageName()+"\");\n");
+		out.write("setDomainName(\""+dc.getPackageName()+"."+ dc.getIdentifier()+"\");\n");
 		lines(out,1);
 		spaces(out, 4);
 		out.write("}\n");

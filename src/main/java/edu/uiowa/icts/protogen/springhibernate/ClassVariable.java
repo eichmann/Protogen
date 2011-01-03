@@ -111,6 +111,22 @@ public class ClassVariable
 		public String getType() {
 			if(type.equals("Object"))
 				return "byte[]";
+			
+			
+			if(domainClass !=null && domainClass.isNullablePrimitives())
+			{
+				if(type.equalsIgnoreCase("int"))
+					return "Integer";
+				else if(type.equalsIgnoreCase("boolean"))
+					return "Boolean";
+				else if(type.equalsIgnoreCase("float"))
+					return "Float";
+				else if(type.equalsIgnoreCase("double"))
+					return "Double";
+				else if(type.equalsIgnoreCase("long"))
+					return "Long";
+			}
+			
 			return type;
 		}
 
@@ -194,7 +210,7 @@ public class ClassVariable
 		public String toDeclaration()
 		{
 			
-			return modifier + " " + type + " " + identifier +initializer+";\n";
+			return modifier + " " + getType() + " " + identifier +initializer+";\n";
 		}
 		
 		public String toAnnotationDeclaration()
@@ -239,9 +255,9 @@ public class ClassVariable
 				output = getterAnnotationsToString(indent);
 			
 			if(attribType == AttributeType.COMPOSITEKEY)
-				output += indent +"public " + type + " get"+"Id()\n";
+				output += indent +"public " + getType() + " get"+"Id()\n";
 			else
-				output +=indent +"public " + type + " get"+getUpperIdentifier()+"()\n";
+				output +=indent +"public " + getType() + " get"+getUpperIdentifier()+"()\n";
 			output +=indent +"{\n";
 			output +=indent + indent+"return " + identifier  + ";\n";
 			output +=indent +"}\n";

@@ -40,6 +40,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 
 
 	
+	protected static final Log log =LogFactory.getLog(DomainCodeGenerator.class);
 
 	/**
 	 * @param model
@@ -49,7 +50,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 	public DomainCodeGenerator(SpringHibernateModel model, String pathBase,
 			String packageRoot) {
 		super(model, pathBase, packageRoot);
-		// TODO Auto-generated constructor stub
+		(new File(packageRootPath)).mkdirs();
 	}
 
 

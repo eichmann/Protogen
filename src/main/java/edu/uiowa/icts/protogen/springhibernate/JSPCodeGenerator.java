@@ -20,6 +20,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
+import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
+import edu.uiowa.webapp.Attribute;
 
 
 public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
@@ -84,7 +86,22 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		{
 			ClassVariable cv = cvIter.next();
 			log.debug("ClassVariable:"+cv.getIdentifier());
+			if(ec.isUsesCompositeKey() && cv.isPrimary())
+			{
+				
+				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
+				{
+					output += "<p>"+a.getLowerLabel()+":${"+cv.getLowerIdentifier()+"."+a.getLowerLabel()+"} </p>";
+			
+				}
+				
+
+		
+			}
+			else 
+			{
 			output += "<p>"+cv.getUpperIdentifier() + ":${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</p>";
+			}
 			output += lines(1);
 			
 			
@@ -205,11 +222,45 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		{
 			
 			ClassVariable cv = cvIter.next();
+
 			if (cv.isPrimary())
 			{
-				output += spaces(indent) +"<td><a href=\"edit.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a>";
+				if(ec.isUsesCompositeKey() && cv.isPrimary())
+				{
+					List<String[]> compositeKeys = new ArrayList<String[]>();
+					
+					
+					for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
+					{
+						compositeKeys.add(new String[] {a.getLowerLabel(), ec.getLowerIdentifier()+".id."+a.getLowerLabel() });
+									
+					}
+				
+					String params="";
+					String label="";
+					for(String[] starray :compositeKeys)
+					{
+						params += starray[0]+"=${"+starray[1] + "}&";
+						label= "("+starray[0]+",${"+starray[1]+"})";
+						
+					}
+					params = params.substring(0, params.length()-1);
+					output += "<td><a href=\"edit.html?"+params+"\">"+label+"</a>";
+					output += "<a href=\"show.html?"+params+"\">show</a></td>";
+					
+
+				
+			
+				}
+				else
+				{
+					output += spaces(indent) +"<td><a href=\"edit.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a>";
+				
 				output += spaces(indent) +"  <a href=\"show.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">(view)</a></td>";
+				}
 			}
+			else if(cv.getRelationshipType() == RelationshipType.MANYTOONE || cv.getRelationshipType() == RelationshipType.ONETOMANY)
+				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getIdentifier() + "}</td>";
 			else
 				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</td>";
 			output += lines(1);
@@ -253,13 +304,20 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		while(cvIter.hasNext())
 		{
 			ClassVariable cv = cvIter.next();
-			output += "<p>"+cv.getUpperIdentifier() + ":${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</p>";
+			if(ec.isUsesCompositeKey() && cv.isPrimary())
+			{
+				output += "<p></p>";
+				
+			}
+			else
+				output += "<p>"+cv.getUpperIdentifier() + ":${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</p>";
+			
 			output += lines(1);
 			
 		}
 		
-		output += spaces(indent) + "<form:form method=\"get\" commandName=\""+ec.getLowerIdentifier()+"\" action=\"save.html\" >";
-		output += spaces(indent) + "<table class=\"tableData1\">";
+		output += spaces(indent) + "<form:form method=\"post\" commandName=\""+ec.getLowerIdentifier()+"\" action=\"save.html\" >";
+		output += spaces(indent) + "<fieldset>";
 		lines(1);
 		
 		cvIter = ec.listAllIter();;
@@ -268,39 +326,52 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		while(cvIter.hasNext())
 		{
 			
-			output += spaces(indent) + "<tr>";
+			output += spaces(indent) + "";
 			output += lines(1);
 			ClassVariable cv = cvIter.next();
 			indent +=4;
+			if(ec.isUsesCompositeKey() && cv.isPrimary())
+			{
+				
+				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
+				{
+					output += "<label for=\"id."+a.getLowerLabel()+"\">"+a.getLowerLabel()+"</label><form:input path=\"id."+a.getLowerLabel()+"\" /><br/>\n ";
 			
-			if( cv.getAttribType() ==AttributeType.CHILD )
+				}
+				
+
+		
+			}
+			else if( cv.getAttribType() ==AttributeType.CHILD )
 			{
 
-				output += spaces(indent) +"<th></th>";
-				output += lines(1);
-				output += spaces(indent) +"<td></td>";
+				//output += spaces(indent) +"<th></th>";
+				//output += lines(1);
+				//output += spaces(indent) +"<td></td>";
 			}
 			else if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE )
 			{
 
 				
-				output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
+				String elementId = cv.getIdentifier()+"."+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier();
+				output += spaces(indent) +"<label for=\""+elementId+"\">" +cv.getUpperIdentifier() + "</label>";
 				output += lines(1);
-				output += spaces(indent) + "<td><select id=\""+cv.getIdentifier()+"\" name=\""+cv.getAttribute().getReferencedEntity().getDomainClass().getEntity().getLowerLabel()+"Id\" >";
+			//	output += spaces(indent) + "<td><select id=\""+cv.getIdentifier()+"\" name=\""+cv.getAttribute().getReferencedEntity().getDomainClass().getEntity().getLowerLabel()+"Id\" >";
+				output += " <form:select path=\""+elementId+"\" items=\"${"+cv.getDomainClass().getLowerIdentifier()+"List}\" itemValue=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier()+"\" itemLabel=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier() +"\"/><br/>";
 				output += lines(1);
-				output += spaces(indent) + "<c:forEach items=\"${" + cv.getDomainClass().getLowerIdentifier()+ "List}\" var=\"item\" >";
-				String selected="";
-				if( cv.getDomainClass().getPrimaryKeys().size()>0 && cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().size()>0)
-				{
-					log.debug("creating select");
-				selected += "<c:if test=\"${";
-				selected += ec.getLowerIdentifier()+"."+cv.getIdentifier()+"." + cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier(); 
-				selected += "== item."+ cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\">selected=\"true\"</c:if>";
-				output += spaces(indent) + "<option "+selected+" value=\"${item."+cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\" >"+ cv.getAttribute().getReferencedEntity().getDomainClass().getSelectBoxLabel()+"</option>";
-				}
-				output += spaces(indent) + "</c:forEach>";
-				output += lines(1);
-				output += spaces(indent) + "</select></td>";
+//				output += spaces(indent) + "<c:forEach items=\"${" + cv.getDomainClass().getLowerIdentifier()+ "List}\" var=\"item\" >";
+//				String selected="";
+//				if( cv.getDomainClass().getPrimaryKeys().size()>0 && cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().size()>0)
+//				{
+//					log.debug("creating select");
+//				selected += "<c:if test=\"${";
+//				selected += ec.getLowerIdentifier()+"."+cv.getIdentifier()+"." + cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier(); 
+//				selected += "== item."+ cv.getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\">selected=\"true\"</c:if>";
+//				output += spaces(indent) + "<option "+selected+" value=\"${item."+cv.getAttribute().getReferencedEntity().getDomainClass().getPrimaryKeys().iterator().next().getIdentifier() +"}\" >"+ cv.getAttribute().getReferencedEntity().getDomainClass().getSelectBoxLabel()+"</option>";
+//				}
+//				output += spaces(indent) + "</c:forEach>";
+//				output += lines(1);
+//				output += spaces(indent) + "</select></td>";
 
 				output += lines(1);
 
@@ -309,36 +380,37 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			{
 				if(cv.isPrimary())
 				{
-				output += spaces(indent) +"<th></th>";
+				output += spaces(indent) +"";
 				output += lines(1);
-				output += spaces(indent) +"<td><form:hidden path=\""+ cv.getIdentifier()+"\" /></td>";
+				output += spaces(indent) +"<form:hidden path=\""+ cv.getIdentifier()+"\" />";
 				}
 				else 
 				{
-					output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
+				
+					output += spaces(indent) +"<label for=\""+cv.getIdentifier()+"\">" +cv.getUpperIdentifier() + "</label>";
 					output += lines(1);
-					output += spaces(indent) +"<td><form:input path=\""+ cv.getIdentifier()+"\" /></td>";
+					output += spaces(indent) +"<form:input path=\""+ cv.getIdentifier()+"\" /><br/>";
 				}
 			}
 			
 			output += lines(1);
 			indent -=4;
-			output += spaces(indent) + "</tr>";
+			output += spaces(indent) + "";
 			output += lines(1);
 		}
 		
-		output += spaces(indent) + "<tr>";
+		output += spaces(indent) + "";
 		output += lines(1);
 		indent +=4;
-		output += spaces(indent) +"<th></th>";
+		output += spaces(indent) +"<label></label>";
 		output += lines(1);
-		output += spaces(indent) +"<td><input type=\"submit\" value=\"Save\" /></td>";
-		output += lines(1);
-		indent -=4;
-		output += spaces(indent) + "</tr>";
+		output += spaces(indent) +"<input type=\"submit\" value=\"Save\" /><br/>";
 		output += lines(1);
 		indent -=4;
-		output += spaces(indent) + "</table>";
+		output += spaces(indent) + "";
+		output += lines(1);
+		indent -=4;
+		output += spaces(indent) + "</fieldset>";
 		output += lines(1);
 		output += spaces(indent) + "</form:form>";
 		output += lines(1);

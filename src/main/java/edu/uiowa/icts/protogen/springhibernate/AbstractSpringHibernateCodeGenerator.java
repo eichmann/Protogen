@@ -35,7 +35,7 @@ public abstract class AbstractSpringHibernateCodeGenerator {
 		this.pathBase = pathBase;
 		this.packageRoot = packageRoot;
 		packageRootPath = pathBase + "/"	+ packageRoot.replaceAll("\\.", "/");
-		(new File(packageRootPath)).mkdirs();
+		
 		
 
 	}

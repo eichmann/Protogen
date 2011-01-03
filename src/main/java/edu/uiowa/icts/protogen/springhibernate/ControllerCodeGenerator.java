@@ -14,15 +14,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
 public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
 	
+	protected static final Log log =LogFactory.getLog(ControllerCodeGenerator.class);
+	
 	private String interfaceSuffix="Service";
 	public ControllerCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {
 		super(model, pathBase, packageRoot);
+		(new File(packageRootPath)).mkdirs();
 	}
 
 
@@ -49,8 +55,10 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		importList.add("import org.springframework.ui.ModelMap;");
 		importList.add("import org.springframework.web.bind.annotation.RequestMapping;");
 		importList.add("import org.springframework.web.bind.annotation.RequestMethod;");
-		importList.add("import org.springframework.web.servlet.ModelAndView;");
+		importList.add("import org.springframework.web.bind.annotation.ModelAttribute;");
 		importList.add("import org.springframework.web.bind.annotation.RequestParam;");
+		importList.add("import org.springframework.web.servlet.ModelAndView;");
+		
 		(new File(packagePath)).mkdirs();
 		
 		/*
@@ -158,6 +166,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		List<String> importList = new ArrayList<String>();
 		importList.add("import edu.uiowa.icts.spring.*;");
 		importList.add("import org.springframework.beans.factory.annotation.Autowired;");
+
 		importList.add("import org.springframework.security.core.context.SecurityContextHolder;");
 		importList.add("import "+daoPackageName+".*;");
 		
@@ -238,9 +247,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent)+"public ModelAndView list()\n");
 		output.append(indent(indent)+"{\n");
 		output.append(indent(indent*2)+"log.debug(\"in list method for "+dc.getIdentifier()+"\");\n");
-		output.append(indent(indent*2)+"ModelMap modelMap = new ModelMap();\n");
-		output.append(indent(indent*2)+"modelMap.addAttribute(\""+dc.getLowerIdentifier()+"List\","+accessor+".list());\n");
-		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"\",modelMap);\n");
+		output.append(indent(indent*2)+"ModelMap model = new ModelMap();\n");
+		output.append(indent(indent*2)+"model.addAttribute(\""+dc.getLowerIdentifier()+"List\","+accessor+".list());\n");
+		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/list\",model);\n");
 	
 		output.append(indent(indent)+"}");
 		return output.toString();
@@ -254,10 +263,14 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent)+"public ModelAndView add()\n");
 		output.append(indent(indent)+"{\n");
 		output.append(indent(indent*2)+"log.debug(\"in add method for "+dc.getIdentifier()+"\");\n");
-		output.append(indent(indent*2)+"ModelMap modelMap = new ModelMap();\n");
+		output.append(indent(indent*2)+"ModelMap model = new ModelMap();\n");
 		output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = new "+dc.getIdentifier()+"();\n");
-		output.append(indent(indent*2)+"modelMap.addAttribute(\""+dc.getLowerIdentifier()+"\","+dc.getLowerIdentifier()+");\n");
-		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/add\",modelMap);\n");
+		output.append(indent(indent*2)+"model.addAttribute(\""+dc.getLowerIdentifier()+"\","+dc.getLowerIdentifier()+");\n");
+		for( ClassVariable cv :dc.getForeignClassVariables())
+		{
+			output.append(indent(indent*2)+"model.addAttribute(\""+cv.getDomainClass().getLowerIdentifier()+"List\","+cv.getDomainClass().getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().list());\n");
+		}
+		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/edit\",model);\n");
 	
 		output.append(indent(indent)+"}");
 		return output.toString();
@@ -295,7 +308,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent)+"{\n");
 		output.append(indent(indent*2)+"log.debug(\"in edit method for "+dc.getIdentifier()+"\");\n");
 		
-		output.append(indent(indent*2)+"ModelMap modelMap = new ModelMap();\n");
+		output.append(indent(indent*2)+"ModelMap model = new ModelMap();\n");
 		
 		/*
 		 * set composite key values
@@ -310,11 +323,16 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 			}
 	
 		}
+	
+		for( ClassVariable cv :dc.getForeignClassVariables())
+		{
+			output.append(indent(indent*2)+"model.addAttribute(\""+cv.getDomainClass().getLowerIdentifier()+"List\","+cv.getDomainClass().getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().list());\n");
+		}
 
 		
 		output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
-		output.append(indent(indent*2)+"modelMap.addAttribute(\""+dc.getLowerIdentifier()+"\","+dc.getLowerIdentifier()+");\n");
-		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/edit\",modelMap);\n");
+		output.append(indent(indent*2)+"model.addAttribute(\""+dc.getLowerIdentifier()+"\","+dc.getLowerIdentifier()+");\n");
+		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/edit\",model);\n");
 	
 		output.append(indent(indent)+"}");
 		return output.toString();
@@ -353,7 +371,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent)+"{\n");
 		output.append(indent(indent*2)+"log.debug(\"in show method for "+dc.getIdentifier()+"\");\n");
 		
-		output.append(indent(indent*2)+"ModelMap modelMap = new ModelMap();\n");
+		output.append(indent(indent*2)+"ModelMap model = new ModelMap();\n");
 		
 		/*
 		 * set composite key values
@@ -371,8 +389,8 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 
 		
 		output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
-		output.append(indent(indent*2)+"modelMap.addAttribute(\""+dc.getLowerIdentifier()+"\","+dc.getLowerIdentifier()+");\n");
-		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/show\",modelMap);\n");
+		output.append(indent(indent*2)+"model.addAttribute(\""+dc.getLowerIdentifier()+"\","+dc.getLowerIdentifier()+");\n");
+		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/show\",model);\n");
 	
 		output.append(indent(indent)+"}");
 		return output.toString();
@@ -382,27 +400,28 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 	{
 		List<String[]> compositeKey = new ArrayList<String[]>();
 		String sig="";
-		if(dc.isUsesCompositeKey())
+//		if(dc.isUsesCompositeKey())
+//		{
+//			
+//			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
+//			{
+//				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+a.getType()+" "+a.getLowerLabel()+", ";
+//				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
+//			}
+//				
+//			sig = sig.substring(0, sig.length());
+//			
+//		}
+		
+		for( ClassVariable cv :dc.getForeignClassVariables())
 		{
-			
-			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
-			{
-				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+a.getType()+" "+a.getLowerLabel()+", ";
-				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
-			}
-				
-			sig = sig.substring(0, sig.length()-2);
-			
+			sig += "@RequestParam(\""+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getIdentifier()+"\") "+cv.getDomainClass().getPrimaryKey().getType()+" "+cv.getDomainClass().getPrimaryKey().getIdentifier()+", "; 
+				//cv.getDomainClass().getLowerIdentifier()+"List\","+cv.getDomainClass().getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().list());\n";
 		}
-		else
-		{
-			for(ClassVariable cv :dc.getPrimaryKeys())
-			{
 				
-				sig += "@RequestParam(\""+cv.getLowerIdentifier()+"\") "+cv.getType()+" "+dc.getLowerIdentifier()+"Id, ";
-			}
-			sig = sig.substring(0, sig.length()-2);
-		}
+			sig += "@ModelAttribute(\""+dc.getLowerIdentifier()+"\") "+dc.getIdentifier()+" "+dc.getLowerIdentifier()+"";
+		
+		
 			
 		StringBuffer output = new StringBuffer();
 		output.append(indent(indent)+"@RequestMapping(value = \"save.html\", method = RequestMethod.POST)\n");
@@ -424,11 +443,20 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 			}
 	
 		}
-
 		
-		output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
+		for( ClassVariable cv :dc.getForeignClassVariables())
+		{
+			String getter = ""+dc.getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().findById("+cv.getDomainClass().getPrimaryKey().getIdentifier()+")"; 
+			output.append(indent(indent*2)+""+dc.getLowerIdentifier()+".set"+cv.getUpperIdentifier()+"("+getter+");\n");
+			
+				//cv.getDomainClass().getLowerIdentifier()+"List\","+cv.getDomainClass().getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().list());\n";
+		}
+	//	output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
+		
+		//output.append(indent(indent*2)+"if ("+dc.getLowerIdentifier()+" == null) \n");
+		//output.append(indent(indent*3)+""+dc.getLowerIdentifier()+" = new "+dc.getIdentifier()+"();\n");
 		output.append(indent(indent*2)+accessor+".save("+dc.getLowerIdentifier()+");\n");
-		output.append(indent(indent*2)+"return \"redirect:"+jspPath+"/show.html\";\n");
+		output.append(indent(indent*2)+"return \"redirect:"+jspPath+"/list.html\";\n");
 	
 		output.append(indent(indent)+"}");
 		return output.toString();
@@ -461,7 +489,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		}
 			
 		StringBuffer output = new StringBuffer();
-		output.append(indent(indent)+"@RequestMapping(value = \"delete.html\", method = RequestMethod.POST)\n");
+		output.append(indent(indent)+"@RequestMapping(value = \"delete.html\", method = RequestMethod.GET)\n");
 		output.append(indent(indent)+"public String delete("+sig+")\n");
 		output.append(indent(indent)+"{\n");
 		output.append(indent(indent*2)+"log.debug(\"in delete method for "+dc.getIdentifier()+"\");\n");

@@ -12,8 +12,6 @@ src/main/java/edu/uiowa/icts/protogen/springhibernate/AbstractSpringHibernateCod
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ClassVariable.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ConfigGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ControllerCodeGenerator.java -text
-src/main/java/edu/uiowa/icts/protogen/springhibernate/CreateController.java -text
-src/main/java/edu/uiowa/icts/protogen/springhibernate/CreateJSP.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/DAOCodeGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/DomainClass.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/DomainCodeGenerator.java -text
