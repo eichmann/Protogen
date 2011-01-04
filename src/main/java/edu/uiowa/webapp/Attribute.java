@@ -232,6 +232,8 @@ public class Attribute extends ClayElement {
             type = "String";
         else if (type.toLowerCase().equals("date"))
             type = "Date";
+        else if (type.toLowerCase().equals("time"))
+            type = "Date";
         else if (type.toLowerCase().equals("timestamp"))
             type = "Date";
         else if (type.toLowerCase().equals("timestamptz"))
@@ -248,6 +250,7 @@ public class Attribute extends ClayElement {
             type = "float";
         else
             type = "Object";
+        log.debug("           new label: label="+label +"   type="+type);
     }
     
     public boolean isInt() {
@@ -294,6 +297,7 @@ public class Attribute extends ClayElement {
     }
     
     public String getJavaTypeClass() {
+    	log.debug("###"+getLabel()+":"+type);
         if (isInt())
             return "Integer";
         if (isLong())

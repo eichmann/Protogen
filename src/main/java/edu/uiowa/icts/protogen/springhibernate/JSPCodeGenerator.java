@@ -80,7 +80,9 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 	
 		
 		Iterator<ClassVariable> cvIter = ec.getPrimaryKeys().iterator();
-		output += "<h2>"+ec.getIdentifier()+"</h2>";
+		output += "<h1>"+ec.getIdentifier()+"</h1>";
+		output += lines(1);
+		output += "<div class=\"box\">\n";
 		output += lines(1);
 		while(cvIter.hasNext())
 		{
@@ -89,25 +91,27 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			if(ec.isUsesCompositeKey() && cv.isPrimary())
 			{
 				
+				output += "<h2>";
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
 				{
-					output += "<p>"+a.getLowerLabel()+":${"+cv.getLowerIdentifier()+"."+a.getLowerLabel()+"} </p>";
+					output += " ${"+cv.getLowerIdentifier()+"."+a.getLowerLabel()+"} ";
 			
 				}
+				output += "</h2>";
 				
 
 		
 			}
 			else 
 			{
-			output += "<p>"+cv.getUpperIdentifier() + ":${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</p>";
+			output += "<h2> ${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"} </h2>";
 			}
 			output += lines(1);
 			
 			
 		}
 		
-		output += spaces(indent) + "<table class=\"tableData1\">";
+		output += spaces(indent) + "";
 		lines(1);
 		
 		cvIter = ec.listAllIter();
@@ -115,12 +119,12 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		indent +=4;
 		while(cvIter.hasNext())
 		{
-			output += spaces(indent) + "<tr>";
+			output += spaces(indent) + "";
 			output += lines(1);
 			ClassVariable cv = cvIter.next();
 			log.debug("-ClassVariable:"+cv.getIdentifier());
 			indent +=4;
-			output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
+			output += spaces(indent) +"" +cv.getUpperIdentifier() + ": ";
 			output += lines(1);
 			
 			String pkString="";
@@ -142,20 +146,47 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				}
 				
 				
-				output += spaces(indent) +"<td><ul><c:forEach items=\"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}\" var=\"item\" varStatus=\"itemStatus\" >";
-				output += spaces(indent) +"<li><a href=\"../"+ cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier() +  "/edit.html?"+pkString+"\" > "+ cv.getAttribute().getEntity().getDomainClass().getSelectBoxLabel() + "</a></li>";
-				output += spaces(indent) +"</c:forEach></li></td>";
+				output += spaces(indent) +"<ul><c:forEach items=\"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}\" var=\"item\" varStatus=\"itemStatus\" >";
+				output += spaces(indent) +"<li><a href=\"../"+ cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier() +  "/edit.html?"+pkString+"\" > ${item."+cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
+				output += spaces(indent) +"</c:forEach></li><br/><br/>";
+			}
+			else if( cv.isPrimary() && cv.getDomainClass().isUsesCompositeKey())
+				
+			{
+				List<String[]> compositeKeys = new ArrayList<String[]>();
+				
+				
+				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
+				{
+					compositeKeys.add(new String[] {a.getLowerLabel(), ec.getLowerIdentifier()+".id."+a.getLowerLabel() });
+								
+				}
+
+			
+				String params="";
+				String label="";
+				for(String[] starray :compositeKeys)
+				{
+					params += starray[0]+"=${"+starray[1] + "}&";
+					label += "("+starray[0]+",${"+starray[1]+"})";
+					
+				}
+				params = params.substring(0, params.length()-1);
+				output += ""+label+" ";
+					
 			}
 			else
-			output += spaces(indent) +"<td>${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</td>";
+			{
+			output += spaces(indent) +"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}<br/><br/>";
+			}
 			
 			output += lines(1);
 			indent -=4;
-			output += spaces(indent) + "</tr>";
+			output += spaces(indent) + "";
 			output += lines(1);
 		}
 		indent -=4;
-		output += spaces(indent) + "</table>";
+		output += spaces(indent) + "</div>";
 		output += lines(1);
 		
 		
@@ -166,7 +197,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		BufferedWriter out = new BufferedWriter(fstream);
 		out.write(output);
 		out.close();
-		log.debug("Log here");
+		log.debug("done creating show");
 
 	}
 	
@@ -185,9 +216,11 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		String output= spaces(indent) + "<%@ include file=\"/WEB-INF/include.jsp\"  %>";
 		output += lines(2);
 
-		output += "<h2>"+ec.getIdentifier()+" List</h2>";
+		output += "<h1>"+ec.getIdentifier()+" List</h1>";
 		output += lines(1);
-		output += spaces(indent) + "<a href=\"add.html\">Add</a>";
+		
+		output += lines(1);
+		output += spaces(indent) + "<div class=\"button\"><a href=\"add.html\">Add</a></div>";
 		output += lines(1);
 		
 		output += spaces(indent) + "<table class=\"tableData1\">\n<thead>";
@@ -208,7 +241,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			
 		}
 		indent -=4;
-		output += spaces(indent) + "</tr>\n</thead>";
+		output += spaces(indent) + "<th></th></tr>\n</thead>";
 		output += lines(1);
 		indent -=4;
 		
@@ -217,12 +250,13 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += spaces(indent) + "<tr>";
 		output += lines(1);
 		indent +=4;
-
+		String links="";
 		while(cvIter.hasNext())
 		{
 			
 			ClassVariable cv = cvIter.next();
 
+			
 			if (cv.isPrimary())
 			{
 				if(ec.isUsesCompositeKey() && cv.isPrimary())
@@ -235,18 +269,21 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 						compositeKeys.add(new String[] {a.getLowerLabel(), ec.getLowerIdentifier()+".id."+a.getLowerLabel() });
 									
 					}
+	
 				
 					String params="";
 					String label="";
 					for(String[] starray :compositeKeys)
 					{
 						params += starray[0]+"=${"+starray[1] + "}&";
-						label= "("+starray[0]+",${"+starray[1]+"})";
+						label += "("+starray[0]+",${"+starray[1]+"})";
 						
 					}
 					params = params.substring(0, params.length()-1);
-					output += "<td><a href=\"edit.html?"+params+"\">"+label+"</a>";
-					output += "<a href=\"show.html?"+params+"\">show</a></td>";
+					links += "<td><a href=\"edit.html?"+params+"\">edit</a> ";
+					links += "<a href=\"show.html?"+params+"\">view</a>";
+					links += " <a href=\"delete.html?"+params+"\">delete</a></td>";
+					output += "<td><a href=\"edit.html?"+params+"\">"+label+"</a></td> ";
 					
 
 				
@@ -254,19 +291,37 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				}
 				else
 				{
-					output += spaces(indent) +"<td><a href=\"edit.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a>";
-				
-				output += spaces(indent) +"  <a href=\"show.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">(view)</a></td>";
+					links += spaces(indent) +"<td><a href=\"edit.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">edit</a> ";
+					links += spaces(indent) +"<a href=\"show.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">view</a>";
+					links += spaces(indent) +" <a href=\"delete.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">delete</a></td> ";
+				output += spaces(indent) +"<td><a href=\"edit.html?"+ec.getLowerIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a></td>";
 				}
 			}
-			else if(cv.getRelationshipType() == RelationshipType.MANYTOONE || cv.getRelationshipType() == RelationshipType.ONETOMANY)
-				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getIdentifier() + "}</td>";
+			else if( cv.getRelationshipType() == RelationshipType.ONETOMANY)
+			{
+				output += spaces(indent) +"<td>"+cv.getLowerIdentifier() + "</td>";
+	//			output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getIdentifier() + "}</td>";
+			}
+			else if( cv.getRelationshipType() == RelationshipType.MANYTOMANY)
+			{
+				//output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getLowerIdentifier() + "}</td>";
+				output += spaces(indent) +"<td>"+cv.getLowerIdentifier() + "</td>";
+			}
+			else if(cv.getRelationshipType() == RelationshipType.MANYTOONE)
+	
+				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</td>";
+			else if(cv.getAttribType() == AttributeType.CHILD)
+				
+				output += spaces(indent) +"<td>"+cv.getIdentifier() + "</td>";
 			else
+			
 				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</td>";
 			output += lines(1);
 			
 			
 		}
+		
+		output += spaces(indent) + links;
 		indent -=4;
 		output += spaces(indent) + "</tr>";
 		output += lines(1);
@@ -299,14 +354,16 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += lines(2);
 		
 		Iterator<ClassVariable> cvIter = ec.getPrimaryKeys().iterator();
-		output += "<h2>"+ec.getIdentifier()+"</h2>";
+		output += "<h1>"+ec.getIdentifier()+"</h1>";
+		output += lines(1);
+		output += "<div class=\"box\">";
 		output += lines(1);
 		while(cvIter.hasNext())
 		{
 			ClassVariable cv = cvIter.next();
 			if(ec.isUsesCompositeKey() && cv.isPrimary())
 			{
-				output += "<p></p>";
+				output += "";
 				
 			}
 			else
@@ -330,12 +387,15 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			output += lines(1);
 			ClassVariable cv = cvIter.next();
 			indent +=4;
-			if(ec.isUsesCompositeKey() && cv.isPrimary())
+			if(ec.isUsesCompositeKey() && cv.isPrimary()    )
 			{
+				
 				
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
 				{
-					output += "<label for=\"id."+a.getLowerLabel()+"\">"+a.getLowerLabel()+"</label><form:input path=\"id."+a.getLowerLabel()+"\" /><br/>\n ";
+					
+					if(!a.isForeign())
+						output += "<label for=\"id."+a.getLowerLabel()+"\">"+a.getLowerLabel()+"</label><form:input path=\"id."+a.getLowerLabel()+"\" /><br/>\n ";
 			
 				}
 				
@@ -349,9 +409,27 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				//output += lines(1);
 				//output += spaces(indent) +"<td></td>";
 			}
-			else if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE )
+			else if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE)
 			{
 
+				if(cv.isPrimary() && cv.getDomainClass().isUsesCompositeKey() )
+				{
+				
+					for(Attribute a : ec.getEntity().getPrimaryKeyAttributes())
+					{
+					
+						String elementId = "id."+a.getLowerLabel();
+						output += spaces(indent) +"<label for=\""+elementId+"\">" +cv.getUpperIdentifier() + "</label>";
+						output += lines(1);
+					
+						output += " <form:select path=\""+elementId+"\" items=\"${"+cv.getDomainClass().getLowerIdentifier()+"List}\" itemValue=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier()+"\" itemLabel=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier() +"\"/><br/>";
+						output += lines(1);
+						
+					
+					}
+				}
+				else
+				{
 				
 				String elementId = cv.getIdentifier()+"."+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier();
 				output += spaces(indent) +"<label for=\""+elementId+"\">" +cv.getUpperIdentifier() + "</label>";
@@ -375,6 +453,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
 				output += lines(1);
 
+				}
 			}
 			else 
 			{
@@ -387,9 +466,12 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				else 
 				{
 				
+					String cssClass=null;
+					if(cv.getType().equalsIgnoreCase("date"))
+						cssClass="dateInput";
 					output += spaces(indent) +"<label for=\""+cv.getIdentifier()+"\">" +cv.getUpperIdentifier() + "</label>";
 					output += lines(1);
-					output += spaces(indent) +"<form:input path=\""+ cv.getIdentifier()+"\" /><br/>";
+					output += spaces(indent) +"<form:input path=\""+ cv.getIdentifier()+"\" "+(cssClass!=null ? cssClass : "")+"  /><br/>";
 				}
 			}
 			
@@ -412,8 +494,9 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		indent -=4;
 		output += spaces(indent) + "</fieldset>";
 		output += lines(1);
-		output += spaces(indent) + "</form:form>";
+		output += spaces(indent) + "</form:form></div>";
 		output += lines(1);
+		
 		
 		File file = new File(jspFile);
 		FileWriter fstream = new FileWriter(file);
@@ -460,15 +543,18 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += lines(2);
 		
 		Iterator<DomainClass> dcIter =ecList.iterator();
-		output += lines(1);
+		
+		output += "<ul id=\"mainmenu\" >\n";
+		output += "<li><a>Main</a><ul>\n";
 		while(dcIter.hasNext())
 		{
 			DomainClass dc = dcIter.next();
-			output += "<a href=\"<c:url value=\"/"+dc.getSchema().getUnqualifiedLabel() +"/" +dc.getLowerIdentifier().toLowerCase() + "/list.html\" />\" >"+dc.getIdentifier()+" List</a>";
+			output += "<li><a href=\"<c:url value=\"/"+dc.getSchema().getUnqualifiedLabel() +"/" +dc.getLowerIdentifier().toLowerCase() + "/list.html\" />\" >"+dc.getIdentifier()+" List</a></li>";
 			output += lines(1);
 			
 		}
 		lines(1);
+		output += "</ul></li></ul>\n";
 		
 	
 		File file = new File(jspFile);

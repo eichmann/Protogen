@@ -46,6 +46,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		String jspPath="/"+dc.getSchema().getLowerLabel()+"/"+dc.getLowerIdentifier();
 		
 		List<String> importList = new ArrayList<String>();
+		importList.add("import java.util.Date;");
 		importList.add("import edu.uiowa.icts.spring.*;");
 		importList.add("import "+dc.getPackageName()+".*;");
 		importList.add("import "+daoPackageName+".*;");
@@ -285,7 +286,10 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 			
 			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
 			{
-				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+a.getType()+" "+a.getLowerLabel()+", ";
+				String type = a.getType();
+				if(type.equalsIgnoreCase("date"))
+					type="String";
+				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+type+" "+a.getLowerLabel()+", ";
 				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
 			}
 				
@@ -400,18 +404,24 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 	{
 		List<String[]> compositeKey = new ArrayList<String[]>();
 		String sig="";
-//		if(dc.isUsesCompositeKey())
-//		{
-//			
-//			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
-//			{
-//				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+a.getType()+" "+a.getLowerLabel()+", ";
-//				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
-//			}
-//				
-//			sig = sig.substring(0, sig.length());
-//			
-//		}
+		if(dc.isUsesCompositeKey())
+		{
+		
+			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
+			{
+				if(a.isForeign()==false)
+				{
+					String type = a.getType();
+					if(type.equalsIgnoreCase("date"))
+						type="String";
+					sig += "@RequestParam(\"id."+a.getLowerLabel()+"\") "+type+" "+a.getLowerLabel()+", ";
+					compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
+				}
+			}
+				
+			sig = sig.substring(0, sig.length());
+			
+		}
 		
 		for( ClassVariable cv :dc.getForeignClassVariables())
 		{
@@ -444,17 +454,31 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 	
 		}
 		
+		
 		for( ClassVariable cv :dc.getForeignClassVariables())
 		{
-			String getter = ""+dc.getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().findById("+cv.getDomainClass().getPrimaryKey().getIdentifier()+")"; 
-			output.append(indent(indent*2)+""+dc.getLowerIdentifier()+".set"+cv.getUpperIdentifier()+"("+getter+");\n");
+			if(cv.isPrimary()==false && dc.isUsesCompositeKey()==false)
+			{
+				String getter = ""+dc.getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().findById("+cv.getDomainClass().getPrimaryKey().getIdentifier()+")"; 
+				output.append(indent(indent*2)+""+dc.getLowerIdentifier()+".set"+cv.getUpperIdentifier()+"("+getter+");\n");
+			}
+			else
+			{
+				 
+				output.append(indent(indent*2)+""+dc.getLowerIdentifier()+"Id.set"+cv.getAttribute().getUpperLabel()+"("+cv.getDomainClass().getPrimaryKey().getIdentifier()+");\n");
+				
+			}
 			
 				//cv.getDomainClass().getLowerIdentifier()+"List\","+cv.getDomainClass().getSchema().getLowerLabel()+"DaoService.get"+cv.getDomainClass().getIdentifier()+interfaceSuffix+"().list());\n";
 		}
-	//	output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
-		
-		//output.append(indent(indent*2)+"if ("+dc.getLowerIdentifier()+" == null) \n");
+		if(dc.isUsesCompositeKey())
+		{
+		//output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
+		//output.append(indent(indent*2)+"if ("+dc.getLowerIdentifier()+" == null) {\n");
 		//output.append(indent(indent*3)+""+dc.getLowerIdentifier()+" = new "+dc.getIdentifier()+"();\n");
+		output.append(indent(indent*3)+""+dc.getLowerIdentifier()+".setId( "+dc.getLowerIdentifier()+"Id);\n");
+		//output.append(indent(indent*3)+"}\n");
+		}
 		output.append(indent(indent*2)+accessor+".save("+dc.getLowerIdentifier()+");\n");
 		output.append(indent(indent*2)+"return \"redirect:"+jspPath+"/list.html\";\n");
 	
@@ -471,7 +495,10 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 			
 			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
 			{
-				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+a.getType()+" "+a.getLowerLabel()+", ";
+				String type = a.getType();
+				if(type.equalsIgnoreCase("date"))
+					type="String";
+				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+type+" "+a.getLowerLabel()+", ";
 				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
 			}
 				

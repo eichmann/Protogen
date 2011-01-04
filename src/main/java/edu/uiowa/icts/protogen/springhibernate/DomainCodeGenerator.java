@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 
 
+
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass.ClassType;
@@ -87,6 +88,10 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		importList.add("import " +  model.getPackageRoot()+ ".*;");
 		importList.add("import javax.persistence.*;");
 		importList.add("import java.io.Serializable;");
+		importList.add("import org.springframework.format.annotation.DateTimeFormat;");
+		importList.add("import java.text.DateFormat;");
+		importList.add("import java.text.SimpleDateFormat;");
+		importList.add("import java.text.ParseException;");
 
 		Iterator<String> importIter = importList.iterator();
 		
@@ -110,7 +115,15 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		{
 			Attribute attrib = attribIter0.next();
 			String field = "";
-			field = "private " + attrib.getType() + " "	+ attrib.getUnqualifiedLowerLabel() + ";\n";
+			if(attrib.getJavaTypeClass().equalsIgnoreCase("date"))
+			{
+				spaces(out,4);
+				out.write("@DateTimeFormat(pattern = \"yyyy-MM-dd\")\n");
+				
+			}
+			
+			
+			field = "private " + attrib.getJavaTypeClass() + " "	+ attrib.getUnqualifiedLowerLabel() + ";\n";
 			spaces(out, 4);
 			out.write(field);
 
@@ -125,6 +138,8 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 			Attribute attrib = attribIter0.next();
 			generateGetter(out, attrib, false);
 			lines(out, 1);
+			if(attrib.getType().equalsIgnoreCase("date"))
+				generateDateStringSetter(out, attrib);
 			generateSetter(out, attrib);
 			lines(out, 1);
 
@@ -134,12 +149,35 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		out.write("}");
 		out.close();
 	}
+	
 
+	private void generateDateStringSetter(BufferedWriter out, Attribute attrib)
+	throws IOException {
+		spaces(out, 4);
+		out.write("public void set" + attrib.getUpperLabel() + "( String " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
+		spaces(out, 4);
+		out.write("{\n");
+		spaces(out, 8);
+		out.write("try{\n");
+		spaces(out, 12);
+		out.write("DateFormat formatter = new SimpleDateFormat(\"MM/dd/yyyy\");\n");
+		spaces(out, 12);
+		out.write("formatter.setLenient(true);\n");
+		spaces(out, 12);
+		out.write("this." + attrib.getUnqualifiedLowerLabel() + " = formatter.parse(" + attrib.getUnqualifiedLowerLabel() + ");\n");
+		out.write("");
+		out.write("} catch (ParseException e) {e.printStackTrace();}\n");
+		spaces(out, 8);
+		
+		spaces(out, 4);
+		out.write("}\n");
+
+	}
 
 	private void generateSetter(BufferedWriter out, Attribute attrib)
 	throws IOException {
 		spaces(out, 4);
-		out.write("public void set" + attrib.getUpperLabel() + "("	+ attrib.getType() + " " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
+		out.write("public void set" + attrib.getUpperLabel() + "("	+ attrib.getJavaTypeClass() + " " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
 		spaces(out, 4);
 		out.write("{\n");
 		spaces(out, 8);
@@ -155,7 +193,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		spaces(out, 4);
 		out.write("@Column(name = \""+attrib.getSqlLabel()+"\""+ (attrib.isPrimary() ? ", nullable = false":"")+ ")\n" );
 		spaces(out, 4);
-		out.write("public "+attrib.getType()+" get" + attrib.getUpperLabel() + "()\n");
+		out.write("public "+attrib.getJavaTypeClass()+" get" + attrib.getUpperLabel() + "()\n");
 		spaces(out, 4);
 		out.write("{\n");
 		spaces(out, 8);

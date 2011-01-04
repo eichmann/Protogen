@@ -355,7 +355,7 @@ public class SpringHibernateModel {
 				else
 				{
 					v.setRelationshipType(RelationshipType.MANYTOONE);
-					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class,cascade=CascadeType.ALL )");
+					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
 					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() >1)
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)");
 					else

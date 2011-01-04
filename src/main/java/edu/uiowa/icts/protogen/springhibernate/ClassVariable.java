@@ -217,12 +217,12 @@ public class ClassVariable
 		{
 			String annotation = "";
 			if (type.equals("Date")) {
-				annotation = "@DateTimeFormat(pattern = \"yyyy-MM-dd\")\n";
+				annotation = "    @DateTimeFormat(pattern = \"yyyy-MM-dd\")\n";
 				if(attribute !=null)
 				{
 					
 				 if(attribute.getType().equalsIgnoreCase("timestamp"))
-					 annotation = "@DateTimeFormat(pattern = \"yyyy-MM-dd hh:mm:ss\")\n";
+					 annotation = "    @DateTimeFormat(pattern = \"yyyy-MM-dd hh:mm:ss\")\n";
 				}
 				
 			}
@@ -270,7 +270,7 @@ public class ClassVariable
 			if(attribType == AttributeType.COMPOSITEKEY)
 				output +=indent +"public void setId("+type +" "+ identifier+")\n";
 			else
-				output += indent+"public void set"+getUpperIdentifier()+"("+type +" "+ identifier+")\n";
+				output += indent+"public void set"+getUpperIdentifier()+"("+getType() +" "+ identifier+")\n";
 			
 			
 			output +=indent +"{\n";
@@ -296,7 +296,7 @@ public class ClassVariable
 			output += indent +indent + "DateFormat formatter = new SimpleDateFormat(\"MM/dd/yyyy\");\n";
 			output += indent + indent + "formatter.setLenient(true);";
 			output +=indent +indent +"this." + identifier  + " = formatter.parse(" + identifier + ");\n";
-			output +=indent + indent +"} catch (ParseException e) {e.printStackTrace();}";
+			output +=indent + indent +"} catch (ParseException e) {e.printStackTrace();}\n";
 			output +=indent +"}\n";
 
 			return output;
