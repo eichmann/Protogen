@@ -215,7 +215,8 @@ public class SpringHibernateModel {
 					v.setComment("Primary key");
 					v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getSqlLabel()+".seqnum\",allocationSize=1)");
 					v.getGetterAnnotations().add("@Id");
-					v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.SEQUENCE,generator=\"gen\")");
+	//				v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.SEQUENCE,generator=\"gen\")");
+					v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.AUTO,generator=\"gen\")");
 					v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\", unique = true, nullable = false)");		
 				}
 				symTable.add(v);

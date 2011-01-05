@@ -146,9 +146,18 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				}
 				
 				
+				if(cv.getAttribute().getEntity().getDomainClass().isUsesCompositeKey())
+				{
+
+					output += spaces(indent) +"not implemented<br/><br/>";
+					
+				}
+				else
+				{
 				output += spaces(indent) +"<ul><c:forEach items=\"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}\" var=\"item\" varStatus=\"itemStatus\" >";
 				output += spaces(indent) +"<li><a href=\"../"+ cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier() +  "/edit.html?"+pkString+"\" > ${item."+cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
-				output += spaces(indent) +"</c:forEach></li><br/><br/>";
+				output += spaces(indent) +"</c:forEach></ul><br/><br/>";
+				}
 			}
 			else if( cv.isPrimary() && cv.getDomainClass().isUsesCompositeKey())
 				
@@ -367,7 +376,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				
 			}
 			else
-				output += "<p>"+cv.getUpperIdentifier() + ":${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</p>";
+				output += "<h2>${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}</h2>";
 			
 			output += lines(1);
 			
@@ -468,7 +477,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				
 					String cssClass=null;
 					if(cv.getType().equalsIgnoreCase("date"))
-						cssClass="dateInput";
+						cssClass="cssClass=\"dateInput\"";
 					output += spaces(indent) +"<label for=\""+cv.getIdentifier()+"\">" +cv.getUpperIdentifier() + "</label>";
 					output += lines(1);
 					output += spaces(indent) +"<form:input path=\""+ cv.getIdentifier()+"\" "+(cssClass!=null ? cssClass : "")+"  /><br/>";

@@ -479,7 +479,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent*3)+""+dc.getLowerIdentifier()+".setId( "+dc.getLowerIdentifier()+"Id);\n");
 		//output.append(indent(indent*3)+"}\n");
 		}
-		output.append(indent(indent*2)+accessor+".save("+dc.getLowerIdentifier()+");\n");
+		output.append(indent(indent*2)+accessor+".saveOrUpdate("+dc.getLowerIdentifier()+");\n");
 		output.append(indent(indent*2)+"return \"redirect:"+jspPath+"/list.html\";\n");
 	
 		output.append(indent(indent)+"}");
