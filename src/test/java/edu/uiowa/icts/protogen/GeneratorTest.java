@@ -55,7 +55,7 @@ public class GeneratorTest  extends TestCase
     	props.setProperty("generate.dao", "true");
     	props.setProperty("generate.controller", "true");
     	props.setProperty("generate.jsp", "true");
-    	props.setProperty("generate.test", "true");
+    	props.setProperty("generate.tests", "true");
     	props.setProperty("domain.file.location",pathPrefix + "/target/test/java"  + "src");
     	props.setProperty("dao.file.location",pathPrefix + "/target/test/java"  + "src");
     	props.setProperty("controller.file.location",pathPrefix + "/target/test/java"  + "src");

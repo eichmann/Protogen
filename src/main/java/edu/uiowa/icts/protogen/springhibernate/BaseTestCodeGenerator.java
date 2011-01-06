@@ -39,7 +39,6 @@ public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
 		List<String> importList = new ArrayList<String>();
 		importList.add("import edu.uiowa.icts.spring.*;");
-		importList.add("import edu.uiowa.icts.sandbox.archetype.schemaname.dao.SchemanameDaoService;");
 		importList.add("import edu.uiowa.icts.spring.AbstractSpringTestCase;");
 		importList.add("import org.junit.After;");
 		importList.add("import org.junit.Before;");

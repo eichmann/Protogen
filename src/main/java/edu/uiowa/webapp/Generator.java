@@ -8,12 +8,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.BaseTestCodeGenerator;
-import edu.uiowa.icts.protogen.springhibernate.ConfigGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ControllerCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.DAOCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.JSPCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.DomainCodeGenerator;
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.icts.protogen.springhibernate.SpringHibernateModel;
 
 public class Generator {
@@ -47,6 +45,8 @@ public class Generator {
 
 
 	public int runGenerator(Properties props) {
+		
+		int error =0;
 		String projectName=props.getProperty("project.name");
 		String packageName=props.getProperty("package.name");
 		
@@ -87,6 +87,7 @@ public class Generator {
 				theLoader.run("database.properties");
 			} catch (Exception e) {
 				log.error("Could load JDBC", e);
+				error=1;
 			}
 			theLoader.getDatabase().setLabel(projectName);
 			theLoader.getDatabase().relabel();
@@ -109,7 +110,7 @@ public class Generator {
 					theGenerator.generateTagClasses(theDatabase);
 				} catch (IOException e2) {
 					log.error("Could not generate Tag Classes: " + tagLocation, e2);
-						return 1;
+					error=1;
 				}
 			}
 			if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
@@ -121,7 +122,7 @@ public class Generator {
 					theTLDgenerator.generateTLD(theDatabase);
 				} catch (IOException e1) {
 					log.error("Could not generate TLD File: " +  props.getProperty("tld.file.location"), e1);
-						return 1;
+					error=1;
 				}
 			}
 			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
@@ -132,7 +133,7 @@ public class Generator {
 					theJSPgenerator.generateJSPs(theDatabase);
 				} catch (IOException e) {
 					log.error("Could not generate JSP Files: " + jspLocation, e);
-						return 1;
+					error=1;
 				}
 			}
 		}
@@ -154,7 +155,7 @@ public class Generator {
 					} catch (IOException e) {
 						log.debug("Error writing domain code");
 						e.printStackTrace();
-						return 1;
+						error=1;
 					}
 			}
 
@@ -170,6 +171,7 @@ public class Generator {
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate DAO Classes: " +daoPath, e3);
+					error=1;
 				}
 			}
 
@@ -187,12 +189,13 @@ public class Generator {
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate Controller Classes: " +controllerPath, e3);
+					error=1;
 				}
 			}
 			
 			
 			/*
-			 * generate.jsps = true 
+			 * generate.jsp = true 
 			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.jsp", "true"))) {
@@ -203,12 +206,13 @@ public class Generator {
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate JSP files: " +jspPath, e3);
+					error=1;
 				}
 			}
 			
 			
 			/*
-			 * generate.tests = true 
+			 * generate.test = true 
 			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.test", "true"))) {
@@ -219,6 +223,7 @@ public class Generator {
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate Test Classes: " + testPath, e3);
+					error=1;
 				}
 			}
 			
@@ -227,7 +232,7 @@ public class Generator {
 		}
 
 
-		return 0;
+		return error;
 
 
 	}
