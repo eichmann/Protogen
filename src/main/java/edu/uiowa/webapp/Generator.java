@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiowa.icts.protogen.springhibernate.BaseTestCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ConfigGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ControllerCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.DAOCodeGenerator;
@@ -16,7 +17,7 @@ import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.icts.protogen.springhibernate.SpringHibernateModel;
 
 public class Generator {
-	static String pathPrefix = "/Users/eichmann/Documents/Components/workspace/";
+	static String pathPrefix = "";
 	//static String mode = "tags";
 	//static String modelSource = "clay";
 	//static String dburl="";
@@ -35,6 +36,11 @@ public class Generator {
 	 *
 	 * @throws Exception 
 	 */
+	
+	public Generator()
+	{
+		pathPrefix = System.getProperty("user.dir") + "/..";
+	}
 
 	static Database theDatabase = null;
 
@@ -43,9 +49,17 @@ public class Generator {
 	public int runGenerator(Properties props) {
 		String projectName=props.getProperty("project.name");
 		String packageName=props.getProperty("package.name");
+		
+		
+		
 		if(props.getProperty("pathPrefix")!=null)
 			pathPrefix = props.getProperty("path.prefix");
+		
+		
+		log.debug("Path Prefix:"+System.getProperty("user.dir"));
+		
 			
+		
 
 		String modelSource=props.getProperty("model.source", "clay");
 		String mode=props.getProperty("mode", "tags");
@@ -188,54 +202,27 @@ public class Generator {
 					
 					codeGen.generate();
 				} catch (Exception e3) {
-					log.error("Could not generate Controller Classes: " +jspPath, e3);
+					log.error("Could not generate JSP files: " +jspPath, e3);
 				}
 			}
 			
 			
 			/*
-			 * generate.controller = true 
+			 * generate.tests = true 
 			 * 
 			 */
-//			if (Boolean.parseBoolean(props.getProperty("generate.controller", "true"))) {
-//				String controllerPath = props.getProperty("controller.file.location",pathPrefix + projectName+ "/"  + "src");
-//				try {
-//					codeGenerator.generateControllerCode(controllerPath);
-//				} catch (Exception e2) {
-//					log.error("Could not generate Controller Classes: " +controllerPath, e2);
-//				}
-//			}
-
-			/*
-			 * generate.jsp = true 
-			 * 
-			 */
-//			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
-//				String jspLocation = props.getProperty("jsp.file.location",	pathPrefix + projectName+ "/"  + "WebContent/WEB-INF/jsp/");
-//				JSPCodeGenerator theJSPGenerator = new JSPCodeGenerator(jspLocation);
-//				try {
-//					theJSPGenerator.generateAllJSP(theDomainGenerator.getDomainClassList());
-//				} catch (IOException e1) {
-//					log.error("Could not generate All JSP Files: " + jspLocation, e1);
-//
-//				}
-//			}
-
-			/*
-			 * generate.config = true 
-			 * 
-			 */
-//			if (Boolean.parseBoolean(props.getProperty("generate.config", "true"))) {
-//				String configLocation = props.getProperty("config.file.location",
-//						pathPrefix + projectName+ "/"  + "src");
-//				ConfigGenerator configGen = new ConfigGenerator(configLocation,packageName, projectName);
-//				try {
-//					configGen.generateDispatcher(theDatabase);
-//				} catch (Exception e) {
-//					log.error("Could not generate Dispatcher: " + configLocation, e);
-//
-//				}
-//			}
+			if (Boolean.parseBoolean(props.getProperty("generate.test", "true"))) {
+				String testPath = props.getProperty("test.file.location",	pathPrefix +projectName+ "/"  + "src");
+				BaseTestCodeGenerator codeGen = new BaseTestCodeGenerator(model,testPath,packageName);
+				try {
+					
+					codeGen.generate();
+				} catch (Exception e3) {
+					log.error("Could not generate Test Classes: " + testPath, e3);
+				}
+			}
+			
+			
 
 		}
 

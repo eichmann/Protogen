@@ -55,10 +55,12 @@ public class GeneratorTest  extends TestCase
     	props.setProperty("generate.dao", "true");
     	props.setProperty("generate.controller", "true");
     	props.setProperty("generate.jsp", "true");
+    	props.setProperty("generate.test", "true");
     	props.setProperty("domain.file.location",pathPrefix + "/target/test/java"  + "src");
     	props.setProperty("dao.file.location",pathPrefix + "/target/test/java"  + "src");
     	props.setProperty("controller.file.location",pathPrefix + "/target/test/java"  + "src");
     	props.setProperty("jsp.file.location",pathPrefix + "/target/test/jsp"  + "src");
+    	props.setProperty("test.file.location",pathPrefix + "/target/test/javatest"  + "src");
     	Generator gen = new Generator();
     	int result = gen.runGenerator(props);
         assertEquals("Error during domain code generation",0,result);
