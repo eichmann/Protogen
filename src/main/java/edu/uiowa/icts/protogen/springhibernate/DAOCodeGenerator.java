@@ -117,6 +117,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		importList.add("import org.springframework.stereotype.Repository;");
 		importList.add("import org.springframework.transaction.annotation.Transactional;");
 		
+		
 		(new File(packagePath)).mkdirs();
 		
 		/*
@@ -322,7 +323,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 	 */
 	public void generate() throws IOException 
 	{
-		
+		log.debug("Generating dao classes");
 		for(DomainClass dc: model.getDomainClassList())
 			generateDao(dc);
 	

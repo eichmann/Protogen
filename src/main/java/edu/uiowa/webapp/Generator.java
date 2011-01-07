@@ -37,7 +37,7 @@ public class Generator {
 	
 	public Generator()
 	{
-		pathPrefix = System.getProperty("user.dir") + "/..";
+		pathPrefix = System.getProperty("user.dir") + "/../";
 	}
 
 	static Database theDatabase = null;
@@ -158,6 +158,8 @@ public class Generator {
 						error=1;
 					}
 			}
+			else
+				log.debug("Not generating domain code");
 
 			/*
 			 * generate.dao = true 
@@ -165,15 +167,19 @@ public class Generator {
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.dao", "true"))) {
 				String daoPath = props.getProperty("dao.file.location",	pathPrefix +projectName+ "/"  + "src");
+				
 				DAOCodeGenerator codeGen = new DAOCodeGenerator(model,daoPath,packageName);
+				
 				try {
-					
-					codeGen.generate();
+						codeGen.generate();
+				
 				} catch (Exception e3) {
 					log.error("Could not generate DAO Classes: " +daoPath, e3);
 					error=1;
 				}
 			}
+			else
+				log.debug("Not generating dao code");
 
 			
 
@@ -192,6 +198,8 @@ public class Generator {
 					error=1;
 				}
 			}
+			else
+				log.debug("Not generating controller code");
 			
 			
 			/*
@@ -209,6 +217,8 @@ public class Generator {
 					error=1;
 				}
 			}
+			else
+				log.debug("Not generating jsp code");
 			
 			
 			/*
@@ -226,6 +236,8 @@ public class Generator {
 					error=1;
 				}
 			}
+			else
+				log.debug("Not generating test code");
 			
 			
 
