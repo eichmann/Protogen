@@ -99,7 +99,10 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		if(dc.isUsesCompositeKey())
 			out.write("public "+dc.getIdentifier()+"  findById("+dc.getIdentifier()+"Id id);\n");
 		else
-			out.write("public "+dc.getIdentifier()+"  findById(int id);\n");
+		{
+			//if(dc.getPrimaryKey().getType())
+			out.write("public "+dc.getIdentifier()+"  findById("+dc.getPrimaryKey().getType()+" id);\n");
+		}
 		
 		lines(out,1);
 		out.write("}\n");
@@ -189,7 +192,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		if(dc.isUsesCompositeKey())
 			out.write("public "+dc.getIdentifier()+"  findById("+dc.getIdentifier()+"Id id)\n");
 		else
-			out.write("public "+dc.getIdentifier()+"  findById(int id)\n");
+			out.write("public "+dc.getIdentifier()+"  findById("+dc.getPrimaryKey().getType()+" id)\n");
 		
 		lines(out,1);
 		spaces(out, 4);
