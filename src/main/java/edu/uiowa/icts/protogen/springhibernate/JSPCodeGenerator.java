@@ -155,7 +155,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				else
 				{
 				output += spaces(indent) +"<ul><c:forEach items=\"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}\" var=\"item\" varStatus=\"itemStatus\" >";
-				output += spaces(indent) +"<li><a href=\"../"+ cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier() +  "/edit.html?"+pkString+"\" > ${item."+cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
+				output += spaces(indent) +"<li><a href=\"../"+ cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier().toLowerCase() +  "/edit.html?"+pkString+"\" > ${item."+cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
 				output += spaces(indent) +"</c:forEach></ul><br/><br/>";
 				}
 			}
@@ -382,7 +382,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			
 		}
 		
-		output += spaces(indent) + "<form:form method=\"post\" commandName=\""+ec.getLowerIdentifier()+"\" action=\"save.html\" >";
+		output += spaces(indent) + "<form:form method=\"post\" commandName=\""+ec.getLowerIdentifier().toLowerCase()+"\" action=\"save.html\" >";
 		output += spaces(indent) + "<fieldset>";
 		lines(1);
 		

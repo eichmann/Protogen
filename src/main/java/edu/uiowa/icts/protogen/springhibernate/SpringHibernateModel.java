@@ -188,6 +188,10 @@ public class SpringHibernateModel {
 			{
 
 				Attribute attrib = attribIter1.next();
+				//if type is number, we should disable key generation
+				boolean number= false;
+				if(attrib.getType().equalsIgnoreCase("int")||attrib.getType().equalsIgnoreCase("integer") || attrib.getType().equalsIgnoreCase("double"))
+					number = true;
 				ClassVariable v = new ClassVariable("private", attrib.getType(), attrib.getUnqualifiedLowerLabel());
 				if(attrib.isForeign())
 				{
@@ -201,6 +205,7 @@ public class SpringHibernateModel {
 					v.setAttribute(attrib);
 					v.setType(attrib.getType());	
 					v.setComment("Foreign-Primary Key");
+					
 					v.getGetterAnnotations().add("@GenericGenerator(name = \"generator\", strategy = \"foreign\", parameters = @Parameter(name = \"property\", value = \""+parent.getUnqualifiedLowerLabel()+"\"))");
 					v.getGetterAnnotations().add("@Id");
 					v.getGetterAnnotations().add("@GeneratedValue(generator=\"generator\")");
@@ -213,10 +218,12 @@ public class SpringHibernateModel {
 
 					v.setAttribute(attrib);
 					v.setComment("Primary key");
-					v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getSqlLabel()+".seqnum\",allocationSize=1)");
+					
+					if(number)
+						v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getSqlLabel()+".seqnum\",allocationSize=1)");
 					v.getGetterAnnotations().add("@Id");
-	//				v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.SEQUENCE,generator=\"gen\")");
-					v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.AUTO,generator=\"gen\")");
+					if(number)
+						v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.AUTO,generator=\"gen\")");
 					v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\", unique = true, nullable = false)");		
 				}
 				symTable.add(v);

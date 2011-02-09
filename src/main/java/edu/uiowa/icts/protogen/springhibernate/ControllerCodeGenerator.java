@@ -44,6 +44,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		String interfaceName=""+dc.getIdentifier()+interfaceSuffix;
 		String accessor=""+dc.getSchema().getLowerLabel()+"DaoService.get"+dc.getIdentifier()+interfaceSuffix+"()";
 		String jspPath="/"+dc.getSchema().getLowerLabel()+"/"+dc.getLowerIdentifier();
+		jspPath = jspPath.toLowerCase();
 		
 		List<String> importList = new ArrayList<String>();
 		importList.add("import java.util.Date;");
@@ -107,7 +108,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		 * 
 		 */
 		out.write("@Controller\n");
-		out.write("@RequestMapping(\"/"+dc.getSchema().getLowerLabel()+"/"+dc.getLowerIdentifier()+"/*\")\n");
+		out.write("@RequestMapping(\"/"+dc.getSchema().getLowerLabel().toLowerCase()+"/"+dc.getLowerIdentifier().toLowerCase()+"/*\")\n");
 		out.write("public class "+className+" extends Abstract"+dc.getSchema().getUpperLabel()+"Controller {\n");
 		lines(out,2);
 

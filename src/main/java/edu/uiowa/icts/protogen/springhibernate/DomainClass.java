@@ -339,7 +339,7 @@ public class DomainClass
 	}
 	private String genAnnotations(String indent) {
 		if(classType == ClassType.ENTITY && entity != null)
-		return "@Entity\n@Table(name = \""+entity.getSqlLabel()+"\", schema=\""+schema.getSqlLabel()+"\")";
+		return "@Entity(name=\""+getPackageName().replaceAll("\\.", "_")+"_"+getLowerIdentifier()+"\")\n@Table(name = \""+entity.getSqlLabel()+"\", schema=\""+schema.getSqlLabel()+"\")";
 		else
 			return "";
 	}

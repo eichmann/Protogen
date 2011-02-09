@@ -167,7 +167,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		 * Print class header
 		 * 
 		 */
-		out.write("@Repository\n");
+		out.write("@Repository(\""+daoPackageName.replaceAll("\\.", "_")+"_"+className+"\")\n");
 		out.write("@Transactional\n");
 		out.write("public class "+className+" extends GenericDao<"+dc.getIdentifier()+"> implements "+interfaceName+" {\n");
 		lines(out,2);
