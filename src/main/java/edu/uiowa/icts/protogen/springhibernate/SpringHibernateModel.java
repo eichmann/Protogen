@@ -366,6 +366,21 @@ public class SpringHibernateModel {
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
 					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() >1)
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)");
+//					else  if (at.getReferencedEntity().getParentKeyAttributes().size() >1)
+//					{
+//						v.getGetterAnnotations().add("@JoinColumns({");
+//						
+//						int i=0;
+//						for(Attribute ta: at.getReferencedEntity().getParentKeyAttributes())
+//						{
+//							
+//							
+//							v.getGetterAnnotations().add("@JoinColumn(name = \""+ta.getSqlLabel()+"\",nullable = true)"+((at.getReferencedEntity().getParentKeyAttributes().size()-1) >1 ? ",":""));
+//							i++;
+//						}
+//						
+//						v.getGetterAnnotations().add("})");
+//					}
 					else
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = true)");//, insertable = false, updatable = false)");
 				}
