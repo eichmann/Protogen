@@ -300,10 +300,10 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				}
 				else
 				{
-					links += spaces(indent) +"<td><a href=\"edit.html?"+cv.getIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">edit</a> ";
-					links += spaces(indent) +"<a href=\"show.html?"+cv.getIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">view</a>";
-					links += spaces(indent) +" <a href=\"delete.html?"+cv.getIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">delete</a></td> ";
-				output += spaces(indent) +"<td><a href=\"edit.html?"+cv.getIdentifier()+"Id=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a></td>";
+					links += spaces(indent) +"<td><a href=\"edit.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">edit</a> ";
+					links += spaces(indent) +"<a href=\"show.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">view</a>";
+					links += spaces(indent) +" <a href=\"delete.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">delete</a></td> ";
+				output += spaces(indent) +"<td><a href=\"edit.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a></td>";
 				}
 			}
 			else if( cv.getRelationshipType() == RelationshipType.ONETOMANY)
