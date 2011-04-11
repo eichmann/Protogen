@@ -29,7 +29,7 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 
     public void startElement (String uri, String name, String qName, Attributes atts) {
 		if (debug) {
-			log.debug("Start element: " + name);
+			log.debug("Start clay element: " + name);
 			for (int i = 0; i < atts.getLength(); i++)
 				log.debug("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
 		}

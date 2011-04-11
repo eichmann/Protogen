@@ -17,6 +17,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class TagClassGenerator {
+	
+	private static final Log log =LogFactory.getLog(TagClassGenerator.class);
 
     String projectPath = null;
 
@@ -39,6 +41,7 @@ public class TagClassGenerator {
     }
 
     public void generateTagClasses(Database theDatabase) throws IOException {
+		log.debug("Creating Tag CLasses");
         generateSourceDirectoryRoot(projectPath);
         generatePackagePrefixDirectories(packagePrefix);
 
@@ -200,8 +203,7 @@ public class TagClassGenerator {
         // declare attributes
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            out
-                    .write("\t" + (theAttribute.getDomain() == null ? theAttribute.getType() : theAttribute.getDomain().getJavaType()) + " " + theAttribute.getLabel() + " = " + theAttribute.getInitializer()
+            out.write("\t" + (theAttribute.getDomain() == null ? theAttribute.getType() : theAttribute.getDomain().getJavaType()) + " " + theAttribute.getLabel() + " = " + theAttribute.getInitializer()
                             + ";\n");
         }
 

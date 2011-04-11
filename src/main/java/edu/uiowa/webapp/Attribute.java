@@ -134,6 +134,8 @@ public class Attribute extends ClayElement {
             return "0";
         else if (isDouble())
             return "0.0";
+        else if (isFloat())
+            return "0.0f";
         else if (isDateTime())
             return "new Date()";
         else if (isBoolean())
@@ -142,7 +144,9 @@ public class Attribute extends ClayElement {
             return "null";
     }
 
-    public boolean isCounter() {
+
+
+	public boolean isCounter() {
         return counter;
     }
     
@@ -270,8 +274,13 @@ public class Attribute extends ClayElement {
     }
     
     public boolean isDouble() {
-        return type.equals("double");
+    	return type.equals("double");
     }
+    
+	private boolean isFloat() {
+
+		   return type.equals("float");
+	}
     
     public boolean isDateTime() {
         return type.equals("Date");
@@ -302,6 +311,8 @@ public class Attribute extends ClayElement {
             return "Integer";
         if (isLong())
             return "Long";
+        if (isFloat())
+            return "Float";
         if (isText())
             return "String";
         if (isBoolean())
@@ -314,8 +325,10 @@ public class Attribute extends ClayElement {
     }
     
     public String getSQLMethod(boolean get) {
-        if (type.equals("double") || type.equals("float"))
+        if (type.equals("double"))
             return (get ? "get" : "set") + "Double";
+        if (type.equals("float"))
+            return (get ? "get" : "set") + "Float";
         else if (sqlType.equals("Numeric"))
             return (get ? "get" : "set") + "Int";
         else if (sqlType.equals("Text") || sqlType.toLowerCase().equals("char") || sqlType.toLowerCase().equals("varchar"))
