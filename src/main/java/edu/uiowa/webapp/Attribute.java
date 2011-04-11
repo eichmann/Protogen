@@ -121,10 +121,14 @@ public class Attribute extends ClayElement {
             return "0";
         else if (isDouble())
             return "0.0";
+        else if (isFloat())
+            return "0.0f";
         else if (isBoolean())
             return "false";
         else
+        {
             return "null";
+        }
     }
 
     public String getDefaultValue() {
@@ -245,7 +249,7 @@ public class Attribute extends ClayElement {
         else if (type.toLowerCase().equals("double precision"))
             type = "double";
         else if (type.toLowerCase().equals("float"))
-            type = "double";
+            type = "float";
         else if (type.toLowerCase().equals("boolean"))
             type = "boolean";
         else if (type.toLowerCase().equals("bool"))
