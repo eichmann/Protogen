@@ -362,7 +362,11 @@ public class DomainClass
 	}
 	
 	public ClassVariable getPrimaryKey() {
-		return getPrimaryKeys().iterator().next();
+		Iterator<ClassVariable> iter = getPrimaryKeys().iterator();
+		if(iter.hasNext()){
+			return iter.next();
+		}
+		return null;
 	}
 	
 	public List<ClassVariable> getForeignClassVariables() {

@@ -234,6 +234,8 @@ public class Attribute extends ClayElement {
             type = "long";
         else if (type.toLowerCase().equals("text"))
             type = "String";
+        else if (type.toLowerCase().equals("string"))
+            type = "String";
         else if (type.toLowerCase().equals("char"))
             type = "String";
         else if (type.toLowerCase().equals("varchar") || type.toLowerCase().equals("varchar2") || type.toLowerCase().equals("clob") || type.toLowerCase().equals("char"))
@@ -246,6 +248,8 @@ public class Attribute extends ClayElement {
             type = "Date";
         else if (type.toLowerCase().equals("timestamptz"))
             type = "Date";
+        else if (type.toLowerCase().equals("double"))
+            type = "double";
         else if (type.toLowerCase().equals("double precision"))
             type = "double";
         else if (type.toLowerCase().equals("float"))

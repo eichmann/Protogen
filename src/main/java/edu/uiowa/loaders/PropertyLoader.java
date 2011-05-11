@@ -6,7 +6,13 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public abstract class PropertyLoader {
+	
+	private static final Log log = LogFactory.getLog(PropertyLoader.class);
+	
     /**
      * Looks up a resource named 'name' in the classpath. The resource must map
      * to a file with .properties extention. The name is assumed to be absolute

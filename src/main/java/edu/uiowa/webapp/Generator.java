@@ -84,7 +84,7 @@ public class Generator {
 
 			theLoader = new JDBCLoader();
 			try {
-				theLoader.run("database.properties");
+				theLoader.run(props);
 			} catch (Exception e) {
 				log.error("Could load JDBC", e);
 				error=1;
@@ -260,7 +260,7 @@ public class Generator {
 		}
 		else
 		{
-			System.out.println("Error: invalid number of arguments. needs 2.");
+			log.error("Error: invalid number of arguments. needs 2.");
 			System.exit(1);
 		}
 		if (!pathPrefix.endsWith("/"))
@@ -301,7 +301,7 @@ public class Generator {
 		Generator gen = new Generator();
 		gen.runGenerator(myProps);
 
-		System.out.println("Generator mode:"+ myProps.getProperty("mode"));
+		log.debug("Generator mode: "+ myProps.getProperty("mode"));
 	}
 
 	static Database getDatabase() {

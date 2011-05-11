@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -266,7 +269,7 @@ public class SpringHibernateModel {
 		log.debug("*************Entity:"+ entity.getSqlLabel() + " ---Count:" + entity.getChildren().size() );
 		Iterator<Relationship> iter = entity.getChildren().iterator();
 		HashMap<String, Integer> checkExists = new HashMap<String,Integer>();
-		while (iter.hasNext()) {
+		child_loop: while (iter.hasNext()) {
 			Relationship r = iter.next();
 			Entity e = r.getTargetEntity();
 			Iterator<Attribute> attribIter3 = getHashOfAttributesToEntity(entity,e).iterator();
@@ -282,6 +285,7 @@ public class SpringHibernateModel {
 					int counter = (checkExists.get(e.getUnqualifiedLabel()));
 					postfix = "For" + attrib.getUnqualifiedLabel().substring(0, attrib.getUnqualifiedLabel().length()-2) + ""+ (counter>0?counter:"");
 					checkExists.put(e.getUnqualifiedLabel(),counter+1);
+					continue child_loop;
 				}
 				else
 				{	checkExists.put(e.getUnqualifiedLabel(),0);
@@ -321,7 +325,9 @@ public class SpringHibernateModel {
 		log.debug("***CREATING ForeignRefCode on Entity:"+ entity.getSqlLabel() + " ---Count:" + attribList.size() );
 		Iterator<Attribute> iter2 = attribList.iterator();
 		checkExists = new HashMap<String,Integer>();
-		while (iter2.hasNext()) {
+		
+		
+		parent_loop: while (iter2.hasNext()) {
 
 			Attribute at = iter2.next();
 			log.debug("***Attribute:"+at.getUnqualifiedLabel());
@@ -333,56 +339,82 @@ public class SpringHibernateModel {
 				log.debug("***Current:"+entity.getUnqualifiedLabel()+" **PARENT ENTITY = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
 				String postfix="";
-
-				if(checkExists.containsKey(e.getUnqualifiedLabel()))
-				{
-
+				
+				if(checkExists.containsKey(e.getUnqualifiedLabel())){
 					int counter = (checkExists.get(e.getUnqualifiedLabel()));
 					postfix = "By" + at.getUnqualifiedLabel().substring(0, at.getUnqualifiedLabel().length()-2)+ ""+ (counter>0?counter:"");
 					checkExists.put(e.getUnqualifiedLabel(),counter+1);
-				}
-				else
-				{
-
+					continue parent_loop;
+				}else{
 					log.debug("************EXISTS = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
-
 					checkExists.put(e.getUnqualifiedLabel(),0);
-
-
 				}
 
 				String variableName= e.getUnqualifiedLowerLabel()+"" + postfix;
 				ClassVariable v = new ClassVariable("private", ""+e.getUnqualifiedLabel()+"", variableName);
 
+				log.debug("Attribute Primary ? "+at.isPrimary());
+				
 				if(at.isPrimary() && entity.getPrimaryKeyAttributes().size()==1)
 				{
 					v.setRelationshipType(RelationshipType.ONETOONE);
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
 					v.getGetterAnnotations().add("@PrimaryKeyJoinColumn");
 				}
-				else
-				{
+				
+				else if(at.isPrimary() && e.getPrimaryKeyAttributes().size() > 1){
+					int i = e.getPrimaryKeyAttributes().size() - 1;
 					v.setRelationshipType(RelationshipType.MANYTOONE);
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
-					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() >1)
+					v.getGetterAnnotations().add("@JoinColumns({");
+					for(Attribute ta : e.getPrimaryKeyAttributes()){
+						v.getGetterAnnotations().add("\t@JoinColumn(name = \""+ta.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)"+(i>0?",":""));
+						i--;
+					}
+					
+					v.getGetterAnnotations().add("})");
+				}
+				
+				else if(!at.isPrimary() && attribList.size() > 1){
+					log.debug("new else");
+					
+					v.setRelationshipType(RelationshipType.MANYTOONE);
+					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
+					v.getGetterAnnotations().add("@JoinColumns({");
+
+					int i=-1;
+					Vector<Attribute> other_p_keys = e.getPrimaryKeyAttributes();
+					for(Attribute oa : other_p_keys){
+						for (Attribute a : attribList) {
+							if(a.getSqlLabel().equalsIgnoreCase(oa.getSqlLabel())){
+								i++;
+							}
+						}
+					}
+					for(Attribute oa : other_p_keys){
+						for (Attribute a : attribList) {
+							if(a.getSqlLabel().equalsIgnoreCase(oa.getSqlLabel())){
+								v.getGetterAnnotations().add("\t@JoinColumn(name = \""+oa.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)"+(i>0?",":""));
+								i--;
+							}
+						}
+					}
+					
+					v.getGetterAnnotations().add("})");
+				}
+				
+				else
+				{
+					
+					log.debug("entity: "+entity.getLabel()+" : "+at.getSqlLabel());
+					
+					v.setRelationshipType(RelationshipType.MANYTOONE);
+					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
+					if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() > 1){
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)");
-//					else  if (at.getReferencedEntity().getParentKeyAttributes().size() >1)
-//					{
-//						v.getGetterAnnotations().add("@JoinColumns({");
-//						
-//						int i=0;
-//						for(Attribute ta: at.getReferencedEntity().getParentKeyAttributes())
-//						{
-//							
-//							
-//							v.getGetterAnnotations().add("@JoinColumn(name = \""+ta.getSqlLabel()+"\",nullable = true)"+((at.getReferencedEntity().getParentKeyAttributes().size()-1) >1 ? ",":""));
-//							i++;
-//						}
-//						
-//						v.getGetterAnnotations().add("})");
-//					}
-					else
+					}else{
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = true)");//, insertable = false, updatable = false)");
+					}
 				}
 				v.setAttribute(at);
 				v.setAttribType(AttributeType.FOREIGNATTRIBUTE);
@@ -399,6 +431,7 @@ public class SpringHibernateModel {
 			}
 
 		}
+		
 		String packageName = packageRoot + "." + entity.getSchema().getUnqualifiedLabel()  + ".domain";
 
 		DomainClass domainClass = new DomainClass();
@@ -445,8 +478,10 @@ public class SpringHibernateModel {
 		while(attribIter.hasNext())
 		{
 			Attribute attribute = attribIter.next();
-			if(attribute.isForeign() && attribute.isPrimary() )
+			if(attribute.isForeign() && attribute.isPrimary()){
 				hash.put(attribute.getUnqualifiedLabel(), attribute);
+				log.debug("Adding F & P attribute: "+attribute.getUnqualifiedLabel());
+			}
 		}
 		return hash;
 	}
@@ -469,8 +504,10 @@ public class SpringHibernateModel {
 		while(attribIter.hasNext())
 		{
 			Attribute attribute = attribIter.next();
-			if(attribute.isForeign() && !attribute.isPrimary() )
+			if(attribute.isForeign() && !attribute.isPrimary() ){
 				hash.put(attribute.getUnqualifiedLabel(), attribute);
+				log.debug("Adding F attribute: "+attribute.getUnqualifiedLabel());
+			}
 		}
 		return hash;
 	}

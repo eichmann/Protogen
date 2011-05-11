@@ -1,5 +1,7 @@
 package edu.uiowa.webapp;
 
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.Attributes;
@@ -151,4 +153,9 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
     public Database getDatabase() {
         return currentDatabase;
     }
+
+	@Override
+	public void run(Properties props) throws Exception {
+		// TODO Auto-generated method stub
+	}
 }

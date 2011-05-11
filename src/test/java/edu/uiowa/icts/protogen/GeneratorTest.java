@@ -50,7 +50,7 @@ public class GeneratorTest  extends TestCase
     	props.setProperty("project.name",projectName);
     	props.setProperty("mode", "spring");
     	props.setProperty("model.source", "clay");
-    	props.setProperty("clay.file",pathPrefix+"/src/test/resources/Model.clay");
+    	props.setProperty("clay.file",pathPrefix+"/src/test/resources/pilot-base.clay");
     	props.setProperty("generate.domain", "true");
     	props.setProperty("generate.dao", "true");
     	props.setProperty("generate.controller", "true");

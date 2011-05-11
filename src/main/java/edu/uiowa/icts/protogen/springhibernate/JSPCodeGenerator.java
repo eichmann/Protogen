@@ -250,7 +250,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			
 		}
 		indent -=4;
-		output += spaces(indent) + "<th></th></tr>\n</thead>";
+		output += spaces(indent) + " <th></th>\n</tr>\n</thead>";
 		output += lines(1);
 		indent -=4;
 		
@@ -264,7 +264,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		{
 			
 			ClassVariable cv = cvIter.next();
-
+			log.debug(cv.getLowerIdentifier()+" : "+cv.getRelationshipType()+" : "+cv.getAttribType());
 			
 			if (cv.isPrimary())
 			{

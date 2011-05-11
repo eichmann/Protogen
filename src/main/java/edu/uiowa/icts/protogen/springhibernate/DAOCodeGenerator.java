@@ -101,7 +101,10 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		else
 		{
 			//if(dc.getPrimaryKey().getType())
-			out.write("public "+dc.getIdentifier()+"  findById("+dc.getPrimaryKey().getType()+" id);\n");
+			ClassVariable p_key = dc.getPrimaryKey();
+			if(p_key != null){
+				out.write("public "+dc.getIdentifier()+"  findById("+p_key.getType()+" id);\n");
+			}
 		}
 		
 		lines(out,1);
@@ -189,10 +192,21 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		
 		lines(out,2);
 		spaces(out, 4);
-		if(dc.isUsesCompositeKey())
+		if(dc.isUsesCompositeKey()){
 			out.write("public "+dc.getIdentifier()+"  findById("+dc.getIdentifier()+"Id id)\n");
-		else
-			out.write("public "+dc.getIdentifier()+"  findById("+dc.getPrimaryKey().getType()+" id)\n");
+		}else{
+			ClassVariable p_key = dc.getPrimaryKey();
+			if(p_key != null){
+				out.write("public "+dc.getIdentifier()+"  findById("+p_key.getType()+" id)\n");
+			}else{
+				log.error("There is no primary key for "+dc.getIdentifier());
+				out.write("//There is no primary key for "+dc.getIdentifier());
+				out.write("\n\n}\n");
+				out.close();
+				return;
+			}
+		}
+			
 		
 		lines(out,1);
 		spaces(out, 4);

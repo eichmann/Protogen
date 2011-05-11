@@ -294,9 +294,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+type+" "+a.getLowerLabel()+", ";
 				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
 			}
-				
-			sig = sig.substring(0, sig.length()-2);
-			
+			if(!"".equals(sig)){
+				sig = sig.substring(0, sig.length()-2);
+			}
 		}
 		else
 		{
@@ -305,7 +305,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 				
 				sig += "@RequestParam(\""+cv.getLowerIdentifier()+"\") "+cv.getType()+" "+dc.getLowerIdentifier()+"Id, ";
 			}
-			sig = sig.substring(0, sig.length()-2);
+			if(!"".equals(sig)){
+				sig = sig.substring(0, sig.length()-2);
+			}
 		}
 			
 		StringBuffer output = new StringBuffer();
@@ -357,9 +359,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+a.getType()+" "+a.getLowerLabel()+", ";
 				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
 			}
-				
-			sig = sig.substring(0, sig.length()-2);
-			
+			if(!"".equals(sig)){	
+				sig = sig.substring(0, sig.length()-2);
+			}
 		}
 		else
 		{
@@ -368,7 +370,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 				
 				sig += "@RequestParam(\""+cv.getLowerIdentifier()+"\") "+cv.getType()+" "+dc.getLowerIdentifier()+"Id, ";
 			}
-			sig = sig.substring(0, sig.length()-2);
+			if(!"".equals(sig)){
+				sig = sig.substring(0, sig.length()-2);
+			}
 		}
 			
 		StringBuffer output = new StringBuffer();
@@ -420,8 +424,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 					compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
 				}
 			}
-				
-			sig = sig.substring(0, sig.length());
+			if(!"".equals(sig)){
+				sig = sig.substring(0, sig.length());
+			}
 			
 		}
 		
@@ -514,7 +519,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 				
 				sig += "@RequestParam(\""+cv.getLowerIdentifier()+"\") "+cv.getType()+" "+dc.getLowerIdentifier()+"Id, ";
 			}
-			sig = sig.substring(0, sig.length()-2);
+			if(!"".equals(sig)){
+				sig = sig.substring(0, sig.length()-2);
+			}
 		}
 			
 		StringBuffer output = new StringBuffer();

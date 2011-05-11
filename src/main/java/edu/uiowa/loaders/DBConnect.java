@@ -5,7 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class DBConnect {
+	
+	private static final Log log = LogFactory.getLog(DBConnect.class);
+	
     public Connection conn = null;
 	private String driver_class;
 	private String connectionURL;
@@ -24,7 +30,7 @@ public class DBConnect {
 	
 	public void connect() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
 	{
-		
+		log.debug("driver class: "+driver_class);
         Class.forName(driver_class).newInstance();
         
         final Properties properties = new Properties();

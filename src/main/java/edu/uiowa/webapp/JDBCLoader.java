@@ -5,7 +5,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,8 +25,8 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 	public JDBCLoader() {
 
 	}
-	
-	private static final Log log =LogFactory.getLog(JDBCLoader.class);
+
+	private static final Log log = LogFactory.getLog(JDBCLoader.class);
 
 
 
@@ -36,7 +39,6 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 
 		String schema= prop.getProperty("db.schema");
-
 
 
 
@@ -74,22 +76,22 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		}
 
 		updateForeignKeys(dbMeta);
-		
+
 		for(Schema s:database.getSchemas())
 		{
-            for (int i = 0; i < s.getRelationships().size(); i++) {
-                Relationship currentRelationship = s.getRelationships().elementAt(i);
-                if (currentRelationship.sourceEntity == null) {
-                	{
-                     log.debug("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + s.getEntityByLabel(currentRelationship.getSourceEntityName()));
-                    currentRelationship.setSourceEntity(s.getEntityByLabel(currentRelationship.getSourceEntityName()));
-                	}
-                }
-                currentRelationship.getSourceEntity().setChild(currentRelationship);
-            }
+			for (int i = 0; i < s.getRelationships().size(); i++) {
+				Relationship currentRelationship = s.getRelationships().elementAt(i);
+				if (currentRelationship.sourceEntity == null) {
+					{
+						log.debug("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + s.getEntityByLabel(currentRelationship.getSourceEntityName()));
+						currentRelationship.setSourceEntity(s.getEntityByLabel(currentRelationship.getSourceEntityName()));
+					}
+				}
+				currentRelationship.getSourceEntity().setChild(currentRelationship);
+			}
 			for(Entity e:s.getEntities())
 			{
-				
+
 				e.generateParentKeys();
 				e.generateSubKeys();
 				e.matchRemarks();
@@ -110,7 +112,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 
 
-		
+
 	}
 
 	private void updateForeignKeys(DatabaseMetaData dbMeta) throws SQLException
@@ -199,8 +201,64 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 			rs.close();
 			return;
 		}
+		else if(dbMeta.getDatabaseProductName().equalsIgnoreCase("Teiid Server")){
+			log.debug("...using teiid server lookup");
+			
+			ArrayList<String> rels = new ArrayList<String>();
+			
+			String query = "select PKTABLE_SCHEM, PKTABLE_NAME, PKCOLUMN_NAME, FKTABLE_SCHEM, FKTABLE_NAME, FKCOLUMN_NAME from SYS.ReferenceKeyColumns";
+			Statement statement = conn.createStatement();
+			statement.execute(query);
+			ResultSet rs = statement.getResultSet();
+			while(rs.next()){
+				String pkschema = rs.getString(1);
+				String pktable  = rs.getString(2);
+				String pkcolumn = rs.getString(3);
+				String fkschema = rs.getString(4);
+				String fktable  = rs.getString(5);
+				String fkcolumn = rs.getString(6);
+				
+				log.debug(".........."+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn);
 
-		log.debug("Updating foreign keys");
+				if(pktable.equalsIgnoreCase(fktable) && pkcolumn.equalsIgnoreCase(fkcolumn))
+					continue;
+				
+				Schema    pks = getSchema(pkschema);
+				Entity    pke = getEntity(pks, pktable);
+				Attribute pka = getAttribute(pke, pkcolumn);
+
+				Schema 	  fks = getSchema(fkschema);
+				Entity 	  fke = getEntity(fks, fktable);
+				Attribute fka = getAttribute(fke, fkcolumn);
+
+				Relationship r = new Relationship();
+				r.setSourceEntity(pke);
+				r.setSourceEntityName(pke.getLabel());
+				
+				r.setTargetEntity(fke);
+				
+				r.setLabel("foreign_key");
+				
+				if(!rels.contains(pktable+"."+pkcolumn+"->"+fktable+"."+fkcolumn)){
+					rels.add(pktable+"."+pkcolumn+"->"+fktable+"."+fkcolumn);
+					
+					fke.setParent(r);
+					fks.getRelationships().add(r);
+					
+					r.setForeignReferencedAttributeMapping(fka.getLabel(),pka.getLabel());
+				}else{
+					log.debug("relationship exists: "+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn); 
+				}
+				
+				fka.setForeign(true);
+				fka.setReferencedEntityName(pktable);
+				
+				log.debug("Relationship:"+r);
+			}
+			rs.close();
+			return;
+		}
+
 		int count =0;
 		for(Schema s:database.getSchemas())
 			for(Entity e:s.getEntities())
@@ -224,57 +282,50 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					Entity pke = getEntity(pks, pktable);
 					Attribute  pka = getAttribute(pke, pkcolumn);
 
-
-					//	pka.set
-
-
 					Schema fks = getSchema(fkschema);
 					Entity fke = getEntity(fks, fktable);
 					Attribute  fka = getAttribute(fke, fkcolumn);
+
 					fka.setForeign(true);
 					fka.setForeignAttribute(pka);
 					fka.setParentAttribute(pka);
-					
+
+					log.debug("pka label: "+pka.getLabel());
+					log.debug("fka label: "+fka.getLabel());
 
 
 					pka.setParentAttribute(fka);
-				//	pka.setReferencedEntityName(fka.getLabel());
 					fka.getChildAttributes().add(pka);
-					
 
 					Relationship r = new Relationship();
 					r.setSourceEntity(fke);
 					r.setTargetEntity(pke);
 					r.setForeignReferencedAttributeMapping(pkcolumn, fkcolumn);
 					r.setLabel("foreign_key");
-					
 					pka.setReferencedEntityName(fktable);
 					pka.setParentAttribute(fka);
-					
 					fke.setChild(r);
 					s.getRelationships().add(r);
-					
-
-
-
-
-
-
 				}
 				count++;
 
 				rs.close();
 			}
 
-		
+
 
 
 	}
 
-
-
-
-
+	private boolean relationshipExists(Relationship r, Vector<Relationship> relationships) {
+		for (Relationship rl : relationships) {
+			if(r.getSourceEntity().getLabel().equals(rl.getSourceEntity().getLabel()) && 
+					r.getTargetEntity().getLabel().equals(rl.getTargetEntity().getLabel())){
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private Schema getSchema(String schemaName)
 	{
@@ -293,6 +344,8 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 	{
 		for(Entity e: s.getEntities())
 		{
+
+
 			if (e.getLabel().equalsIgnoreCase(name))
 				return e;
 
@@ -304,10 +357,11 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	private Attribute getAttribute(Entity e,String columnName)
 	{
-		for(Attribute a:e.getAttributes())
+		for(Attribute a : e.getAttributes())
 		{
-			if ( a.getLabel().equalsIgnoreCase(columnName))
+			if ( a.getLabel().equalsIgnoreCase(columnName)){
 				return a;
+			}
 
 		}
 		return null;
@@ -343,11 +397,14 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		while(rs.next())
 		{
 
-			Entity e = createEntity(dbMeta,rs.getString(3));
-			e.setSchema(schema);
-
-			schema.getEntities().add(e);
-
+			String x = rs.getString(3);
+			if(!x.endsWith("_pkey")){
+				Entity e = createEntity(dbMeta,rs.getString(3));
+				e.setSchema(schema);
+				schema.getEntities().add(e);
+			}else{
+				log.error("This table may be an index: "+x+", code not being generated.");
+			}
 		}
 
 		rs.close();
@@ -356,7 +413,8 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	private Entity createEntity(DatabaseMetaData dbMeta, String label) throws SQLException
 	{
-		log.debug("...Column:"+label);
+		log.debug("...Table: "+label);
+
 		Entity e = new Entity();
 		e.setLabel(label);
 
@@ -367,27 +425,24 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		{
 			Attribute a = new Attribute();
 
-			//			for (int i =0;i<count;i++)
-			//			{
-			//				System.out.print(""+i+"-"+rs.getString(i+1));
-			//				if(i<count -1)
-			//					System.out.print(",");
-			//				else
-			//					log.debug("");
-			//					
-			//			}
-
-
 			String aLabel = rs.getString(4);
 			String type = rs.getString(6);
-			log.debug("......"+aLabel+" type="+type);
-			if(getAttribute(e, aLabel)==null)
+			log.debug("......"+aLabel+" type = "+type);
+
+
+
+			if(getAttribute(e, aLabel) == null)
 			{
 				a.setLabel(aLabel);
 				a.setType(type);
 				a.setEntity(e);
 				e.getAttributes().add(a);
 			}
+
+			log.debug("Creating new attribute" +
+					"\n     label:   "+aLabel+
+					"\n     type:    "+type+
+					"\n     eLabel:  "+e.getUnqualifiedLabel());
 
 		}
 		rs.close();
@@ -408,10 +463,10 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					boolean exists = false;
 					for(Attribute aa : e.getPrimaryKeyAttributes())
 					{
-						
+
 						if(aa.getLabel().equalsIgnoreCase(aLabel))
 						{
-							
+
 							exists=true;
 							continue;
 						}
@@ -423,8 +478,8 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 						log.debug("................adding");
 						e.getPrimaryKeyAttributes().add(a);
 					}
-					
-						
+
+
 
 				}
 
@@ -455,7 +510,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 	private void printColumns(ResultSet rs) throws SQLException
 	{
 		int count = rs.getMetaData().getColumnCount();
-	
+
 		if(log.isDebugEnabled()) {
 			StringBuffer  temp = new StringBuffer("......Columns:");
 			for (int i =0;i<count;i++)
@@ -465,9 +520,9 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					temp.append(",");
 				else
 					temp.append("");
-				
+
 			}
-		log.debug(temp);
+			log.debug(temp);
 		}
 
 	}
