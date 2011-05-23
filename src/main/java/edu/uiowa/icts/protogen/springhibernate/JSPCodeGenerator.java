@@ -382,8 +382,8 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			
 		}
 		
-		output += spaces(indent) + "<form:form method=\"post\" commandName=\""+ec.getLowerIdentifier().toLowerCase()+"\" action=\"save.html\" >";
-		output += spaces(indent) + "<fieldset>";
+		output += spaces(indent) + "<form:form method=\"post\" commandName=\""+ec.getLowerIdentifier()+"\" action=\"save.html\" >";
+		output += spaces(indent) + "<fieldset class=\"admin1\">";
 		lines(1);
 		
 		cvIter = ec.listAllIter();;
