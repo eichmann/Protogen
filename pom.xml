@@ -81,13 +81,6 @@
 	<type>jar</type>
 	<scope>compile</scope>
 </dependency>
-<dependency>
-	<groupId>ryan</groupId>
-	<artifactId>mmx</artifactId>
-	<version>1</version>
-	<type>jar</type>
-	<scope>compile</scope>
-</dependency>
     </dependencies>
   
   
