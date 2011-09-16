@@ -887,8 +887,47 @@ public class TagClassGenerator {
         
         out.write("    public int doStartTag() throws JspException {\n");
         generateParentEntityReferences(out, theEntity, "\t\t");
-        out.write("\n      try {\n"
-                + "            int webapp_keySeq = 1;\n"
+        out.write("\n      try {\n");
+        
+        /*
+         * Create count query
+         * 
+         */
+        out.write("            //run count query  \n");
+        out.write("            int webapp_keySeq = 1;\n"
+                + "            stat = getConnection().prepareStatement(\"SELECT count(*)");
+        out.write(" from \" + generateFromClause() + \" where 1=1\"\n");
+        out.write("                                                        + generateJoinCriteria()\n");
+        
+        StringBuffer queryBuffer = new StringBuffer();
+        for (int i = 0; i < parentKeys.size(); i++) {
+            Attribute theAttribute = theEntity.getAttributeBySQLLabel(theEntity.getForeignReferencedAttribute(parentKeys.elementAt(i).getSqlLabel()));
+            out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+            queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
+                    + theAttribute.getSQLMethod(false)
+                    + "(webapp_keySeq++, "
+                    + theAttribute.getLabel()
+                    + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+                            + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                            : "") + ");\n");
+        }
+        out.write("                                                        +  generateLimitCriteria());\n");
+        out.write(queryBuffer.toString());
+        out.write("            rs = stat.executeQuery();\n"
+                + "\n"
+                + "            if (rs.next()) {\n");
+//        for (int i = 0; i < primaryKeys.size(); i++) {
+//            Attribute theKey = primaryKeys.elementAt(i);
+//            out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
+//        }
+        out.write("                pageContext.setAttribute(var+\"Total\", rs.getInt(1));\n"
+                + "            }\n\n\n");
+        
+        out.write("            //run select id query  \n");
+        /*
+         * Create select id query
+         */
+        out.write("            webapp_keySeq = 1;\n"
                 + "            stat = getConnection().prepareStatement(\"SELECT ");
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
@@ -897,7 +936,7 @@ public class TagClassGenerator {
         out.write(" from \" + generateFromClause() + \" where 1=1\"\n");
         out.write("                                                        + generateJoinCriteria()\n");
         StringBuffer paramBuffer = new StringBuffer();
-        StringBuffer queryBuffer = new StringBuffer();
+        queryBuffer = new StringBuffer();
         for (int i = 0; i < parentKeys.size(); i++) {
             Attribute theAttribute = theEntity.getAttributeBySQLLabel(theEntity.getForeignReferencedAttribute(parentKeys.elementAt(i).getSqlLabel()));
             out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
@@ -920,8 +959,8 @@ public class TagClassGenerator {
         }
         out.write("                pageContext.setAttribute(var, ++rsCount);\n"
                 + "                return EVAL_BODY_INCLUDE;\n"
-                + "            }\n"
-                + "        } catch (SQLException e) {\n"
+                + "            }\n");
+        out.write("        } catch (SQLException e) {\n"
                 + "            e.printStackTrace();\n"
                 + "            clearServiceState();\n"
                 + "            freeConnection();\n"

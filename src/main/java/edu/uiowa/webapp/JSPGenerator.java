@@ -329,8 +329,41 @@ public class JSPGenerator {
         out.write("\t\t\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
         out.write("\t\t\t\t</tr>\n");
         out.write("\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
-        out.write("\t\t</table>\n");
-        out.write("\t\t<a href=\"../../" + theEntity.getSchema().getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/add" + theEntity.getUnqualifiedLabel() + ".jsp");
+            
+        
+        
+        
+        out.write("\t\t</table><br/>\n");
+        
+        //create list
+        out.write("\t\t<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
+  
+        out.write("\t\t\t<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
+        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+            if (theAttribute == keyAttribute) {
+                out.write("\t\t\t\t\t\t<a href=\"../../" + theEntity.getSchema().getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + ".jsp?");
+                for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
+                    Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
+                    if (j > 0)
+                        out.write("&");
+                    out.write(currentAttribute.getLabel() + "=<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                }
+                out.write("\"><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a>\n");
+            } else {
+                out.write("\t\t");
+                generateAttributeTag(true, out, theEntity, theAttribute);
+                out.write("\n");
+               //out.write("\t\t\t\t<td><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
+            }
+        }
+        out.write("\t\t\t<c:if test=\"${"+ keyAttribute.getLowerLabel() + "Iter != "+ keyAttribute.getLowerLabel() + "IterTotal}\" >, </c:if>" );
+        
+        out.write("\t\t\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
+        out.write("\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
+        
+        //create add link
+        out.write("\t\t<br/><a href=\"../../" + theEntity.getSchema().getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/add" + theEntity.getUnqualifiedLabel() + ".jsp");
         if (theEntity.getParents().size() > 0) {
             Entity parent = theEntity.getParents().firstElement().getSourceEntity();
             for (int i = 0; i < parent.getPrimaryKeyAttributes().size(); i++) {
