@@ -154,7 +154,7 @@ public class Generator {
 						codeGen.generate();
 					} catch (IOException e) {
 						log.debug("Error writing domain code");
-						e.printStackTrace();
+						log.error("Error writing domain code", e);
 						error=1;
 					}
 			}

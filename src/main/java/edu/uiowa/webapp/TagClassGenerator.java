@@ -1159,7 +1159,7 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
 
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Deleter.class);\n\n");
 
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
@@ -1297,7 +1297,7 @@ public class TagClassGenerator {
         }
         out.write("\tint newNumber = 0;\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Shifter.class);\n\n");
 
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
@@ -1501,7 +1501,7 @@ public class TagClassGenerator {
         	out.write("\tString timeStyle = \"DEFAULT\";\n");
         	out.write("\tString pattern = null;\n");
         }
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ uploadString + theAttribute.getUpperLabel()+".class);\n\n");
 
         
         if (theAttribute.isBinaryDomain() || theAttribute.isImage()) {
@@ -1747,7 +1747,7 @@ public class TagClassGenerator {
 
         out.write("\n@SuppressWarnings(\"serial\")\n");
         out.write("public class " + theEntity.getUnqualifiedLabel() + theAttribute.getUpperLabel() + "ToNow extends " + projectName + "TagSupport {\n");
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ theAttribute.getUpperLabel() +"ToNow.class);\n\n");
 
         out.write("\n\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\ttry {\n");
@@ -1854,7 +1854,7 @@ public class TagClassGenerator {
         out.write("\tboolean newRecord = false;\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Upload.class);\n\n");
         
 
         // declare attributes

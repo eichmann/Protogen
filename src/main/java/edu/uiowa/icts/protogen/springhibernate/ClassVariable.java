@@ -296,7 +296,7 @@ public class ClassVariable
 			output += indent +indent + "DateFormat formatter = new SimpleDateFormat(\"MM/dd/yyyy\");\n";
 			output += indent + indent + "formatter.setLenient(true);";
 			output +=indent +indent +"this." + identifier  + " = formatter.parse(" + identifier + ");\n";
-			output +=indent + indent +"} catch (ParseException e) {e.printStackTrace();}\n";
+			output +=indent + indent +"} catch (ParseException e) { log.error(\" ParseException setting date for \""+getUpperIdentifier()+", e); }\n";
 			output +=indent +"}\n";
 
 			return output;

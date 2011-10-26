@@ -166,7 +166,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		spaces(out, 12);
 		out.write("this." + attrib.getUnqualifiedLowerLabel() + " = formatter.parse(" + attrib.getUnqualifiedLowerLabel() + ");\n");
 		out.write("");
-		out.write("} catch (ParseException e) {e.printStackTrace();}\n");
+		out.write("} catch (ParseException e) {log.error(\" ParseException setting date for \""+attrib.getUpperLabel()+", e);();}\n");
 		spaces(out, 8);
 		
 		spaces(out, 4);
