@@ -393,7 +393,8 @@ public class TagClassGenerator {
         // end of context cases
         
         out.write("\t\t} catch (SQLException e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"JDBC error retrieving " + keyAttribute.getLabel() + " \" + "
+                + keyAttribute.getLabel() + ", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: JDBC error retrieving " + keyAttribute.getLabel() + " \" + "
                 + keyAttribute.getLabel() + ");\n");
         out.write("\t\t} finally {\n");
@@ -459,7 +460,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\tstmt.close();\n");
         out.write("\t\t\t}\n");
         out.write("\t\t} catch (SQLException e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"Error: IOException while writing to the user\", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
         out.write("\t\t} finally {\n");
         out.write("\t\t\tclearServiceState();\n");
@@ -561,7 +562,7 @@ public class TagClassGenerator {
         }
         out.write("\t\t\tstmt.close();\n");
         out.write("\t\t} catch (SQLException e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"Error: IOException while writing to the user\", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
         out.write("\t\t} finally {\n");
         out.write("\t\t\tfreeConnection();\n");
@@ -740,7 +741,7 @@ public class TagClassGenerator {
                     + "\t\t\t}\n"
                     + "\t\t\tstat.close();\n"
                     + "\t\t} catch (SQLException e) {\n"
-                    + "\t\t\te.printStackTrace();\n"
+                    + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
                     + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
                     + "\t\t} finally {\n"
                     + "\t\t\ttheIterator.freeConnection();\n"
@@ -779,7 +780,7 @@ public class TagClassGenerator {
                     + "\t\t\t}\n"
                     + "\t\t\tstat.close();\n"
                     + "\t\t} catch (SQLException e) {\n"
-                    + "\t\t\te.printStackTrace();\n"
+                    + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
                     + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
                     + "\t\t} finally {\n"
                     + "\t\t\ttheIterator.freeConnection();\n"
@@ -824,7 +825,7 @@ public class TagClassGenerator {
                     + "\t\t\t}\n"
                     + "\t\t\tstat.close();\n"
                     + "\t\t} catch (SQLException e) {\n"
-                    + "\t\t\te.printStackTrace();\n"
+                    + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
                     + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
                     + "\t\t} finally {\n"
                     + "\t\t\ttheIterator.freeConnection();\n"
@@ -875,7 +876,7 @@ public class TagClassGenerator {
                         + "\t\t\t}\n"
                         + "\t\t\tstat.close();\n"
                         + "\t\t} catch (SQLException e) {\n"
-                        + "\t\t\te.printStackTrace();\n"
+                        + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
                         + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
                         + "\t\t} finally {\n"
                         + "\t\t\ttheIterator.freeConnection();\n"
@@ -961,7 +962,7 @@ public class TagClassGenerator {
                 + "                return EVAL_BODY_INCLUDE;\n"
                 + "            }\n");
         out.write("        } catch (SQLException e) {\n"
-                + "            e.printStackTrace();\n"
+                + "            log.error(\"JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString(), e);\n"
                 + "            clearServiceState();\n"
                 + "            freeConnection();\n"
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString());\n"
@@ -1031,7 +1032,7 @@ public class TagClassGenerator {
                 + "                return EVAL_BODY_AGAIN;\n"
                 + "            }\n"
                 + "        } catch (SQLException e) {\n"
-                + "            e.printStackTrace();\n"
+                + "            log.error(\"JDBC error iterating across " + theEntity.getLabel() + "\", e);\n"
                 + "            clearServiceState();\n"
                 + "            freeConnection();\n"
                 + "            throw new JspTagException(\"Error: JDBC error iterating across " + theEntity.getLabel() + "\");\n"
@@ -1044,7 +1045,7 @@ public class TagClassGenerator {
                 + "            rs.close();\n"
                 + "            stat.close();\n"
                 + "        } catch (SQLException e) {\n"
-                + "            e.printStackTrace();\n"
+                + "            log.error(\"JDBC error ending " + theEntity.getLabel() + " iterator\",e);\n"
                 + "            throw new JspTagException(\"Error: JDBC error ending " + theEntity.getLabel() + " iterator\");\n"
                 + "        } finally {\n"
                 + "            clearServiceState();\n"
@@ -1130,6 +1131,9 @@ public class TagClassGenerator {
                 + "import java.sql.ResultSet;\n"
                 + "import java.sql.SQLException;\n"
                 + "import java.util.Vector;\n");
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+        
         if (theEntity.hasDateTime())
             out.write("import java.util.Date;\n");
 //        if (theEntity.hasImage())
@@ -1154,7 +1158,9 @@ public class TagClassGenerator {
                 out.write("    " + theAttribute.getType() + " " + theAttribute.getLabel() + " = " + theAttribute.getInitializer() + ";\n");
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
-        
+
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
                 + "    int rsCount = 0;\n"
@@ -1217,7 +1223,7 @@ public class TagClassGenerator {
         }
         
         out.write("        } catch (SQLException e) {\n"
-                + "            e.printStackTrace();\n"
+                + "            log.error(\"JDBC error generating " + theEntity.getLabel() + " deleter\", e);\n"
                 + "            clearServiceState();\n"
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " deleter\");\n"
                 + "        } finally {\n"
@@ -1279,6 +1285,9 @@ public class TagClassGenerator {
                 + "import " + packagePrefix + "." + projectName + "TagSupport;\n"
                 + "import " + packagePrefix + "." + projectName + "BodyTagSupport;\n");
         generateParentImports(out, theEntity);
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+        
         out.write("\n"
                 + "@SuppressWarnings(\"serial\")\n" + "\n"
                 + "public class " + theEntity.getUnqualifiedLabel() + "Shifter extends " + projectName + "BodyTagSupport {\n");
@@ -1288,7 +1297,8 @@ public class TagClassGenerator {
         }
         out.write("\tint newNumber = 0;\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
-        
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
                 + "    int rsCount = 0;\n"
@@ -1397,7 +1407,7 @@ public class TagClassGenerator {
         }
         
         out.write("        } catch (SQLException e) {\n"
-                + "            e.printStackTrace();\n"
+                + "            log.error(\"JDBC error generating " + theEntity.getLabel() + " deleter\", e);\n"
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " deleter\");\n"
                 + "        } finally {\n"
                 + "            freeConnection();\n"
@@ -1464,6 +1474,7 @@ public class TagClassGenerator {
             out.write("import java.io.InputStream;\n");
             out.write("import java.io.OutputStream;\n");
             out.write("import java.io.IOException;\n");
+
         }
         if (theAttribute.isImage()) {
             out.write("import javax.imageio.ImageIO;\n");
@@ -1473,6 +1484,9 @@ public class TagClassGenerator {
             out.write("import java.text.DateFormat;\n");
             out.write("import java.text.SimpleDateFormat;\n");
         }
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+
 //        if (theAttribute.isImage() || (theAttribute.isDomain() && theEntity.hasImage()))
 //            out.write("import java.awt.Image;\n");
 
@@ -1487,6 +1501,8 @@ public class TagClassGenerator {
         	out.write("\tString timeStyle = \"DEFAULT\";\n");
         	out.write("\tString pattern = null;\n");
         }
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+
         
         if (theAttribute.isBinaryDomain() || theAttribute.isImage()) {
             for (int i = 0; i < theEntity.getAttributes().size(); i++) {
@@ -1600,7 +1616,8 @@ public class TagClassGenerator {
                 out.write("\t\t\t}\n");
         }
         out.write("\t\t} catch (Exception e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
+                + theAttribute.getLabel() + " tag \", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
                 + theAttribute.getLabel() + " tag \");\n");
         out.write("\t\t}\n");
@@ -1621,7 +1638,8 @@ public class TagClassGenerator {
 	                + ")findAncestorWithClass(this, " + theEntity.getUnqualifiedLabel() + ".class);\n");
 	        out.write("\t\t\treturn the" + theEntity.getUnqualifiedLabel() + ".get" + theAttribute.getUpperLabel() + "();\n");
 	        out.write("\t\t} catch (Exception e) {\n");
-	        out.write("\t\t\te.printStackTrace();\n");
+	        out.write("\t\t\tlog.error(\" Can't find enclosing " + theEntity.getLabel() + " for "
+	                + theAttribute.getLabel() + " tag \", e);\n");
 	        out.write("\t\t\tthrow new JspTagException(\"Error: Can't find enclosing " + theEntity.getLabel() + " for "
 	                + theAttribute.getLabel() + " tag \");\n");
 	        out.write("\t\t}\n");
@@ -1634,7 +1652,8 @@ public class TagClassGenerator {
 	                + ")findAncestorWithClass(this, " + theEntity.getUnqualifiedLabel() + ".class);\n");
 	        out.write("\t\t\tthe" + theEntity.getUnqualifiedLabel() + ".set" + theAttribute.getUpperLabel() + "(" + theAttribute.getLabel() + ");\n");
 	        out.write("\t\t} catch (Exception e) {\n");
-	        out.write("\t\t\te.printStackTrace();\n");
+	        out.write("\t\t\tlog.error(\"Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
+	                + theAttribute.getLabel() + " tag \", e);\n");
 	        out.write("\t\t\tthrow new JspTagException(\"Error: Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
 	                + theAttribute.getLabel() + " tag \");\n");
 	        out.write("\t\t}\n");
@@ -1716,6 +1735,9 @@ public class TagClassGenerator {
 
         out.write("\nimport javax.servlet.jsp.JspException;\n");
         out.write("import javax.servlet.jsp.JspTagException;\n");
+        out.write("import org.apache.commons.logging.Log;\n");
+        out.write("import org.apache.commons.logging.LogFactory;\n");
+        
         if (theAttribute.isDateTime() && !theAttribute.isPrimary())
             out.write("import java.util.Date;\n");
 //        if (theAttribute.isImage())
@@ -1725,6 +1747,7 @@ public class TagClassGenerator {
 
         out.write("\n@SuppressWarnings(\"serial\")\n");
         out.write("public class " + theEntity.getUnqualifiedLabel() + theAttribute.getUpperLabel() + "ToNow extends " + projectName + "TagSupport {\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
 
         out.write("\n\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\ttry {\n");
@@ -1732,7 +1755,8 @@ public class TagClassGenerator {
                 + ")findAncestorWithClass(this, " + theEntity.getUnqualifiedLabel() + ".class);\n");
         out.write("\t\t\tthe" + theEntity.getUnqualifiedLabel() + ".set" + theAttribute.getUpperLabel() + "ToNow( );\n");
         out.write("\t\t} catch (Exception e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\" Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
+                + theAttribute.getLabel() + " tag \", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
                 + theAttribute.getLabel() + " tag \");\n");
         out.write("\t\t}\n");
@@ -1745,7 +1769,8 @@ public class TagClassGenerator {
                 + ")findAncestorWithClass(this, " + theEntity.getUnqualifiedLabel() + ".class);\n");
         out.write("\t\t\treturn the" + theEntity.getUnqualifiedLabel() + ".get" + theAttribute.getUpperLabel() + "();\n");
         out.write("\t\t} catch (Exception e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"Can't find enclosing " + theEntity.getLabel() + " for "
+                + theAttribute.getLabel() + " tag \", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: Can't find enclosing " + theEntity.getLabel() + " for "
                 + theAttribute.getLabel() + " tag \");\n");
         out.write("\t\t}\n");
@@ -1757,7 +1782,8 @@ public class TagClassGenerator {
                 + ")findAncestorWithClass(this, " + theEntity.getUnqualifiedLabel() + ".class);\n");
         out.write("\t\t\tthe" + theEntity.getUnqualifiedLabel() + ".set" + theAttribute.getUpperLabel() + "ToNow( );\n");
         out.write("\t\t} catch (Exception e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
+                + theAttribute.getLabel() + " tag \", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: Can't find enclosing " + theEntity.getUnqualifiedLabel() + " for "
                 + theAttribute.getLabel() + " tag \");\n");
         out.write("\t\t}\n");
@@ -1985,21 +2011,22 @@ public class TagClassGenerator {
                 + "\t\t\t\t\t\t}\n"
                 + "\t\t\t\t\t\tstat.close();\n"
                 + "\t\t\t\t\t} catch (SQLException e) {\n"
-                + "\t\t\t\t\t\te.printStackTrace();\n"
+                + "\t\t\t\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " object count\", e);\n"
                 + "\t\t\t\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " object count\");\n"
                 + "\t\t\t\t\t} finally {\n"
                 + "\t\t\t\t\t\tfreeConnection();\n"
-                + "\t\t\t\t\t}\n");
+                + "\t\t\t\t\t}\n"
+                );
 
         out.write("\t\t\t\t\tif (count == 0)\n");
         out.write("\t\t\t\t\t\tinsertEntity();\n");
         out.write("\t\t\t\t} catch (FileUploadException e) {\n");
         out.write("\t\t\t\t\t// TODO Auto-generated catch block\n");
-        out.write("\t\t\t\t\te.printStackTrace();\n");
+        out.write("\t\t\t\t\tlog.error(\"Upload Exception\", e);\n");
         if (theEntity.hasImage()) {
             out.write("\t\t\t\t} catch (IOException e) {\n");
             out.write("\t\t\t\t\t// TODO Auto-generated catch block\n");
-            out.write("\t\t\t\t\te.printStackTrace();\n");
+            out.write("\t\t\t\t\tlog.error(\"HasImage\", e);\n");
         }
         out.write("\t\t\t\t}\n");
         
@@ -2127,7 +2154,8 @@ public class TagClassGenerator {
         // end of context cases
         
         out.write("\t\t} catch (SQLException e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"JDBC error retrieving " + keyAttribute.getLabel() + " \" + "
+                + keyAttribute.getLabel() + ",e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: JDBC error retrieving " + keyAttribute.getLabel() + " \" + "
                 + keyAttribute.getLabel() + ");\n");
         out.write("\t\t} finally {\n");
@@ -2198,11 +2226,11 @@ public class TagClassGenerator {
         out.write("\t\t\t\tstmt.close();\n");
         out.write("\t\t\t}\n");
         out.write("\t\t} catch (SQLException e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"SQLException while writing to the user\", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: SQLException while writing to the user\");\n");
         if (theEntity.hasBinaryDomainAttribute()) {
             out.write("\t\t} catch (IOException e) {\n");
-            out.write("\t\t\te.printStackTrace();\n");
+            out.write("\t\t\tlog.error(\"IOException while writing to the user\", e);\n");
             out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
         }
         out.write("\t\t} finally {\n");
@@ -2270,7 +2298,7 @@ public class TagClassGenerator {
                 + "        	theConnection.close();\n" 
                 + "        theConnection = null;\n" 
                 + "     } catch (SQLException e) {\n" 
-                + "         e.printStackTrace();\n"
+                + "         log.error(\"JDBC error freeing connection\", e);\n"
                 + "        theConnection = null;\n" 
                 + "         throw new JspTagException(\"Error: JDBC error freeing connection\");\n" 
                 + "     }\n"
@@ -2313,7 +2341,7 @@ public class TagClassGenerator {
                 + "         theConnection.close();\n" 
                 + "        theConnection = null;\n" 
                 + "     } catch (SQLException e) {\n" 
-                + "         e.printStackTrace();\n"
+                + "         log.error(\"JDBC error freeing connection\", e);\n"
                 + "        theConnection = null;\n" 
                 + "         throw new JspTagException(\"Error: JDBC error freeing connection\");\n" 
                 + "     }\n"
@@ -2399,13 +2427,13 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\tnextInt = 1;\n");
         out.write("\t\t\t}\n");
         out.write("\t\t} catch (Exception e) {\n");
-        out.write("\t\t\te.printStackTrace();\n");
+        out.write("\t\t\tlog.error(\"SeqNum Exception\", e);\n");
         out.write("\t\t} finally {\n");
         out.write("\t\t\ttry {\n");
         out.write("\t\t\t\tif (conn != null)\n");
         out.write("\t\t\t\t\tconn.close();\n");
         out.write("\t\t\t} catch (SQLException e) {\n");
-        out.write("\t\t\t\te.printStackTrace();\n");
+        out.write("\t\t\t\tlog.error(\"Problem closing Connection\",e);\n");
         out.write("\t\t\t}\n");
         out.write("\t\t}\n");
         out.write("\t\treturn nextInt;\n");
