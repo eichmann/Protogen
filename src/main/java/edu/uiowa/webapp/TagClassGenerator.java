@@ -708,7 +708,7 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Iterator.class);\n\n");
         
         out.write("\n    PreparedStatement stat = null;\n"
                 + "    ResultSet rs = null;\n"
