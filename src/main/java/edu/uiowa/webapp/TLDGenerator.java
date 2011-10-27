@@ -387,7 +387,7 @@ public class TLDGenerator {
             IODesc.close();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("IO Exception", e);
         }
 
     }
