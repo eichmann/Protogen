@@ -1,7 +1,6 @@
 package edu.uiowa.webapp;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;

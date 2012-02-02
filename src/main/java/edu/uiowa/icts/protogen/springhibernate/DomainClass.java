@@ -1,15 +1,10 @@
 package edu.uiowa.icts.protogen.springhibernate;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.lang.reflect.*;
-
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.webapp.Entity;
 import edu.uiowa.webapp.Schema;
 

@@ -16,8 +16,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.uiowa.webapp.Schema;
-
 public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
 	protected static final Log log =LogFactory.getLog(BaseTestCodeGenerator.class);

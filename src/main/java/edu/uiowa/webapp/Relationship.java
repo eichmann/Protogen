@@ -84,7 +84,7 @@ public class Relationship extends ClayElement {
 
     public void dump() {
         log.debug("\t\tsource entity: " + sourceEntity + "\ttarget entity: " + targetEntity + "\tuid: " + uid);
-        log.debug("\t\tsource entity: " + sourceEntity.getLabel() + "\ttarget entity: " + targetEntity.getLabel() + "\tuid: " + uid);
+        log.debug("\t\tsource entity: " + (sourceEntity == null ? null : sourceEntity.getLabel()) + "\ttarget entity: " + (targetEntity == null ? null : targetEntity.getLabel()) + "\tuid: " + uid);
     }
 
 	@Override

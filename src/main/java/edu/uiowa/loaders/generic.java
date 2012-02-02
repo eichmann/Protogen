@@ -5,8 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
-import edu.uiowa.webapp.TLDGenerator;
-
 import java.io.*;
 import java.util.zip.*;
 import java.net.*;

@@ -7,16 +7,10 @@
 package edu.uiowa.icts.protogen.springhibernate;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import edu.uiowa.webapp.Entity;
 
 public abstract class AbstractSpringHibernateCodeGenerator {
 

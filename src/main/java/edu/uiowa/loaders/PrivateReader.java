@@ -9,8 +9,6 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.uiowa.webapp.Generator;
-
 public class PrivateReader extends Reader {
 	protected static boolean debug = false;
 	protected Reader internal = null;

@@ -13,28 +13,15 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
-
-
-
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
-import edu.uiowa.icts.protogen.springhibernate.DomainClass.ClassType;
 import edu.uiowa.webapp.Attribute;
-import edu.uiowa.webapp.Database;
 import edu.uiowa.webapp.Entity;
-import edu.uiowa.webapp.Relationship;
-import edu.uiowa.webapp.Schema;
 
 
 public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
