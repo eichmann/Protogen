@@ -901,16 +901,38 @@ public class TagClassGenerator {
         out.write("                                                        + generateJoinCriteria()\n");
         
         StringBuffer queryBuffer = new StringBuffer();
-        for (int i = 0; i < parentKeys.size(); i++) {
-            Attribute theAttribute = theEntity.getAttributeBySQLLabel(theEntity.getForeignReferencedAttribute(parentKeys.elementAt(i).getSqlLabel()));
-            out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
-            queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
-                    + theAttribute.getSQLMethod(false)
-                    + "(webapp_keySeq++, "
-                    + theAttribute.getLabel()
-                    + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                            + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
-                            : "") + ");\n");
+//        for (int i = 0; i < parentKeys.size(); i++) {
+//            Attribute theAttribute = theEntity.getAttributeBySQLLabel(theEntity.getForeignReferencedAttribute(parentKeys.elementAt(i).getSqlLabel()));
+//            out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+//            queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
+//                    + theAttribute.getSQLMethod(false)
+//                    + "(webapp_keySeq++, "
+//                    + theAttribute.getLabel()
+//                    + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+//                            + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+//                            : "") + ");\n");
+//        }
+        
+        for (int i = 0; i < theEntity.getParents().size(); i++) {
+        	
+            Relationship theRelationship = theEntity.getParents().elementAt(i);
+            Entity theSourceEntity = theRelationship.getSourceEntity();
+            
+            for (int j = 0; j < theSourceEntity.getPrimaryKeyAttributes().size(); j++) {
+            	
+            	Attribute theAttribute = theEntity.getAttributeBySQLLabel(theRelationship.getForeignReferencedAttribute(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getSqlLabel()));
+            	
+            	out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+            	
+            	queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
+                        + theAttribute.getSQLMethod(false)
+                        + "(webapp_keySeq++, "
+                        + theAttribute.getLabel()
+                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                : "") + ");\n");
+            }
+            
         }
         out.write("                                                        +  generateLimitCriteria());\n");
         out.write(queryBuffer.toString());
@@ -938,17 +960,62 @@ public class TagClassGenerator {
         out.write("                                                        + generateJoinCriteria()\n");
         StringBuffer paramBuffer = new StringBuffer();
         queryBuffer = new StringBuffer();
-        for (int i = 0; i < parentKeys.size(); i++) {
-            Attribute theAttribute = theEntity.getAttributeBySQLLabel(theEntity.getForeignReferencedAttribute(parentKeys.elementAt(i).getSqlLabel()));
-            out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
-            queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
-                    + theAttribute.getSQLMethod(false)
-                    + "(webapp_keySeq++, "
-                    + theAttribute.getLabel()
-                    + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                            + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
-                            : "") + ");\n");
+        
+        
+        
+        
+//        for (int i = 0; i < parentKeys.size(); i++) {
+//            Attribute theAttribute = theEntity.getAttributeBySQLLabel(theEntity.getForeignReferencedAttribute(parentKeys.elementAt(i).getSqlLabel()));
+//            out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+//            queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
+//                    + theAttribute.getSQLMethod(false)
+//                    + "(webapp_keySeq++, "
+//                    + theAttribute.getLabel()
+//                    + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+//                            + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+//                            : "") + ");\n");
+//        }
+        
+
+        for (int i = 0; i < theEntity.getParents().size(); i++) {
+        	
+            Relationship theRelationship = theEntity.getParents().elementAt(i);
+            Entity theSourceEntity = theRelationship.getSourceEntity();
+            
+            for (int j = 0; j < theSourceEntity.getPrimaryKeyAttributes().size(); j++) {
+            	
+            	Attribute theAttribute = theEntity.getAttributeBySQLLabel(theRelationship.getForeignReferencedAttribute(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getSqlLabel()));
+            	
+            	out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+            	
+            	queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
+                        + theAttribute.getSQLMethod(false)
+                        + "(webapp_keySeq++, "
+                        + theAttribute.getLabel()
+                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                : "") + ");\n");
+            }
+            
         }
+        
+        
+        
+        
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         out.write("                                                        + \" order by \" + generateSortCriteria() + generateLimitCriteria());\n");
         out.write(queryBuffer.toString());
         out.write("            rs = stat.executeQuery();\n"
