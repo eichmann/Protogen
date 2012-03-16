@@ -309,12 +309,22 @@ public class DomainClass
 		output += "\n";
 		output += "\n";
 		output += genImportList(indent);
+		
 		output += "\n";
+		
+		output += "import org.apache.commons.logging.Log;\n";
+		output += "import org.apache.commons.logging.LogFactory;\n";
+		
+		output += "\n";
+		
+		
 		output += comment;
 		output += "\n";
 		output += genAnnotations(indent) + "\n";
-		output += modifier + " class " + identifier + "\n";
-		output += "{\n";
+		output += modifier + " class " + identifier + " { \n\n";
+		
+		output += "	private static final Log log = LogFactory.getLog("+identifier+".class);\n\n";
+		
 		indent = "    ";
 		output += symbolsToString(indent);
 		output += "\n";

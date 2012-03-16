@@ -291,13 +291,15 @@ public class ClassVariable
 			String output = "\n";
 
 			output += indent+"public void set"+getUpperIdentifier()+"(String "+ identifier+")\n";
-			output +=indent +"{\n";
-			output +=indent + indent +"try{\n";
-			output += indent +indent + "DateFormat formatter = new SimpleDateFormat(\"MM/dd/yyyy\");\n";
-			output += indent + indent + "formatter.setLenient(true);";
-			output +=indent +indent +"this." + identifier  + " = formatter.parse(" + identifier + ");\n";
-			output +=indent + indent +"} catch (ParseException e) { log.error(\" ParseException setting date for \""+getUpperIdentifier()+", e); }\n";
-			output +=indent +"}\n";
+			output += indent +"{\n";
+			output += indent + indent + "try{\n";
+			output += indent + indent + indent + "DateFormat formatter = new SimpleDateFormat(\"MM/dd/yyyy\");\n";
+			output += indent + indent + indent + "formatter.setLenient(true);\n";
+			output += indent + indent + indent + "this." + identifier  + " = formatter.parse(" + identifier + ");\n";
+			output += indent + indent + "} catch (ParseException e) { \n";
+			output += indent + indent + indent +"log.error(\" ParseException setting date for "+getUpperIdentifier()+"\", e);\n";
+			output += indent + indent + "}\n";
+			output += indent +"}\n";
 
 			return output;
 		}
