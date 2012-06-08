@@ -18,7 +18,7 @@ public class PrivateReader extends Reader {
 	String footer = null;
 	
 	
-	private static final Log log =LogFactory.getLog(PrivateReader.class);
+	private static final Log log = LogFactory.getLog(PrivateReader.class);
 
 	public PrivateReader(String file, String head, String foot) throws MalformedURLException, IOException {
 		header = head;

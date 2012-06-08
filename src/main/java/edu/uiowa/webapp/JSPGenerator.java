@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class JSPGenerator {
 
-	private static final Log log =LogFactory.getLog(JSPGenerator.class);
+	private static final Log log = LogFactory.getLog(JSPGenerator.class);
 
 	
     String webAppPath = null;

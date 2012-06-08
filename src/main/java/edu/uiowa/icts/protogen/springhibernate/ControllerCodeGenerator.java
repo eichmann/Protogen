@@ -23,7 +23,7 @@ import edu.uiowa.webapp.Schema;
 public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
 	
-	protected static final Log log =LogFactory.getLog(ControllerCodeGenerator.class);
+	protected static final Log log = LogFactory.getLog(ControllerCodeGenerator.class);
 	
 	private String interfaceSuffix="Service";
 	public ControllerCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {
@@ -113,7 +113,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		lines(out,2);
 
 		spaces(out, 4);
-		out.write("private static final Log log =LogFactory.getLog("+className+".class);");
+		out.write("private static final Log log = LogFactory.getLog("+className+".class);");
 		lines(out,2);
 		out.write(generateListMethod(dc, accessor,jspPath, 4));
 		lines(out,2);

@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
-	protected static final Log log =LogFactory.getLog(BaseTestCodeGenerator.class);
+	protected static final Log log = LogFactory.getLog(BaseTestCodeGenerator.class);
 	
 	public BaseTestCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {
 		super(model, pathBase, packageRoot);

@@ -28,7 +28,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 
 
 	
-	protected static final Log log =LogFactory.getLog(DomainCodeGenerator.class);
+	protected static final Log log = LogFactory.getLog(DomainCodeGenerator.class);
 
 	/**
 	 * @param model

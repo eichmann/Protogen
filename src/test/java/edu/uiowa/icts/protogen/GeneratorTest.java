@@ -17,7 +17,7 @@ public class GeneratorTest  extends TestCase
 {
 	
 	
-	private static final Log log =LogFactory.getLog(GeneratorTest.class);
+	private static final Log log = LogFactory.getLog(GeneratorTest.class);
     /**
      * Create the test case
      *

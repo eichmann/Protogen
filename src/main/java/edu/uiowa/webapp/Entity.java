@@ -20,7 +20,7 @@ public class Entity extends ClayElement {
 	
 	private DomainClass domainClass;
 
-	private static final Log log =LogFactory.getLog(Entity.class);
+	private static final Log log = LogFactory.getLog(Entity.class);
 
 	
 	public Schema getSchema() {

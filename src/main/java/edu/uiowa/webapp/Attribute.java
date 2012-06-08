@@ -26,7 +26,7 @@ public class Attribute extends ClayElement {
     Attribute foreignAttribute = null;
 	Vector<Attribute> childAttributes = new Vector<Attribute>();
 	
-	private static final Log log =LogFactory.getLog(Attribute.class);
+	private static final Log log = LogFactory.getLog(Attribute.class);
 
 	
 
@@ -258,6 +258,8 @@ public class Attribute extends ClayElement {
             type = "boolean";
         else if (type.toLowerCase().equals("bool"))
             type = "boolean";
+        else if (type.toLowerCase().equals("bit"))
+            type = "boolean";
         else if (type.toLowerCase().equals("real"))
             type = "float";
         else
@@ -348,6 +350,8 @@ public class Attribute extends ClayElement {
         else if (sqlType.toLowerCase().equals("decimal"))
             return (get ? "get" : "set") + "Int";
         else if (sqlType.toLowerCase().equals("bool"))
+            return (get ? "get" : "set") + "Boolean";
+        else if (sqlType.toLowerCase().equals("bit"))
             return (get ? "get" : "set") + "Boolean";
         else if (sqlType.toLowerCase().equals("bytea"))
             return (get ? "get" : "set") + "Bytes";

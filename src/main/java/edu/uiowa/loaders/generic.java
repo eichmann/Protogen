@@ -29,7 +29,7 @@ public class generic extends DefaultHandler {
 	}
 	
 	
-	private static final Log log =LogFactory.getLog(generic.class);
+	private static final Log log = LogFactory.getLog(generic.class);
 
 	public void run(String args[]) throws Exception {
 		xr = XMLReaderFactory.createXMLReader();

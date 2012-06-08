@@ -36,7 +36,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		// TODO Auto-generated constructor stub
 	}
 
-	private static final Log log =LogFactory.getLog(JSPCodeGenerator.class);
+	private static final Log log = LogFactory.getLog(JSPCodeGenerator.class);
 	public String jspRoot;
 
 

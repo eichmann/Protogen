@@ -18,7 +18,7 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 	Attribute currentAttribute = null;
 	Relationship currentRelationship = null;
 	
-	private static final Log log =LogFactory.getLog(ClayLoader.class);
+	private static final Log log = LogFactory.getLog(ClayLoader.class);
 
 	mode currentMode = mode.DOMAIN;
 	private String referencedEntityName;

@@ -19,7 +19,7 @@ public abstract class JDBCReader extends Reader {
 	String header = null;
 	String footer = null;
 
-	private static final Log log =LogFactory.getLog(JDBCReader.class);
+	private static final Log log = LogFactory.getLog(JDBCReader.class);
 
 	
 	public JDBCReader(String className, String jdbcURL, String userID, String password) throws IOException, ClassNotFoundException, SQLException {

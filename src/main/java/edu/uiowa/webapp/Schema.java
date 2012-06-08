@@ -12,7 +12,7 @@ public class Schema extends ClayElement {
     Vector<Entity> entities = new Vector<Entity>();
     Vector<Relationship> relationships = new Vector<Relationship>();
     
-	private static final Log log =LogFactory.getLog(Schema.class);
+	private static final Log log = LogFactory.getLog(Schema.class);
 
     
     public Vector<Domain> getDomains() {

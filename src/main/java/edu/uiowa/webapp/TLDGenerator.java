@@ -27,7 +27,7 @@ public class TLDGenerator {
     File theTLD = null;
     BufferedWriter out = null;
 
-	private static final Log log =LogFactory.getLog(TLDGenerator.class);
+	private static final Log log = LogFactory.getLog(TLDGenerator.class);
 
 	
     File packagePrefixDirectory = null;

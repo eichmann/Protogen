@@ -21,7 +21,7 @@ public abstract class AbstractSpringHibernateCodeGenerator {
 	protected boolean overwrite=false;
 
 
-	protected static final Log log =LogFactory.getLog(AbstractSpringHibernateCodeGenerator.class);
+	protected static final Log log = LogFactory.getLog(AbstractSpringHibernateCodeGenerator.class);
 
 
 	public AbstractSpringHibernateCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {

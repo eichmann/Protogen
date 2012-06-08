@@ -42,7 +42,7 @@ public class SpringHibernateModel {
 	private List<DomainClass> domainClassList = new ArrayList<DomainClass>();
 	private HashMap<Schema, List<DomainClass> > schemaMap;
 	//private Schema currentSchema;
-	private static final Log log =LogFactory.getLog(SpringHibernateModel.class);
+	private static final Log log = LogFactory.getLog(SpringHibernateModel.class);
 
 
 	public List<DomainClass> getDomainClassList() {

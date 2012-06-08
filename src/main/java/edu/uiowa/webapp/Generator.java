@@ -24,7 +24,7 @@ public class Generator {
 	//static String dbschema = "";
 	//static boolean dbssl = true;
 
-	private static final Log log =LogFactory.getLog(Generator.class);
+	private static final Log log = LogFactory.getLog(Generator.class);
 	/**
 	 * @param args
 	 * arg 0 = qualified package name (required)

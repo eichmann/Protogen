@@ -20,7 +20,7 @@ import edu.uiowa.webapp.Schema;
 
 public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
-	protected static final Log log =LogFactory.getLog(DAOCodeGenerator.class);
+	protected static final Log log = LogFactory.getLog(DAOCodeGenerator.class);
 	
 	private String interfaceSuffix="Service";
 	private String impleSuffix="Home";
@@ -176,7 +176,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		lines(out,2);
 
 		spaces(out, 4);
-		out.write("private static final Log log =LogFactory.getLog("+className+".class);");
+		out.write("private static final Log log = LogFactory.getLog("+className+".class);");
 	
 		lines(out,2);
 		spaces(out, 4);

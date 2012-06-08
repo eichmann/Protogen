@@ -16,7 +16,7 @@ public class Relationship extends ClayElement {
 		ONE_TO_ONE, ONE_TO_MANY, ONE, MANY
 	};
 
-	private static final Log log =LogFactory.getLog(Relationship.class);
+	private static final Log log = LogFactory.getLog(Relationship.class);
 
 	CardinalityEnum relationshipCardinality = CardinalityEnum.ONE_TO_MANY;
 	CardinalityEnum sourceEntityCardinality = CardinalityEnum.ONE;

@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class TagClassGenerator {
 	
-	private static final Log log =LogFactory.getLog(TagClassGenerator.class);
+	private static final Log log = LogFactory.getLog(TagClassGenerator.class);
 
     String projectPath = null;
 
@@ -57,9 +57,14 @@ public class TagClassGenerator {
         generateTagSupportClass();
         generateSequenceClass();
         generateDBTestClass();
+        generateExportImport();
     }
 
-    private void generateSourceDirectoryRoot(String projectPath) throws IOException {
+    private void generateExportImport() {
+    	
+	}
+
+	private void generateSourceDirectoryRoot(String projectPath) throws IOException {
         //sourceRootDirectory = new File((projectPath.endsWith("/src") ? projectPath : projectPath + "/src"));
     	sourceRootDirectory = new File(projectPath);
         if (sourceRootDirectory.exists()) {
@@ -171,7 +176,11 @@ public class TagClassGenerator {
         out.write("import java.sql.PreparedStatement;\n");
         out.write("import java.sql.ResultSet;\n");
         out.write("import java.sql.SQLException;\n");
-        out.write("import java.util.Vector;\n");
+        out.write("import java.util.Vector;\n\n");
+        
+        out.write("import org.json.JSONObject;\n");
+        out.write("import org.json.JSONException;\n\n");
+        
         out.write("import org.apache.commons.logging.Log;\n");
         out.write("import org.apache.commons.logging.LogFactory;\n");
         
@@ -192,12 +201,12 @@ public class TagClassGenerator {
                 break;
             }
         }
-        out.write("\n@SuppressWarnings(\"serial\")\n");
+        out.write("\n@SuppressWarnings(\"serial\")");
         out.write("\npublic class " + theEntity.getUnqualifiedLabel() + " extends " + projectName + "TagSupport {\n\n");
         out.write("\tstatic " + theEntity.getUnqualifiedLabel() + " currentInstance = null;\n");
         out.write("\tboolean commitNeeded = false;\n");
         out.write("\tboolean newRecord = false;\n\n");
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
 
         // declare attributes
@@ -210,6 +219,8 @@ public class TagClassGenerator {
         generateDoStartTag(theEntity, out);
 
         generateDoEndTag(theEntity, out);
+        
+        generateToJson(theEntity, out);
         
         generateInsertEntity(theEntity, out);
 
@@ -470,6 +481,21 @@ public class TagClassGenerator {
         out.write("\t}\n");
     }
     
+    private void generateToJson(Entity theEntity, BufferedWriter out) throws IOException {
+        out.write("\n\tpublic String toJson() {\n");
+        out.write("\t\tJSONObject job = new JSONObject();\n");
+        out.write("\t\ttry {\n");
+        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+            out.write("\t\t\tjob.put(\""+theAttribute.getLabel()+"\","+theAttribute.getLabel()+");\n");
+        }   
+        out.write("\t\t} catch (JSONException e) {\n");
+        out.write("\t\t\tlog.error(\"error building json string\",e);\n");
+        out.write("\t\t}\n");
+        out.write("\t\treturn job.toString();\n");
+        out.write("\t}\n");
+    }
+    
     private void generateInsertEntity(Entity theEntity, BufferedWriter out) throws IOException {
         int attrSeq = 0;
 
@@ -695,7 +721,8 @@ public class TagClassGenerator {
                 + "import " + packagePrefix + "." + projectName + "BodyTagSupport;\n");
         generateParentImports(out, theEntity);
         out.write("\n"
-                + "@SuppressWarnings(\"serial\")\n" + "\n"
+                + "@SuppressWarnings(\"serial\")" 
+        		+ "\n"
                 + "public class " + theEntity.getUnqualifiedLabel() + "Iterator extends " + projectName + "BodyTagSupport {\n");
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
@@ -708,7 +735,7 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Iterator.class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Iterator.class);\n\n");
         
         out.write("\n    PreparedStatement stat = null;\n"
                 + "    ResultSet rs = null;\n"
@@ -1213,7 +1240,8 @@ public class TagClassGenerator {
                 + "import " + packagePrefix + "." + projectName + "BodyTagSupport;\n");
         generateParentImports(out, theEntity);
         out.write("\n"
-                + "@SuppressWarnings(\"serial\")\n" + "\n"
+                + "@SuppressWarnings(\"serial\")" 
+        		+ "\n"
                 + "public class " + theEntity.getUnqualifiedLabel() + "Deleter extends " + projectName + "BodyTagSupport {\n");
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
@@ -1226,7 +1254,7 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
 
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Deleter.class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Deleter.class);\n\n");
 
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
@@ -1356,7 +1384,8 @@ public class TagClassGenerator {
         out.write("import org.apache.commons.logging.LogFactory;\n");
         
         out.write("\n"
-                + "@SuppressWarnings(\"serial\")\n" + "\n"
+                + "@SuppressWarnings(\"serial\")" 
+        		+ "\n"
                 + "public class " + theEntity.getUnqualifiedLabel() + "Shifter extends " + projectName + "BodyTagSupport {\n");
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
@@ -1364,7 +1393,7 @@ public class TagClassGenerator {
         }
         out.write("\tint newNumber = 0;\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Shifter.class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Shifter.class);\n\n");
 
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
@@ -1568,7 +1597,7 @@ public class TagClassGenerator {
         	out.write("\tString timeStyle = \"DEFAULT\";\n");
         	out.write("\tString pattern = null;\n");
         }
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ uploadString + theAttribute.getUpperLabel()+".class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ uploadString + theAttribute.getUpperLabel()+".class);\n\n");
 
         
         if (theAttribute.isBinaryDomain() || theAttribute.isImage()) {
@@ -1814,7 +1843,7 @@ public class TagClassGenerator {
 
         out.write("\n@SuppressWarnings(\"serial\")\n");
         out.write("public class " + theEntity.getUnqualifiedLabel() + theAttribute.getUpperLabel() + "ToNow extends " + projectName + "TagSupport {\n");
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ theAttribute.getUpperLabel() +"ToNow.class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ theAttribute.getUpperLabel() +"ToNow.class);\n\n");
 
         out.write("\n\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\ttry {\n");
@@ -1915,13 +1944,13 @@ public class TagClassGenerator {
                 break;
             }
         }
-        out.write("\n@SuppressWarnings(\"serial\")\n");
+        out.write("\n@SuppressWarnings(\"serial\")");
         out.write("\npublic class " + theEntity.getUnqualifiedLabel() + "Upload extends " + projectName + "TagSupport {\n\n");
         out.write("\tboolean commitNeeded = false;\n");
         out.write("\tboolean newRecord = false;\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\tprivate static final Log log =LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Upload.class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Upload.class);\n\n");
         
 
         // declare attributes
@@ -2323,9 +2352,10 @@ public class TagClassGenerator {
                 + "import javax.servlet.jsp.tagext.BodyTagSupport;\n"
                 + "import javax.sql.DataSource;\n"
                 + "import org.apache.commons.logging.Log;\n"
-                + "import org.apache.commons.logging.LogFactory;\n"
+                + "import org.apache.commons.logging.LogFactory;\n\n"
+                + "import org.codehaus.jackson.annotate.JsonIgnore;\n"
                 + "\n" 
-                + "@SuppressWarnings(\"serial\")\n" 
+                + "@SuppressWarnings(\"serial\")" 
                 + "\n"
                 + "public class " + projectName + "BodyTagSupport extends BodyTagSupport {\n" 
                 + "\n"
@@ -2336,14 +2366,15 @@ public class TagClassGenerator {
                 + "        super();\n" 
                 + "    }\n" 
                 + "\n" 
-                + "    private static final Log log =LogFactory.getLog("+ projectName + "BodyTagSupport.class);\n"
+                + "    private static final Log log = LogFactory.getLog("+ projectName + "BodyTagSupport.class);\n"
                 + "\n"
                 + "    @Override\n"
                 + "    public int doEndTag() throws JspException {\n" 
                 + "    	freeConnection();\n"
                 + "    	return super.doEndTag();\n" 
                 + "    }\n" 
-                + "    \n" 
+                + "    \n"
+                + "    @JsonIgnore\n"
                 + "    public DataSource getDataSource() {\n"
                 + "        if (theDataSource == null) try {\n"
                 + "            theDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n"
@@ -2354,6 +2385,7 @@ public class TagClassGenerator {
                 + "        return theDataSource;\n" 
                 + "    }\n" 
                 + "    \n"
+                + "    @JsonIgnore\n"
                 + "    public Connection getConnection() throws SQLException {\n" 
                 + "        if (theConnection == null)\n"
                 + "        	theConnection = getDataSource().getConnection();\n" 
@@ -2386,22 +2418,41 @@ public class TagClassGenerator {
                 + "import javax.servlet.jsp.tagext.TagSupport;\n"
                 + "import javax.sql.DataSource;\n" 
                 + "import org.apache.commons.logging.Log;\n"
-                + "import org.apache.commons.logging.LogFactory;\n"
-                + "\n" + "@SuppressWarnings(\"serial\")\n" + "\n"
-                + "public class " + projectName + "TagSupport extends TagSupport {\n" + "\n" + "    protected DataSource theDataSource = null;\n"
+                + "import org.apache.commons.logging.LogFactory;\n\n"
+                + "import org.codehaus.jackson.annotate.JsonIgnore;\n"
+                + "\n" 
+                + "@SuppressWarnings(\"serial\")"
+                + "\n" 
+                + "public class " + projectName + "TagSupport extends TagSupport {\n" 
+                + "\n" 
+                + "    protected DataSource theDataSource = null;\n"
                 + "    protected Connection theConnection = null;\n"
-                + "    private static final Log log =LogFactory.getLog("+ projectName + "TagSupport.class);\n"
-                + "\n" + "    public " + projectName + "TagSupport() {\n"
-                + "        super();\n" + "    }\n" + "\n" + "    @Override\n" + "    public int doEndTag() throws JspException {\n"
-                + "    	freeConnection();\n"
-                + "    	return super.doEndTag();\n" + "    }\n" + "    \n" + "    public DataSource getDataSource() {\n"
+                + "    private static final Log log = LogFactory.getLog("+ projectName + "TagSupport.class);\n"
+                + "\n" 
+                + "    public " + projectName + "TagSupport() {\n"
+                + "        super();\n" 
+                + "    }\n" 
+                + "\n" 
+                + "    @Override\n" 
+                + "    public int doEndTag() throws JspException {\n"
+                + "		freeConnection();\n"
+                + "    	return super.doEndTag();\n" 
+                + "    }\n\n" 
+                + "    @JsonIgnore\n"
+                + "    public DataSource getDataSource() {\n"
                 + "        if (theDataSource == null) try {\n"
                 + "            theDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n"
                 + "        } catch (Exception e) {\n"
-                + "            log.error(\"Error in database initialization: \" + e);\n" + "        }\n" + " \n"
-                + "        return theDataSource;\n" + "    }\n" + "    \n"
-                + "    public Connection getConnection() throws SQLException {\n" + "        if (theConnection == null)\n"
-                + "        	theConnection = getDataSource().getConnection();\n" + "        return theConnection;\n" + "    }\n\n"
+                + "            log.error(\"Error in database initialization: \" + e);\n" 
+                + "        }\n\n" 
+                + "        return theDataSource;\n" 
+                + "    }\n" 
+                + "    \n"
+                + "    @JsonIgnore\n"
+                + "    public Connection getConnection() throws SQLException {\n" 
+                + "        if (theConnection == null)\n"
+                + "        	theConnection = getDataSource().getConnection();\n" 
+                + "        return theConnection;\n" + "    }\n\n"
                 + "    public void freeConnection() throws JspTagException {\n" 
                 + "     try {\n" 
                 + "        if (theConnection != null)\n"
@@ -2436,7 +2487,6 @@ public class TagClassGenerator {
         out.write("import javax.servlet.jsp.JspException;\n");
         out.write("\n");
         out.write("@SuppressWarnings(\"serial\")\n");
-        out.write("\n");
         out.write("public class Sequence extends " + projectName + "TagSupport {\n");
         out.write("\tpublic static enum Driver {POSTGRESQL, ORACLE, MYSQL, SQLSERVER, UNKNOWN};\n");
         out.write("\tpublic static Driver theDriver = Driver.UNKNOWN;\n");
@@ -2449,7 +2499,7 @@ public class TagClassGenerator {
         out.write("\t\ttheDriverHash.put(\"Microsoft SQL Server\", Driver.SQLSERVER);\n");
         out.write("\t}\n");
         
-        out.write("\tprivate static final Log log =LogFactory.getLog(Sequence.class);\n\n");
+        out.write("\tprivate static final Log log = LogFactory.getLog(Sequence.class);\n\n");
 
         out.write("\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\tpageContext.setAttribute(var, generateID());\n");
@@ -2524,11 +2574,11 @@ public class TagClassGenerator {
                 + "import org.apache.commons.logging.LogFactory;\n"
         		+ "\n"
         		+ "\n"
-        		+ "@SuppressWarnings(\"serial\")" + "\n"
-        		+ "public class DBTest extends "  
-        		+ this.projectName + "BodyTagSupport {" + "\n"
+        		+ "@SuppressWarnings(\"serial\")" 
         		+ "\n"
-        		+ "private static final Log log =LogFactory.getLog(DBTest.class);\n\n"
+        		+ "public class DBTest extends "+ this.projectName + "BodyTagSupport {" 
+        		+ "\n\n"
+        		+ "private static final Log log = LogFactory.getLog(DBTest.class);\n\n"
         		+ "		public int doStartTag() throws JspException {" + "\n"
         		+ "			try { \n" 
         		+ "				JspWriter out = pageContext.getOut();" + "\n"
