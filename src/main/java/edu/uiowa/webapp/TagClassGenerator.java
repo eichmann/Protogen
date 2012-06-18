@@ -178,8 +178,8 @@ public class TagClassGenerator {
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Vector;\n\n");
         
-        out.write("import org.json.JSONObject;\n");
-        out.write("import org.json.JSONException;\n\n");
+        // out.write("import org.json.JSONObject;\n");
+        // out.write("import org.json.JSONException;\n\n");
         
         out.write("import org.apache.commons.logging.Log;\n");
         out.write("import org.apache.commons.logging.LogFactory;\n");
@@ -220,7 +220,7 @@ public class TagClassGenerator {
 
         generateDoEndTag(theEntity, out);
         
-        generateToJson(theEntity, out);
+        // generateToJson(theEntity, out);
         
         generateInsertEntity(theEntity, out);
 
@@ -2353,7 +2353,7 @@ public class TagClassGenerator {
                 + "import javax.sql.DataSource;\n"
                 + "import org.apache.commons.logging.Log;\n"
                 + "import org.apache.commons.logging.LogFactory;\n\n"
-                + "import org.codehaus.jackson.annotate.JsonIgnore;\n"
+                //+ "import org.codehaus.jackson.annotate.JsonIgnore;\n"
                 + "\n" 
                 + "@SuppressWarnings(\"serial\")" 
                 + "\n"
@@ -2374,7 +2374,7 @@ public class TagClassGenerator {
                 + "    	return super.doEndTag();\n" 
                 + "    }\n" 
                 + "    \n"
-                + "    @JsonIgnore\n"
+                //+ "    @JsonIgnore\n"
                 + "    public DataSource getDataSource() {\n"
                 + "        if (theDataSource == null) try {\n"
                 + "            theDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n"
@@ -2385,7 +2385,7 @@ public class TagClassGenerator {
                 + "        return theDataSource;\n" 
                 + "    }\n" 
                 + "    \n"
-                + "    @JsonIgnore\n"
+                //+ "    @JsonIgnore\n"
                 + "    public Connection getConnection() throws SQLException {\n" 
                 + "        if (theConnection == null)\n"
                 + "        	theConnection = getDataSource().getConnection();\n" 
@@ -2419,7 +2419,7 @@ public class TagClassGenerator {
                 + "import javax.sql.DataSource;\n" 
                 + "import org.apache.commons.logging.Log;\n"
                 + "import org.apache.commons.logging.LogFactory;\n\n"
-                + "import org.codehaus.jackson.annotate.JsonIgnore;\n"
+                //+ "import org.codehaus.jackson.annotate.JsonIgnore;\n"
                 + "\n" 
                 + "@SuppressWarnings(\"serial\")"
                 + "\n" 
@@ -2438,7 +2438,7 @@ public class TagClassGenerator {
                 + "		freeConnection();\n"
                 + "    	return super.doEndTag();\n" 
                 + "    }\n\n" 
-                + "    @JsonIgnore\n"
+                // + "    @JsonIgnore\n"
                 + "    public DataSource getDataSource() {\n"
                 + "        if (theDataSource == null) try {\n"
                 + "            theDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n"
@@ -2448,7 +2448,7 @@ public class TagClassGenerator {
                 + "        return theDataSource;\n" 
                 + "    }\n" 
                 + "    \n"
-                + "    @JsonIgnore\n"
+                // + "    @JsonIgnore\n"
                 + "    public Connection getConnection() throws SQLException {\n" 
                 + "        if (theConnection == null)\n"
                 + "        	theConnection = getDataSource().getConnection();\n" 
