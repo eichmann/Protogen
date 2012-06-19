@@ -1297,6 +1297,7 @@ public class TagClassGenerator {
             Attribute theKey = primaryKeys.elementAt(i);
             if (!theKey.isCounter())
             	continue;
+             
             out.write("\t\t\tPreparedStatement stmt = getConnection().prepareStatement(\n");
             out.write("\t\t\t\t\t\"select ");
             out.write(theKey.getSqlLabel()+" from "+ theSchema.getSqlLabel() + "." + theEntity.getSqlLabel());
@@ -1305,7 +1306,7 @@ public class TagClassGenerator {
                 Attribute theAttribute = primaryKeys.elementAt(j);
                 if (theAttribute == theKey) {
                 	orderBy = theKey.getSqlLabel();
-                	keyBuf.append("\t\t\t\t"+theKey.type +" keyVal = rs."+theKey.getSQLMethod(true)+"(1);\n");
+                	keyBuf.append("\t\t\t\t"+theKey.type +" _keyVal = rs."+theKey.getSQLMethod(true)+"(1);\n");
                 	
                 	out.write("\n\t\t\t\t\t+\" and " + theKey.getSqlLabel() + " > ? \"");
                 } else {
@@ -1347,7 +1348,7 @@ public class TagClassGenerator {
                 queryBuffer.append("\n\t\t\t\tif (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat.");
                 queryBuffer.append(theAttribute.getSQLMethod(false));
                 queryBuffer.append("(webapp_keySeq++, ");
-                queryBuffer.append((theAttribute == theKey ? "keyVal" : theAttribute.getLabel())); 
+                queryBuffer.append((theAttribute == theKey ? "_keyVal" : theAttribute.getLabel())); 
                 queryBuffer.append((theAttribute.isDateTime() ? " == null ? null : new java.sql."+ (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : ""));
                 queryBuffer.append(");");
             }
