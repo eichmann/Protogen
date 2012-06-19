@@ -1269,11 +1269,11 @@ public class TagClassGenerator {
         out.write("\n        PreparedStatement stat;\n"
                 + "        try {\n"
                 + "            int webapp_keySeq = 1;\n"
-                + "            stat = getConnection().prepareStatement(\"DELETE from " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " where 1=1\"\n");
+                + "            stat = getConnection().prepareStatement(\"DELETE from " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " where 1=1\"");
         StringBuffer queryBuffer = new StringBuffer();
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theAttribute = primaryKeys.elementAt(i);
-            out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+            out.write("\n                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ? \")");
             queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
                     + theAttribute.getSQLMethod(false)
                     + "(webapp_keySeq++, "
@@ -1282,39 +1282,85 @@ public class TagClassGenerator {
                             + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                             : "") + ");\n");
         }
-        out.write("                                                        );\n");
+        out.write(");\n");
         out.write(queryBuffer.toString());
-        out.write("            stat.execute();\n"
-                + "\n");
+        out.write("            stat.execute();\n\n");
         
+        out.write("\t\t\twebapp_keySeq = 1;\n");
+        
+        queryBuffer = new StringBuffer();
+        
+        StringBuffer keyBuf = new StringBuffer("");
+        String orderBy = null;
         // if we have a counter attribute, we need to shift the record of interest to zero
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
             if (!theKey.isCounter())
             	continue;
-            out.write("            webapp_keySeq = 1;\n"
-                + "            stat = getConnection().prepareStatement(\"update " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel()
-            		+ " set " + theKey.getSqlLabel() + " = " + theKey.getSqlLabel() + " - 1 where 1=1\"\n");
-            queryBuffer = new StringBuffer();
+            out.write("\t\t\tPreparedStatement stmt = getConnection().prepareStatement(\n");
+            out.write("\t\t\t\t\t\"select ");
+            out.write(theKey.getSqlLabel()+" from "+ theSchema.getSqlLabel() + "." + theEntity.getSqlLabel());
+            out.write(" where 1=1 \"");
             for (int j = 0; j < primaryKeys.size(); j++) {
                 Attribute theAttribute = primaryKeys.elementAt(j);
                 if (theAttribute == theKey) {
-                	out.write("                                                        + \" and " + theKey.getSqlLabel() + " > ?\"\n");
+                	orderBy = theKey.getSqlLabel();
+                	keyBuf.append("\t\t\t\t"+theKey.type +" keyVal = rs."+theKey.getSQLMethod(true)+"(1);\n");
+                	
+                	out.write("\n\t\t\t\t\t+\" and " + theKey.getSqlLabel() + " > ? \"");
                 } else {
-	                out.write("                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ?\")\n");
+	                out.write("\n\t\t\t\t\t+(" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ? \")");
                 }
-                queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
+                
+                queryBuffer.append("\n\t\t\tif (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stmt."
                         + theAttribute.getSQLMethod(false)
                         + "(webapp_keySeq++, "
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
                                 + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : ""));
-                queryBuffer.append(");\n");
+                queryBuffer.append(");");
             }
-            out.write("                                                        );\n");
+            out.write(orderBy == null ? "" : "\n\t\t\t\t\t+\" order by "+orderBy+" asc\"");
+            out.write(");\n");
+            
+            
             out.write(queryBuffer.toString());
-            out.write("            stat.execute();\n\n");
+            out.write("\n\t\t\trs = stmt.executeQuery();\n");
+            out.write("\t\t\twhile(rs.next()){\n");
+            out.write("\t\t\t\twebapp_keySeq = 1;\n");
+            
+            out.write(keyBuf.toString());
+            
+            queryBuffer = new StringBuffer();
+            
+            out.write("\t\t\t\tstat = getConnection().prepareStatement(");
+            out.write("\"update " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel()+" set " + theKey.getSqlLabel() + " = " + theKey.getSqlLabel() + " - 1 where 1=1 \"");
+            
+            for (int j = 0; j < primaryKeys.size(); j++) {
+                Attribute theAttribute = primaryKeys.elementAt(j);
+                if (theAttribute == theKey) {
+                	out.write("\n\t\t\t\t\t\t+ \" and " + theKey.getSqlLabel() + " = ? \"");
+                } else {
+	                out.write("\n\t\t\t\t\t\t+ (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ? \") ");
+                }
+                queryBuffer.append("\n\t\t\t\tif (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat.");
+                queryBuffer.append(theAttribute.getSQLMethod(false));
+                queryBuffer.append("(webapp_keySeq++, ");
+                queryBuffer.append((theAttribute == theKey ? "keyVal" : theAttribute.getLabel())); 
+                queryBuffer.append((theAttribute.isDateTime() ? " == null ? null : new java.sql."+ (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : ""));
+                queryBuffer.append(");");
+            }
+            out.write(");\n");
+            out.write(queryBuffer.toString());
+            out.write("\n");
+            out.write("\t\t\t\tstat.execute();\n");
+            out.write("\t\t\t\tstat.close();\n");
+            
+            out.write("\t\t\t}\n");
+            out.write("\t\t\trs.close();\n");
+            out.write("\t\t\tstmt.close();\n\n");
+            
         }
         
         out.write("        } catch (SQLException e) {\n"
@@ -1323,8 +1369,7 @@ public class TagClassGenerator {
                 + "            throw new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " deleter\");\n"
                 + "        } finally {\n"
                 + "            freeConnection();\n"
-                + "        }\n"
-                + "\n"
+                + "        }\n\n"
                 + "        return SKIP_BODY;\n"
                 + "    }\n"
                 + "\n");
