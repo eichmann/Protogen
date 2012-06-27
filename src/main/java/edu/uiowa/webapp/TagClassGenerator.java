@@ -277,8 +277,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t// no " + keyAttribute.getLabel() + " was provided - the default is to assume that it is a new "
                 + theEntity.getLabel() + " and to generate a new " + keyAttribute.getLabel() + "\n");
         out.write("\t\t\t\t" + keyAttribute.getLabel() + " = " + keyAttribute.getDefaultValue() + ";\n");
-        out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()
-                + ");\n");
+        // out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()+ ");\n");
         out.write("\t\t\t\tinsertEntity();\n");
         
         // case for one parent active among multiple parents - we iterate through the parents, using each of them in turn as the only non-null
@@ -587,6 +586,13 @@ public class TagClassGenerator {
             out.write("\n");
         }
         out.write("\t\t\tstmt.close();\n");
+        
+        if (autoIncrementAttribute != null) {
+        	out.write("\n");
+        	out.write("\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + autoIncrementAttribute.getLabel()+ ");\n");
+        	out.write("\n");
+        }
+        
         out.write("\t\t} catch (SQLException e) {\n");
         out.write("\t\t\tlog.error(\"Error: IOException while writing to the user\", e);\n");
         out.write("\t\t\tthrow new JspTagException(\"Error: IOException while writing to the user\");\n");
