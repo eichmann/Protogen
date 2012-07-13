@@ -666,14 +666,28 @@ public class TagClassGenerator {
     
     private void generateFunctionGetter(Entity theEntity, Attribute theAttribute, BufferedWriter out) throws IOException {
         // generate getter method
-        out.write("\n\tpublic static " + (theAttribute.getDomain() == null ? theAttribute.getType() : theAttribute.getDomain().getJavaType()) + " " + theAttribute.getLabel() + "Value() throws JspException {\n");
+        out.write("\n\tpublic static " + staticType((theAttribute.getDomain() == null ? theAttribute.getType() : theAttribute.getDomain().getJavaType())) + " " + theAttribute.getLabel() + "Value() throws JspException {\n");
         out.write("\t\ttry {\n");
-        out.write("\t\t\treturn currentInstance.get" + Character.toUpperCase(theAttribute.getLabel().charAt(0))
-                + theAttribute.getLabel().substring(1) + "();\n");
+        out.write("\t\t\treturn currentInstance.get" + Character.toUpperCase(theAttribute.getLabel().charAt(0)) + theAttribute.getLabel().substring(1) + "();\n");
         out.write("\t\t} catch (Exception e) {\n");
         out.write("\t\t\t throw new JspTagException(\"Error in tag function " + theAttribute.getLabel() + "Value()\");\n");
         out.write("\t\t}\n");
         out.write("\t}\n");
+    }
+    
+    private String staticType(String type){
+    	if("int".equalsIgnoreCase(type)){
+    		return "Integer";
+    	}else if("long".equalsIgnoreCase(type)){
+    		return "Long";
+    	}else if("boolean".equalsIgnoreCase(type)){
+    		return "Boolean";
+    	}else if("float".equalsIgnoreCase(type)){
+    		return "Float";
+    	}else if("double".equalsIgnoreCase(type)){
+    		return "Double";
+    	}
+    	return type;
     }
     
     private void generateServiceStateReset(Entity theEntity, BufferedWriter out) throws IOException {
