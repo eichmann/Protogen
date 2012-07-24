@@ -280,6 +280,17 @@ public class TagClassGenerator {
         // out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()+ ");\n");
         out.write("\t\t\t\tinsertEntity();\n");
         
+        //TODO need case for null iterator and all active parents
+//        out.write("\t\t\t} else if (the" + theEntity.getLabel() + "Iterator == null");
+//        for (int j = 0; j < theEntity.getParents().size(); j++) {
+//            Entity theParentEntity = theEntity.getParents().elementAt(j).getSourceEntity();
+//            out.write(" && the" + theParentEntity.getLabel() + " != null");
+//        }
+//        out.write(" && " + keyAttribute.getLabel() + " == " + keyAttribute.getInitializer() + ") {\n");
+//        out.write("\t\t\t\tboolean found = false;\n");
+//        out.write("\t\t\t\tPreparedStatement stmt = getConnection().prepareStatement(\"select");
+
+        
         // case for one parent active among multiple parents - we iterate through the parents, using each of them in turn as the only non-null
         // ancestor
         if (theEntity.getParents().size() > 1) {
@@ -296,8 +307,7 @@ public class TagClassGenerator {
 	            }
 	            out.write(") {\n");
 	            
-	            out.write("\t\t\t\t// an " + keyAttribute.getLabel() + " was provided as an attribute - we need to load a "
-	                    + theEntity.getLabel() + " from the database\n");
+	            out.write("\t\t\t\t// an " + keyAttribute.getLabel() + " was provided as an attribute - we need to load a " + theEntity.getLabel() + " from the database\n");
 	            out.write("\t\t\t\tboolean found = false;\n");
 	            out.write("\t\t\t\tPreparedStatement stmt = getConnection().prepareStatement(\"select");
 	            paramBuffer = new StringBuffer();
@@ -321,13 +331,25 @@ public class TagClassGenerator {
 	                                    : "") + ");\n");
 	                    keySeq++;
 	                    firstParam = false;
+	                }else if (theNavigationEntity.isPrimaryReference(theAttribute)) {
+	                	paramBuffer.append((firstParam ? " " : " and ") + theAttribute.getSqlLabel() + " = ?");
+	                	
+	                	queryBuffer.append("\t\t\t\tstmt."
+	                			+ theAttribute.getSQLMethod(false)
+	                			+ "(" + (keySeq + 1) + ","
+	                			+ theAttribute.getLabel()
+	                			+ (theAttribute.isDateTime() ? " == null ? null : new java.sql."
+	                			+ (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "") + ");\n");
+	                	keySeq++;
+	                	firstParam = false;
 	                } else {
-	                    out.write((attrSeq == 0 ? " " : ",") + theAttribute.getSqlLabel());
+	                	
+                		out.write((attrSeq == 0 ? " " : ",") + theAttribute.getSqlLabel());
 	                    resultBuffer.append("\t\t\t\t\tif (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + ")\n");
 	                    resultBuffer.append("\t\t\t\t\t\t" + theAttribute.getLabel() + " = "
-//	                            + (theAttribute.getDomain() == null ? "" : "(" + theAttribute.getDomain().getLabel() + ") (Object) ")
-	                            + "rs." + theAttribute.getSQLMethod(true) + "(" + (attrSeq + 1) + ");\n");
-	                    attrSeq++;
+	                    		+ "rs." + theAttribute.getSQLMethod(true) + "(" + (attrSeq + 1) + ");\n");
+	                    attrSeq++;	                		
+	                    
 	                }
 	            }
 	            out.write(" from " + theSchema.getSqlLabel()+ "." + theEntity.getSqlLabel() + " where");
