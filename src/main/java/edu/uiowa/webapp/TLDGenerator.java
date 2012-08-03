@@ -160,6 +160,8 @@ public class TLDGenerator {
         out.write("\t\t<body-content>JSP</body-content>\n");
 //        out.write("\t\t<info>demographic information for a " + theEntity.getUnqualifiedLabel() + "</info>\n");
 
+        generateAttribute("var", false, false);
+        
         for (int i = 0; i < theEntity.getPrimaryKeyAttributes().size(); i++) {
             if (theEntity.getPrimaryKeyAttributes().elementAt(i).getLabel().equals("ID"))
                 generateAttribute(theEntity.getPrimaryKeyAttributes().elementAt(i).getLabel(), false, true);
@@ -209,7 +211,7 @@ public class TLDGenerator {
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             generateAttributeTag(theEntity, theEntity.getAttributes().elementAt(i));
             if (! (theEntity.hasBinaryDomainAttribute() || theEntity.hasImage())) {
-                generateAttributeFunction(theEntity, theEntity.getAttributes().elementAt(i));
+                // generateAttributeFunction(theEntity, theEntity.getAttributes().elementAt(i));
             }
             if (theEntity.getAttributes().elementAt(i).isDateTime()) {
                 generateAttributeToNowTag(theEntity, theEntity.getAttributes().elementAt(i));

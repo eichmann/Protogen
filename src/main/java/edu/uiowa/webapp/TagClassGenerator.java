@@ -216,6 +216,10 @@ public class TagClassGenerator {
                             + ";\n");
         }
 
+        out.write("\n\tprivate String var = null;\n");
+        
+        out.write("\n\tprivate "+theEntity.getLabel()+" cached"+theEntity.getLabel()+" = null;\n");
+        
         generateDoStartTag(theEntity, out);
 
         generateDoEndTag(theEntity, out);
@@ -225,6 +229,8 @@ public class TagClassGenerator {
         generateInsertEntity(theEntity, out);
 
         generateSettersGetters(theEntity, out, false, true);
+        
+        generateSetterGetter("String", "var", false, out);
         
         generateFunctionGetters(theEntity, out);
 
@@ -432,6 +438,16 @@ public class TagClassGenerator {
         out.write("\t\t} finally {\n");
         out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t}\n");
+        
+        out.write("\n");
+        
+        out.write("\t\t"+theEntity.getLabel()+" current"+theEntity.getLabel()+" = ("+theEntity.getLabel()+") pageContext.getAttribute(\"tag_"+theEntity.getLowerLabel()+"\");\n");
+        out.write("\t\tif(current"+theEntity.getLabel()+" != null){\n");
+        out.write("\t\t\tcached"+theEntity.getLabel()+" = current"+theEntity.getLabel()+";\n");
+        out.write("\t\t}\n");
+        out.write("\t\tcurrent"+theEntity.getLabel()+" = this;\n");
+        out.write("\t\tpageContext.setAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var), current"+theEntity.getLabel()+");\n\n");
+        
         out.write("\t\treturn EVAL_PAGE;\n");
         out.write("\t}\n");
     }
@@ -445,6 +461,16 @@ public class TagClassGenerator {
 
         out.write("\n\tpublic int doEndTag() throws JspException {\n");
         out.write("\t\tcurrentInstance = null;\n");
+        
+        out.write("\n");
+        
+        out.write("\t\tif(this.cached"+theEntity.getLabel()+" != null){\n");
+        out.write("\t\t\tpageContext.setAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var), this.cached"+theEntity.getLabel()+");\n");
+        out.write("\t\t}else{\n");
+        out.write("\t\t\tpageContext.removeAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var));\n");
+        out.write("\t\t\tthis.cached"+theEntity.getLabel()+" = null;\n");
+        out.write("\t\t}\n\n");
+        
         out.write("\t\ttry {\n");
         out.write("\t\t\tif (commitNeeded) {\n");
         out.write("\t\t\t\tPreparedStatement stmt = getConnection().prepareStatement(\"update " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " set");
@@ -713,10 +739,10 @@ public class TagClassGenerator {
     }
     
     private void generateServiceStateReset(Entity theEntity, BufferedWriter out) throws IOException {
-        generateServiceStateReset(theEntity, out, true);
+        generateServiceStateReset(theEntity, out, true, false);
     }
     
-    private void generateServiceStateReset(Entity theEntity, BufferedWriter out, boolean isMainTag) throws IOException {
+    private void generateServiceStateReset(Entity theEntity, BufferedWriter out, boolean isMainTag, boolean isUploadTag) throws IOException {
         out.write("\n\tprivate void clearServiceState () {\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -726,7 +752,10 @@ public class TagClassGenerator {
         if (isMainTag) {
             out.write("\t\tnewRecord = false;\n");
             out.write("\t\tcommitNeeded = false;\n");
-            out.write("\t\tparentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
+            out.write("\t\tparentEntities = new Vector<" + projectName + "TagSupport>();\n");
+            if(!isUploadTag){
+            	out.write("\t\tthis.var = null;\n\n");
+            }
         }
         out.write("\t}\n");
     }
@@ -1869,7 +1898,7 @@ public class TagClassGenerator {
             out.write("\t\t}\n");
             out.write("\t}\n");
 
-            generateServiceStateReset(theEntity, out, false);
+            generateServiceStateReset(theEntity, out, false, false);
         }
         
         if (theAttribute.isDateTime()) {
@@ -2057,7 +2086,7 @@ public class TagClassGenerator {
 
         generateSettersGetters(theEntity, out, false, false);
 
-        generateServiceStateReset(theEntity, out);
+        generateServiceStateReset(theEntity, out, true, true);
 
         // close out class
         out.write("\n}\n");
