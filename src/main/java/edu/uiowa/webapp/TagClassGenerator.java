@@ -454,12 +454,14 @@ public class TagClassGenerator {
         
         out.write("\n");
         
-        out.write("\t\t"+theEntity.getLabel()+" current"+theEntity.getLabel()+" = ("+theEntity.getLabel()+") pageContext.getAttribute(\"tag_"+theEntity.getLowerLabel()+"\");\n");
-        out.write("\t\tif(current"+theEntity.getLabel()+" != null){\n");
-        out.write("\t\t\tcached"+theEntity.getLabel()+" = current"+theEntity.getLabel()+";\n");
-        out.write("\t\t}\n");
-        out.write("\t\tcurrent"+theEntity.getLabel()+" = this;\n");
-        out.write("\t\tpageContext.setAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var), current"+theEntity.getLabel()+");\n\n");
+        out.write("\t\tif(pageContext != null){\n");
+        out.write("\t\t\t"+theEntity.getLabel()+" current"+theEntity.getLabel()+" = ("+theEntity.getLabel()+") pageContext.getAttribute(\"tag_"+theEntity.getLowerLabel()+"\");\n");
+        out.write("\t\t\tif(current"+theEntity.getLabel()+" != null){\n");
+        out.write("\t\t\t\tcached"+theEntity.getLabel()+" = current"+theEntity.getLabel()+";\n");
+        out.write("\t\t\t}\n");
+        out.write("\t\t\tcurrent"+theEntity.getLabel()+" = this;\n");
+        out.write("\t\t\tpageContext.setAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var), current"+theEntity.getLabel()+");\n");
+        out.write("\t\t}\n\n");
         
         out.write("\t\treturn EVAL_PAGE;\n");
         out.write("\t}\n");
@@ -477,16 +479,23 @@ public class TagClassGenerator {
         
         out.write("\n");
         
-        out.write("\t\tif(this.cached"+theEntity.getLabel()+" != null){\n");
-        out.write("\t\t\tpageContext.setAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var), this.cached"+theEntity.getLabel()+");\n");
-        out.write("\t\t}else{\n");
-        out.write("\t\t\tpageContext.removeAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var));\n");
-        out.write("\t\t\tthis.cached"+theEntity.getLabel()+" = null;\n");
+        out.write("\t\tif(pageContext != null){\n");
+        out.write("\t\t\tif(this.cached"+theEntity.getLabel()+" != null){\n");
+        out.write("\t\t\t\tpageContext.setAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var), this.cached"+theEntity.getLabel()+");\n");
+        out.write("\t\t\t}else{\n");
+        out.write("\t\t\t\tpageContext.removeAttribute((var == null ? \"tag_"+theEntity.getLowerLabel()+"\" : var));\n");
+        out.write("\t\t\t\tthis.cached"+theEntity.getLabel()+" = null;\n");
+        out.write("\t\t\t}\n");
         out.write("\t\t}\n\n");
         
         out.write("\t\ttry {\n");
         
-        out.write("\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
+        out.write("\t\t\tBoolean error = null; // (Boolean) pageContext.getAttribute(\"tagError\");\n");
+        
+        out.write("\t\t\tif(pageContext != null){\n");
+        out.write("\t\t\t\terror = (Boolean) pageContext.getAttribute(\"tagError\");\n");
+        out.write("\t\t\t}\n\n");
+        
         out.write("\t\t\tif(error != null && error){\n\n");
         
         out.write("\t\t\t\tfreeConnection();\n");
@@ -494,6 +503,11 @@ public class TagClassGenerator {
 
         out.write("\t\t\t\tException e = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
         out.write("\t\t\t\tString message = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        
+        // out.write("\t\t\t\tif(pageContext != null){\n");
+        // out.write("\t\t\t\t\te = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        // out.write("\t\t\t\t\tmessage = (String) pageContext.getAttribute(\"tagErrorMessage\");\n");
+        // out.write("\t\t\t\t}\n\n");
         
         out.write("\t\t\t\tTag parent = getParent();\n");
         out.write("\t\t\t\tif(parent != null){\n");
@@ -1247,25 +1261,32 @@ public class TagClassGenerator {
         out.write("    public int doEndTag() throws JspTagException, JspException {\n");
         out.write("        try {\n");
         
-        out.write("\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
-        out.write("\t\t\tif(error != null && error){\n\n");
+        out.write("\t\t\tif(pageContext != null){\n");
+        out.write("\t\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
+        out.write("\t\t\t\tif(error != null && error){\n\n");
         
-        out.write("\t\t\t\tfreeConnection();\n");
-        out.write("\t\t\t\tclearServiceState();\n\n");
+        out.write("\t\t\t\t\tfreeConnection();\n");
+        out.write("\t\t\t\t\tclearServiceState();\n\n");
         
-        out.write("\t\t\t\tException e = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\tString message = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        out.write("\t\t\t\tException e = null; // (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\tString message = null; // (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
         
-        out.write("\t\t\t\tTag parent = getParent();\n");
-        out.write("\t\t\t\tif(parent != null){\n");
-        out.write("\t\t\t\t\treturn parent.doEndTag();\n");
+        out.write("\t\t\t\tif(pageContext != null){\n");
+        out.write("\t\t\t\t\te = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\tmessage = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        out.write("\t\t\t\t}\n");
         
-        out.write("\t\t\t\t}else if(e != null && message != null){\n");
-        out.write("\t\t\t\t\tthrow new JspException(message,e);\n");
-        out.write("\t\t\t\t}else if(parent == null){\n");
-        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagError\");\n");
-        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
+        out.write("\t\t\t\t\tTag parent = getParent();\n");
+        out.write("\t\t\t\t\tif(parent != null){\n");
+        out.write("\t\t\t\t\t\treturn parent.doEndTag();\n");
+        
+        out.write("\t\t\t\t\t}else if(e != null && message != null){\n");
+        out.write("\t\t\t\t\t\tthrow new JspException(message,e);\n");
+        out.write("\t\t\t\t\t}else if(parent == null && pageContext != null){\n");
+        out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagError\");\n");
+        out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
+        out.write("\t\t\t\t\t}\n");
         out.write("\t\t\t\t}\n");
         out.write("\t\t\t}\n");
         
@@ -1761,20 +1782,22 @@ public class TagClassGenerator {
         out.write("\t\tclearServiceState();\n");
         
         
-        out.write("\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
-        out.write("\t\tif(error != null && error){\n\n");
-        out.write("\t\t\tfreeConnection();\n\n");
-        out.write("\t\t\tException e = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\tString message = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
-        out.write("\t\t\tTag parent = getParent();\n");
-        out.write("\t\t\tif(parent != null){\n");
-        out.write("\t\t\t\treturn parent.doEndTag();\n");
-        out.write("\t\t\t}else if(e != null && message != null){\n");
-        out.write("\t\t\t\tthrow new JspException(message,e);\n");
-        out.write("\t\t\t}else if(parent == null){\n");
-        out.write("\t\t\t\tpageContext.removeAttribute(\"tagError\");\n");
-        out.write("\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
+        out.write("\t\tif(pageContext != null){\n");
+        out.write("\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
+        out.write("\t\t\tif(error != null && error){\n\n");
+        out.write("\t\t\t\tfreeConnection();\n\n");
+        out.write("\t\t\t\tException e = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\tString message = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        out.write("\t\t\t\tTag parent = getParent();\n");
+        out.write("\t\t\t\tif(parent != null){\n");
+        out.write("\t\t\t\t\treturn parent.doEndTag();\n");
+        out.write("\t\t\t\t}else if(e != null && message != null){\n");
+        out.write("\t\t\t\t\tthrow new JspException(message,e);\n");
+        out.write("\t\t\t\t}else if(parent == null){\n");
+        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagError\");\n");
+        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
+        out.write("\t\t\t\t}\n");
         out.write("\t\t\t}\n");
         out.write("\t\t}\n");
         
@@ -2655,25 +2678,27 @@ public class TagClassGenerator {
         out.write("\n\tpublic int doEndTag() throws JspException {\n");
         out.write("\t\ttry {\n");
         
-        out.write("\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
-        out.write("\t\t\tif(error != null && error){\n\n");
+        out.write("\t\t\tif(pageContext != null){\n");
+        out.write("\t\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
+        out.write("\t\t\t\tif(error != null && error){\n\n");
         
-        out.write("\t\t\t\tfreeConnection();\n");
-        out.write("\t\t\t\tclearServiceState();\n\n");
+        out.write("\t\t\t\t\tfreeConnection();\n");
+        out.write("\t\t\t\t\tclearServiceState();\n\n");
 
-        out.write("\t\t\t\tException e = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\tString message = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        out.write("\t\t\t\t\tException e = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\tString message = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
         
-        out.write("\t\t\t\tTag parent = getParent();\n");
-        out.write("\t\t\t\tif(parent != null){\n");
-        out.write("\t\t\t\t\treturn parent.doEndTag();\n");
+        out.write("\t\t\t\t\tTag parent = getParent();\n");
+        out.write("\t\t\t\t\tif(parent != null){\n");
+        out.write("\t\t\t\t\t\treturn parent.doEndTag();\n");
         
-        out.write("\t\t\t\t}else if(e != null && message != null){\n");
-        out.write("\t\t\t\t\tthrow new JspException(message,e);\n");
-        out.write("\t\t\t\t}else if(parent == null){\n");
-        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagError\");\n");
-        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
+        out.write("\t\t\t\t\t}else if(e != null && message != null){\n");
+        out.write("\t\t\t\t\t\tthrow new JspException(message,e);\n");
+        out.write("\t\t\t\t\t}else if(parent == null){\n");
+        out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagError\");\n");
+        out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
+        out.write("\t\t\t\t\t}\n");
         out.write("\t\t\t\t}\n");
         out.write("\t\t\t}\n");
         
