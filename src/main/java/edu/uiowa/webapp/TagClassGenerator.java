@@ -1433,7 +1433,8 @@ public class TagClassGenerator {
         generateParentEntityReferences(out, theEntity, "\t\t");
         
         // generate and execute the delete statement to remove this tuple.
-        //TODO the initializer logic may be generically unsafe in that it might be possible to execute a statement that removes all entries in the table
+        // TODO the initializer logic may be generically unsafe in that it might be possible to execute a statement that removes all entries in the table
+        
         out.write("\n        PreparedStatement stat;\n"
                 + "        try {\n"
                 + "            int webapp_keySeq = 1;\n"
@@ -1444,12 +1445,39 @@ public class TagClassGenerator {
             out.write("\n                                                        + (" + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ? \"\" : \" and " + theAttribute.getSqlLabel() + " = ? \")");
             queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
                     + theAttribute.getSQLMethod(false)
-                    + "(webapp_keySeq++, "
-                    + theAttribute.getLabel()
-                    + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                            + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
-                            : "") + ");\n");
+                    + "(webapp_keySeq++, " + theAttribute.getLabel() + (theAttribute.isDateTime() ? " == null ? null : new java.sql." 
+                    + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "") 
+                    + ");\n");
         }
+        
+        for (int i = 0; i < theEntity.getParents().size(); i++) {
+            Relationship theRelationship = theEntity.getParents().elementAt(i);
+            Entity theSourceEntity = theRelationship.getSourceEntity();
+            
+            /*
+             out.write(indentString + theSourceEntity.getLabel() + " the" + theSourceEntity.getLabel() + " = (" 
+             	+ theSourceEntity.getLabel() + ")findAncestorWithClass(this, " + theSourceEntity.getLabel() + ".class);\n");
+            out.write(indentString + "if (the" + theSourceEntity.getLabel() + "!= null)" + "\n" + indentString + "\tparentEntities.addElement(the" + theSourceEntity.getLabel() + ");\n");
+            parentBuffer.append(indentString + "if (the" + theSourceEntity.getLabel() + " == null) {\n");
+            parentBuffer.append(indentString + "} else {\n");
+            for (int j = 0; j < theSourceEntity.getPrimaryKeyAttributes().size(); j++) {
+                parentBuffer.append(indentString + "\t" + theEntity.getAttributeBySQLLabel(theRelationship.getForeignReferencedAttribute(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getSqlLabel())).getLabel() + " = the" + theSourceEntity.getLabel() + ".get"
+                        + Character.toUpperCase(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getLabel().charAt(0))
+                        + theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getLabel().substring(1) + "();\n");
+            }
+            parentBuffer.append(indentString + "}\n");
+             */
+            
+            for (int j = 0; j < theSourceEntity.getPrimaryKeyAttributes().size(); j++) {
+            	Attribute attribute = theEntity.getAttributeBySQLLabel(theRelationship.getForeignReferencedAttribute(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getSqlLabel()));
+            	out.write("\n                                                        + (" + attribute.getLabel() + " == " + attribute.getInitializer() + " ? \"\" : \" and " + attribute.getSqlLabel() + " = ? \")");
+                queryBuffer.append("\t\t\tif (" + attribute.getLabel() + " != " + attribute.getInitializer() + ") stat."+ attribute.getSQLMethod(false)
+                        + "(webapp_keySeq++, " + attribute.getLabel() + (attribute.isDateTime() ? " == null ? null : new java.sql." 
+                        + (attribute.isTime() ? "Timestamp" : "Date") + "(" + attribute.getLabel() + ".getTime())" : "") 
+                        + ");\n");
+            }
+        }
+        
         out.write(");\n");
         out.write(queryBuffer.toString());
         out.write("            stat.execute();\n\n");
