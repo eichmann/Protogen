@@ -99,7 +99,7 @@ public class Entity extends ClayElement {
         Attribute target = null;
         
         for (int i = 0; i < attributes.size(); i++) {
-            log.debug(attributes.elementAt(i).getLabel());
+//            log.debug(attributes.elementAt(i).getLabel());
             if (attributes.elementAt(i).getSqlLabel().equals(label))
                 return attributes.elementAt(i);
         }

@@ -227,7 +227,7 @@ public class Attribute extends ClayElement {
         else if (type.toLowerCase().equals("number"))
             type = "int";
         else if (type.toLowerCase().equals("decimal"))
-            type = "int";
+            type = "double";
         else if (type.toLowerCase().equals("bigint"))
             type = "long";
         else if (type.toLowerCase().equals("int8"))
