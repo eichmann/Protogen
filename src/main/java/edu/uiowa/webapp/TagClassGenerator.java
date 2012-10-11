@@ -2431,7 +2431,7 @@ public class TagClassGenerator {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (!theAttribute.isImage() && !theAttribute.isBinaryDomain()) {
               out.write("\t\t\t\t\t\t\tif (name.equals(\"" + theAttribute.getLabel() + "\")) {\n");
-              out.write("\t\t\t\t\t\t\t\tcommitNeeded = true;\n");
+              // out.write("\t\t\t\t\t\t\t\tcommitNeeded = true;\n");
               out.write("\t\t\t\t\t\t\t\tif (value == null || value.length() == 0)\n");
               out.write("\t\t\t\t\t\t\t\t\t" + theAttribute.getLabel() + " = " + theAttribute.getDefaultValue() + ";\n");
               out.write("\t\t\t\t\t\t\t\telse\n");
@@ -2453,7 +2453,7 @@ public class TagClassGenerator {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isImage() ||theAttribute.isBinaryDomain()) {
               out.write("\t\t\t\t\t\t\tif (fieldName.equals(\"" + theAttribute.getLabel() + "\") && contentType != null) {\n");
-              out.write("\t\t\t\t\t\t\t\tcommitNeeded = true;\n");
+              // out.write("\t\t\t\t\t\t\t\tcommitNeeded = true;\n");
               out.write("\t\t\t\t\t\t\t\t" + theAttribute.getLabel() + "Item = item;\n");
               out.write("\t\t\t\t\t\t\t\tif (fileName.contains(\"\\\\\"))\n");
               out.write("\t\t\t\t\t\t\t\t\t" + theAttribute.getLabel() + "Name = fileName.substring(fileName.lastIndexOf('\\\\')+1);\n");
@@ -2510,7 +2510,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\t\tfreeConnection();\n");
         out.write("\t\t\t\t\t}\n");
 
-        out.write("\t\t\t\t\tif (count == 0)\n");
+        out.write("\t\t\t\t\tif (count == 0 && commitNeeded)\n");
         out.write("\t\t\t\t\t\tinsertEntity();\n");
         out.write("\t\t\t\t} catch (FileUploadException e) {\n\n");
         
