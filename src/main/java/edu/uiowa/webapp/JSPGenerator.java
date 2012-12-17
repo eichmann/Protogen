@@ -20,7 +20,7 @@ public class JSPGenerator {
 
 	private static final Log log = LogFactory.getLog(JSPGenerator.class);
 
-	
+	String tagLibrayPrefix = null;
     String webAppPath = null;
     String packagePrefix = null;
     String projectName = null;
@@ -32,12 +32,25 @@ public class JSPGenerator {
         this.webAppPath = webAppPath;
         this.packagePrefix = packagePrefix;
         this.projectName = projectName;
+        this.tagLibrayPrefix = packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1);
+    }
+    
+    public JSPGenerator(String webAppPath, String packagePrefix, String projectName, String tagLibrayPrefix) {
+        this.webAppPath = webAppPath;
+        this.packagePrefix = packagePrefix;
+        this.projectName = projectName;
+        this.tagLibrayPrefix = tagLibrayPrefix;
     }
 
     public void generateJSPs(Database theDatabase) throws IOException {
         generateEntityDirectories(theDatabase);
 
+        generateNav(theDatabase);
+        generateBranding(theDatabase);
+        
+        generateMenu(theDatabase);
         generateIndex(theDatabase);
+        generateInclude(theDatabase);
         generateHeader(theDatabase);
         generateFooter(theDatabase);
         generateDbtest(theDatabase);
@@ -48,18 +61,135 @@ public class JSPGenerator {
             Enumeration<Entity> entityEnum = theSchema.getEntities().elements();
             while (entityEnum.hasMoreElements()) {
                 Entity theEntity = entityEnum.nextElement();
+                
+                generateAddEditEntityJSP(theSchema, theEntity);
+                generateAddEditEntityJSP(theSchema, theEntity, false);
+                generateDeleteEntityJSP(theSchema, theEntity);
                 generateEntityJSP(theSchema, theEntity);
-                generateAddEntityJSP(theSchema, theEntity);
-                if (theEntity.hasBinaryDomainAttribute()|| theEntity.hasImage())
-                {      	
+                generateEntityListJSP(theSchema, theEntity);
+                
+                // generateAddEntityJSP(theSchema, theEntity);
+                
+                if (theEntity.hasBinaryDomainAttribute()|| theEntity.hasImage()) {
                     generateUploadEntityJSP(theSchema, theEntity);
                 }
-                generateEditEntityJSP(theSchema, theEntity);
             }
         }
     }
 
-    private void generateEntityDirectories(Database theDatabase) throws IOException {
+    /**
+	 * @param theSchema
+	 * @param theEntity
+     * @throws IOException 
+	 */
+	private void generateDeleteEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
+		File f = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/delete.jsp");
+        FileWriter fstream = new FileWriter(f);
+        BufferedWriter out = new BufferedWriter(fstream);
+        out.write("<%@ include file=\"/_include.jsp\"  %>\n\n");
+        
+        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+            if (theAttribute.isPrimary()){
+            	out.write("<c:if test=\"${ empty param." + theAttribute.getLabel() + " }\">\n");
+            	out.write("\t<c:redirect url=\"list.jsp\"/>\n");
+            	out.write("</c:if>\n\n");
+            }
+        }
+        
+        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+            if (theAttribute.isPrimary() && theAttribute.isInt())
+                out.write("<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
+            if (theAttribute.isPrimary() && theAttribute.isDateTime())
+                out.write("<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
+        }
+        
+        out.write("\n<" + tagLibrayPrefix + ":delete" + theEntity.getUpperLabel());
+        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+            if (theAttribute.isPrimary()){
+            	out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
+            }
+        }
+        out.write("/>\n\n");
+        
+        out.write("<c:redirect url=\"list.jsp\"/>");
+        out.flush();
+        out.close();
+	}
+
+	/**
+	 * @param theDatabase
+     * @throws IOException 
+	 */
+	private void generateBranding(Database theDatabase) throws IOException {
+		File f  = new File(webAppPath + "branding.jsp");
+        FileWriter fstream = new FileWriter(f);
+        BufferedWriter out = new BufferedWriter(fstream);
+        out.write("<%@ include file=\"/_include.jsp\"  %>\n");
+        out.write("<img src=\"<c:url value=\"/resources/images/logo-icts.png\" />\" alt=\"logo\">\n");
+	}
+
+	/**
+	 * @param theDatabase
+	 * @throws IOException 
+	 */
+	private void generateNav(Database theDatabase) throws IOException {
+		File f  = new File(webAppPath + "nav.jsp");
+        FileWriter fstream = new FileWriter(f);
+        BufferedWriter out = new BufferedWriter(fstream);
+        out.write("\n");
+	}
+
+	/**
+	 * @param theDatabase
+     * @throws IOException 
+	 */
+	private void generateInclude(Database theDatabase) throws IOException {
+		File f  = new File(webAppPath + "_include.jsp");
+        FileWriter fstream = new FileWriter(f);
+        BufferedWriter out = new BufferedWriter(fstream);
+		out.write("<%@ taglib prefix=\"sql\" uri=\"http://java.sun.com/jsp/jstl/sql\"%>\n");
+        out.write("<%@ taglib prefix=\"c\" uri=\"http://java.sun.com/jsp/jstl/core\"%>\n");
+        out.write("<%@ taglib prefix=\"fmt\" uri=\"http://java.sun.com/jsp/jstl/fmt\"%>\n");
+        out.write("<%@ taglib prefix=\"" + tagLibrayPrefix + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
+        out.flush();
+        out.close();
+	}
+
+	/**
+	 * @param theDatabase
+     * @throws IOException 
+	 */
+	private void generateMenu(Database theDatabase) throws IOException {
+		File theIndexJSP  = new File(webAppPath + "menu.jsp");
+        FileWriter fstream = new FileWriter(theIndexJSP);
+        BufferedWriter out = new BufferedWriter(fstream);
+        
+        generateHeaderPrefix(out);
+        
+        out.write("<ul class=\"nav nav-list\">\n");
+        out.write(spaces(4)+"<li><a href=\"<c:url value=\"/index.jsp\" />\">Home</a></li>");
+        Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
+        while (schemaEnum.hasMoreElements()) {
+            Schema theSchema = schemaEnum.nextElement();
+            Enumeration<Entity> entityEnum = theSchema.getEntities().elements();
+            while (entityEnum.hasMoreElements()) {
+                Entity theEntity = entityEnum.nextElement();
+                // skip over subordinate entities
+                // if (theEntity.getParents().size() > 0)
+                //   continue;
+                out.write(spaces(4)+"<li><a href=\"<c:url value=\"/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "List.jsp\" /> \">" + theEntity.getUnqualifiedLabel() + " list</a></li>\n");
+            }
+        }
+        out.write("</ul>\n");
+        
+        out.close();
+		
+	}
+
+	private void generateEntityDirectories(Database theDatabase) throws IOException {
         Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
         while (schemaEnum.hasMoreElements()) {
             Schema theSchema = schemaEnum.nextElement();
@@ -89,37 +219,50 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        generateHeaderBlock(out, false);
+        generateHeaderBlock(out, false, false, true);
         
-        out.write("<ul>\n");
-        Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
-        while (schemaEnum.hasMoreElements()) {
-            Schema theSchema = schemaEnum.nextElement();
-            out.write("\t<li>" + theSchema.getLabel() + " list\n");
-            out.write("\t<ul>\n");
-            Enumeration<Entity> entityEnum = theSchema.getEntities().elements();
-            while (entityEnum.hasMoreElements()) {
-                Entity theEntity = entityEnum.nextElement();
-                // skip over subordinate entities
-                if (theEntity.getParents().size() > 0)
-                    continue;
-                out.write("\t\t<li><a href=\"" + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "List.jsp\">" + theEntity.getUnqualifiedLabel() + " list</a></li>\n");
-                generateEntityListJSP(theSchema, theEntity);
-            }
-            out.write("\t</ul></li>\n");
-        }
-        out.write("</ul>\n");
+        out.write(spaces(20)+"<div class=\"hero-unit\">\n");
+        out.write(spaces(24)+"<h1>Hello World.</h1>\n");
+        out.write(spaces(24)+"<p>\n");
+        out.write(spaces(28)+"Bacon ipsum dolor sit amet sirloin pork chop pancetta, kielbasa beef ribs shankle hamburger salami sausage.\n"); 
+        out.write(spaces(28)+"Spare ribs capicola shankle short ribs, bacon chicken ground round. Jerky ribeye meatball bacon sausage. \n");
+        out.write(spaces(28)+"Tail pork loin pastrami capicola shank andouille tri-tip bacon bresaola tenderloin prosciutto swine sirloin.\n");
+        out.write(spaces(24)+"</p>\n");
+        out.write(spaces(24)+"<a href=\"#myModal\" class=\"btn btn-primary btn-large\" data-toggle=\"modal\">Learn More</a>\n");
+        out.write(spaces(20)+"</div>\n\n");
+        
+        out.write(spaces(20)+"<div id=\"myModal\" class=\"modal hide fade\">\n");
+        out.write(spaces(24)+"<div class=\"modal-header\">\n");
+        out.write(spaces(28)+"<h3>Hello</h3>\n");
+        out.write(spaces(24)+"</div>\n");
+        out.write(spaces(24)+"<div class=\"modal-body\">\n");
+        out.write(spaces(28)+"<p>Welcome.</p>\n");
+        out.write(spaces(24)+"</div>\n");
+        out.write(spaces(24)+"<div class=\"modal-footer\">\n");
+        out.write(spaces(28)+"<a class=\"btn btn-primary\" id=\"okModalButton\">Ok</a>\n");
+        out.write(spaces(28)+"<a class=\"btn\" id=\"closeModalButton\">Close</a> \n");
+        out.write(spaces(24)+"</div>\n");
+        out.write(spaces(20)+"</div>\n\n");
+
+        out.write(spaces(20)+"<script type=\"text/javascript\">\n");
+        out.write(spaces(24)+"$('#closeModalButton, #okModalButton').click(function(){\n");
+        out.write(spaces(28)+"$('#myModal').modal('hide');\n");
+        out.write(spaces(24)+"});\n");
+        out.write(spaces(20)+"</script>\n");
+        
         generateFooterBlock(out, false);
         
         out.close();
     }
     
     public void generateEntityListJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "List.jsp");
+        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/list.jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        generateHeaderBlock(out, true);
+        generateHeaderPrefix(out);
+        
+        generateHeaderBlock(out, false, false, true);
         
         generateEntityListBlock(out, theSchema, theEntity);
 
@@ -129,12 +272,14 @@ public class JSPGenerator {
     }
     
     public void generateEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + ".jsp");
+        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/show.jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
+        generateHeaderPrefix(out);
+        
         Attribute keyAttribute = (theEntity.getSubKeyAttributes().size() == 0 ? theEntity.getPrimaryKeyAttributes().firstElement() : theEntity.getSubKeyAttributes().firstElement());
-        generateHeaderBlock(out, true, theEntity.hasInt() || theEntity.hasDateTime());
+        generateHeaderBlock(out, true, theEntity.hasInt() || theEntity.hasDateTime(), true, 8);
 
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -143,7 +288,7 @@ public class JSPGenerator {
             if (theAttribute.isPrimary() && theAttribute.isDateTime())
                 out.write("<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
         }
-        out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel());
+        out.write("<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel());
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isPrimary())
@@ -155,7 +300,7 @@ public class JSPGenerator {
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isPrimary())
-                out.write(" <" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " />");
+                out.write(" <" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " />");
         }
         out.write("</h2>\n");
 
@@ -177,14 +322,14 @@ public class JSPGenerator {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
                     if (j > 0)
                         out.write("&");
-                    out.write(currentAttribute.getLabel() + "=<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
                 }
-                out.write("\"><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
+                out.write("\"><" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
             } else {
                 out.write("\t\t\t\t<td>");
                 generateAttributeTag(true, out, theEntity, theAttribute);
                 out.write("</td>\n");
-               //out.write("\t\t\t\t<td><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
+               //out.write("\t\t\t\t<td><" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
             }
         	
         	if (theAttribute.isDomain()) {
@@ -205,7 +350,7 @@ public class JSPGenerator {
             generateEntityListBlock(out, theSchema, childEntity);
         }
         
-        out.write("</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + ">\n");
+        out.write("</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
 
         generateFooterBlock(out, true);
 
@@ -218,10 +363,10 @@ public class JSPGenerator {
             out.write("<a href=\"../" + parentEntity.getUnqualifiedLowerLabel() + "/" + parentEntity.getUnqualifiedLowerLabel() + ".jsp?");
             for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
                 Attribute currentAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
-                if (j > 0)
-                    out.write("&");
-                out.write(currentAttribute.getLabel() + "=<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":"
-                        + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " />");
+                if (j > 0){
+                	out.write("&");
+                }
+                out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " />");
             }
             out.write("\">");
         }
@@ -233,23 +378,22 @@ public class JSPGenerator {
                 if (j > 0)
                     out.write("&");
                 out.write(currentAttribute.getLabel() + "=" );
-                out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":" + theEntity.getUnqualifiedLowerLabel() + ""
-                        + currentAttribute.getUpperLabel() + " />");            
+                out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + "" + currentAttribute.getUpperLabel() + " />");            
             }
             out.write("\">");
-            out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":" + theEntity.getUnqualifiedLowerLabel() + ""
+            out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ""
                     + theAttribute.getUpperLabel() + "Name />");        	
             out.write("</a>");
         } else if (theAttribute.isImage()){
             out.write("<img src=\"../" + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel()  + theAttribute.getUpperLabel() + ".jsp?&size=120");
             for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
                 Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
-                out.write("&" + currentAttribute.getLabel() + "=<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":"
+                out.write("&" + currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":"
                         + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
             }
             out.write("\">");
         } else {
-            out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":" + theEntity.getUnqualifiedLowerLabel() + ""
+            out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ""
                     + theAttribute.getUpperLabel() + " />");        	
         }
 
@@ -262,9 +406,10 @@ public class JSPGenerator {
         File theIndexJSP = new File(webAppPath + theEntity.getSchema().getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel() + theAttribute.getUpperLabel() + ".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
+
+        generateHeaderPrefix(out);
         
-        out.write("<%@ taglib prefix=\"" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
-        out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
+        out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
         for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
             Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
             out.write(" " + currentAttribute.getLabel() + "=\"${param." + currentAttribute.getLabel() + "}\"");
@@ -279,8 +424,9 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
         
-        out.write("<%@ taglib prefix=\"" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
-        out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
+        generateHeaderPrefix(out);
+        
+        out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
         for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
             Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
             out.write(" " + currentAttribute.getLabel() + "=\"${param." + currentAttribute.getLabel() + "}\"");
@@ -296,49 +442,90 @@ public class JSPGenerator {
 
         Attribute keyAttribute = (theEntity.getSubKeyAttributes().size() == 0 ? theEntity.getPrimaryKeyAttributes().firstElement() : theEntity.getSubKeyAttributes().firstElement());
 
-        out.write("\n\t\t<h2>" + theEntity.getUnqualifiedLabel() + " List</h2>\n");
+        int tabs = 6;
+        out.write("\n");
+        out.write(tabs(tabs)+"<h2>" + theEntity.getUnqualifiedLabel() + " List</h2>\n");
 
-        out.write("\t\t<table border=1>\n");
-        out.write("\t\t\t<tr>\n");
+        out.write(tabs(tabs)+"<table class=\"table table-bordered table-striped table-hover\">\n");
+        tabs++;
+        out.write(tabs(tabs)+"<thead>\n");
+        tabs++;
+        out.write(tabs(tabs)+"<tr>\n");
+        tabs++;
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            out.write("\t\t\t\t<th>" + theAttribute.getUpperLabel() + "</th>\n");
+            out.write(tabs(tabs)+"<th>" + theAttribute.getUpperLabel() + "</th>\n");
         }
-        out.write("\t\t\t</tr>\n");
-        out.write("\t\t\t<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
-        out.write("\t\t\t\t<tr>\n");
-        out.write("\t\t\t\t\t<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
+        out.write(tabs(tabs)+"<th></th>\n");
+        tabs--;
+        out.write(tabs(tabs)+"</tr>\n");
+        tabs--;
+        out.write(tabs(tabs)+"</thead>\n");
+        
+        
+        out.write(tabs(tabs)+"<tbody>\n");
+        tabs++;
+        out.write(tabs(tabs)+"<" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
+        tabs++;
+        out.write(tabs(tabs)+"<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
+        tabs++;
+        out.write(tabs(tabs)+"<tr>\n");
+        tabs++;
+        String editUrl = "";
+        String deleteUrl = "";
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute == keyAttribute) {
-                out.write("\t\t\t\t\t\t<td><a href=\"../../" + theEntity.getSchema().getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + ".jsp?");
+            	editUrl = "edit.jsp?";
+            	deleteUrl = "delete.jsp?";
+                out.write(tabs(tabs)+"<td><a href=\"show.jsp?");
                 for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
-                    if (j > 0)
-                        out.write("&");
-                    out.write(currentAttribute.getLabel() + "=<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    if (j > 0){
+                    	out.write("&");
+                    	editUrl += "&";
+                    	deleteUrl += "&";
+                    }
+                    out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    editUrl += currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />";
+                    deleteUrl += currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />";
+                    
                 }
-                out.write("\"><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
+                out.write("\"><" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
+                
             } else {
-                out.write("\t\t\t\t\t\t<td>");
+                out.write(tabs(tabs)+"<td>");
                 generateAttributeTag(true, out, theEntity, theAttribute);
                 out.write("</td>\n");
-               //out.write("\t\t\t\t<td><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
             }
         }
-        out.write("\t\t\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
-        out.write("\t\t\t\t</tr>\n");
-        out.write("\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
-            
+        out.write(tabs(tabs)+"<td><a href=\""+editUrl+"\">edit</a> <a href=\""+ deleteUrl +"\">delete</a></td>\n");
+        tabs--;
+        out.write(tabs(tabs)+"</tr>\n");
+        tabs--;
+        out.write(tabs(tabs)+"</" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
+        tabs--;
+        out.write(tabs(tabs)+"</" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
+        tabs--;
+        out.write(tabs(tabs)+"</tbody>\n");
         
         
+        out.write(tabs(tabs)+"<tfoot>\n");
+        out.write(tabs(tabs)+"</tfoot>\n");
         
-        out.write("\t\t</table><br/>\n");
+        tabs--;
+        out.write(tabs(tabs)+"</table>\n\n");
+        out.write(tabs(tabs)+"<br/>\n\n");
+
+        //create add link
+        out.write(tabs(tabs)+"<a class=\"btn\" href=\"add.jsp\">add</a>\n");
+        
+        out.write(tabs(tabs)+"<br/><br/>\n\n");
         
         //create list
-        out.write("\t\t<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
+        out.write("\t\t<" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
   
-        out.write("\t\t\t<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
+        out.write("\t\t\t<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute == keyAttribute) {
@@ -347,35 +534,21 @@ public class JSPGenerator {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
                     if (j > 0)
                         out.write("&");
-                    out.write(currentAttribute.getLabel() + "=<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
                 }
-                out.write("\"><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a>\n");
+                out.write("\"><" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a>\n");
             } else {
                 out.write("\t\t");
                 generateAttributeTag(true, out, theEntity, theAttribute);
                 out.write("\n");
-               //out.write("\t\t\t\t<td><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
+               //out.write("\t\t\t\t<td><" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
             }
         }
         out.write("\t\t\t<c:if test=\"${"+ keyAttribute.getLowerLabel() + "Iter != "+ keyAttribute.getLowerLabel() + "IterTotal}\" >, </c:if>" );
         
-        out.write("\t\t\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
-        out.write("\t\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
+        out.write("\t\t\t\t\t</" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
+        out.write("\t\t\t</" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
         
-        //create add link
-        out.write("\t\t<br/><a href=\"../../" + theEntity.getSchema().getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/add" + theEntity.getUnqualifiedLabel() + ".jsp");
-        if (theEntity.getParents().size() > 0) {
-            Entity parent = theEntity.getParents().firstElement().getSourceEntity();
-            for (int i = 0; i < parent.getPrimaryKeyAttributes().size(); i++) {
-                Attribute parentKey = parent.getPrimaryKeyAttributes().elementAt(i);
-                if (i == 0)
-                    out.write("?");
-                else
-                    out.write("&");
-                out.write(parentKey.getLabel() + "=<c:out value=\"${" + parentKey.getLabel() + "}\"/>");
-            }
-        }
-        out.write("\">Add new " + theEntity.getUnqualifiedLabel() + "</a>\n");
         
     }
 
@@ -384,7 +557,7 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        generateHeaderBlock(out, true, theEntity.hasInt() || theEntity.hasDateTime());
+        generateHeaderBlock(out, true, theEntity.hasInt() || theEntity.hasDateTime(), true);
         out.write("<h2>Add " + theEntity.getUnqualifiedLabel() + ":</h2>\n");
 
         out.write("\n<c:choose>\n");
@@ -439,8 +612,8 @@ public class JSPGenerator {
         out.write("\t</c:when>\n");
         out.write("\t<c:when test=\"${param.submit == 'Save'}\">\n");
         if (theEntity.hasDomainAttribute() || theEntity.hasImage()) {
-            out.write(generateIndent(2) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":upload" + theEntity.getUpperLabel() + "> ");
-            out.write("</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":upload" + theEntity.getUpperLabel() + ">\n");
+            out.write(generateIndent(2) + "<" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
+            out.write("</" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
         } else {
             for (int i = 0; i < theEntity.getAttributes().size(); i++) {
                 Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -460,21 +633,21 @@ public class JSPGenerator {
                     ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();
                 else
                     ancestorKey = ancestors.elementAt(i).getPrimaryKeyAttributes().firstElement();
-                out.write(generateIndent(i+2) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
+                out.write(generateIndent(i+2) + "<" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
             }
-            out.write(generateIndent(ancestors.size()+2) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + ">\n");
+            out.write(generateIndent(ancestors.size()+2) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
             for (int i = 0; i < theEntity.getAttributes().size(); i++) {
                 Attribute theAttribute = theEntity.getAttributes().elementAt(i);
                 if (theAttribute.isPrimary()) {
-                	out.write(generateIndent(ancestors.size()+3) + "<c:set var=\"" + theAttribute.getLabel() + "\" ><" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + "/></c:set>\n");
+                	out.write(generateIndent(ancestors.size()+3) + "<c:set var=\"" + theAttribute.getLabel() + "\" ><" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + "/></c:set>\n");
                 	if (theAttribute.isInt())
                 		continue;
                 }
-                out.write(generateIndent(ancestors.size()+3) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
+                out.write(generateIndent(ancestors.size()+3) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
             }
-            out.write(generateIndent(ancestors.size()+2) + "</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + ">\n");
+            out.write(generateIndent(ancestors.size()+2) + "</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
             for (int i = ancestors.size() - 1; i >= 0; i--) {
-                out.write(generateIndent(i+2) + "</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
+                out.write(generateIndent(i+2) + "</" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
             }
         }
 
@@ -503,137 +676,166 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        generateHeaderPrefix(out, theEntity.hasInt() || theEntity.hasDateTime());
+        generateHeaderPrefix(out);
 
-        out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":upload" + theEntity.getUpperLabel() + "> ");
-        out.write("</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":upload" + theEntity.getUpperLabel() + ">\n");
+        out.write("<" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
+        out.write("</" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
 
         out.write("<c:redirect url=\"" + theEntity.getUnqualifiedLowerLabel() + "List.jsp \"/>\n");
 
         out.close();
     }
     
+    public void generateAddEditEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
+    	generateAddEditEntityJSP(theSchema, theEntity, true);
+    }
     
-    public void generateEditEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getLowerLabel() + "/" + "edit" + theEntity.getLabel() + ".jsp");
+    public void generateAddEditEntityJSP(Schema theSchema, Entity theEntity, Boolean isEdit) throws IOException {
+        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getLowerLabel() + "/"+ ( isEdit ? "edit" : "add" ) +".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        generateHeaderBlock(out, true, theEntity.hasInt() || theEntity.hasDateTime());
-        out.write("<h2>Add " + theEntity.getUnqualifiedLabel() + ":</h2>\n");
-
+        generateHeaderPrefix(out);
+        
+        int tabs = 1;
+        
         out.write("\n<c:choose>\n");
-        out.write("\t<c:when test=\"${empty param.submit}\">\n");
-        out.write("\t\t<form action=\"edit" + theEntity.getLabel() + ".jsp\" method=\"post\" >\n");
+        out.write(tabs(tabs) + "<c:when test=\"${empty param.submit}\">\n");
+        
+        tabs++;
+        
+        generateHeaderBlock(out, true, (theEntity.hasInt() || theEntity.hasDateTime()), true, tabs*4);
+        
+        tabs = 8;
+        if(isEdit){
+        	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+        		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+        		if (theAttribute.isPrimary() && theAttribute.isInt()){
+        			out.write(tabs(tabs) + "<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
+        		}
+        		if (theAttribute.isPrimary() && theAttribute.isDateTime()){
+        			out.write(tabs(tabs) + "<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
+        		}
+        	}
+        	out.write(tabs(tabs) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel());
+        	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+        		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+        		if (theAttribute.isPrimary()){
+        			out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
+        		}
+        	}
+        	out.write(">\n");
+        	tabs++;
+        }
+        
+        out.write(tabs(tabs) + "<form action=\""+ ( isEdit ? "edit.jsp" : "add.jsp" ) +"\" method=\"post\" >\n");
+        tabs++;
+        out.write(tabs(tabs) + "<fieldset>\n");
+        tabs++;
+        out.write(tabs(tabs) + "<legend>"+ theEntity.getUnqualifiedLabel() + "</legend>\n");
+        
         
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary() && theAttribute.isInt())
-                out.write("<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
-            if (theAttribute.isPrimary() && theAttribute.isDateTime())
-                out.write("<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
+            if (theAttribute.isPrimary() && theAttribute.isInt()){
+            	continue;
+            } else {
+                out.write(tabs(tabs) + "<label for=\""+theAttribute.getLabel()+"\">" + theAttribute.getUpperLabel() + "</label>\n");
+                out.write(tabs(tabs) + "<input type=\"text\" id=\""+theAttribute.getLabel()+"\" name=\"" + theAttribute.getLabel() + "\" size=\"40\" value=\"");
+                if(isEdit){
+                	generateAttributeTag(false, out, theEntity, theAttribute);
+                }
+                out.write("\">\n\n");
+            }
         }
-        out.write("<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel());
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary())
-                out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
+        out.write(tabs(tabs) + "<input type=\"submit\" name=\"submit\" value=\"Save\">\n");
+        out.write(tabs(tabs) + "<input type=\"submit\" name=\"submit\" value=\"Cancel\">\n");
+        if(isEdit){
+	        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+	            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+	            if (theAttribute.isPrimary() && theAttribute.isInt()) {
+	                out.write(tabs(tabs) + "<input type=\"hidden\" name=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\">\n");
+	            }
+	        }
+        }
+        tabs--;
+        out.write(tabs(tabs) + "</fieldset>\n");
+        tabs--;
+        out.write(tabs(tabs) + "</form>\n");
+        tabs--;
+        if(isEdit){
+        	out.write(tabs(tabs) + "</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+        }
+        
+        tabs = 2;
+        generateFooterBlock(out, true,tabs*4);
+        
+        out.write("\n");
+        
+        out.write("\t</c:when>\n");
+        out.write("\t<c:when test=\"${param.submit eq 'Cancel'}\">\n");
+        out.write("\t\t<c:redirect url=\"/" + theEntity.getLowerLabel() + "/list.jsp\" />\n");
+        out.write("\t</c:when>\n");
+        out.write("\t<c:when test=\"${param.submit eq 'Save'}\">\n");
+        
+        if(isEdit){
+	        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+	            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+	            if (theAttribute.isInt()) {
+	                out.write("\t\t<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
+	            } else if (theAttribute.isDateTime()) {
+	                out.write("\t\t<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd\" />\n");
+	            }
+	        }
+        }
+        
+//        Vector<Entity> ancestors = theEntity.getAncestors();
+//        for (int i = 0; i < ancestors.size(); i++) {
+//            log.debug("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
+//            Attribute ancestorKey = null;
+//            if (ancestors.elementAt(i).getSubKeyAttributes().size() > 0){
+//            	ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();
+//            } else {
+//            	ancestorKey = ancestors.elementAt(i).getPrimaryKeyAttributes().firstElement();
+//            }
+//            out.write(generateIndent(i+2) + "<" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
+//        }
+        out.write(tabs(2) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel());
+        if(isEdit){
+        	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+        		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+        		if (theAttribute.isPrimary()){
+        			out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
+        		}
+        	}
         }
         out.write(">\n");
         
-        
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary() && theAttribute.isInt()) {
-                out.write("\t\t<input type=\"hidden\" name=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\">\n");
+            if ((theAttribute.isPrimary() && theAttribute.isInt()) || theAttribute.isDomain() || theAttribute.isImage()){
+            	continue;
             }
+            out.write(tabs(3) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
         }
-        out.write("\t\t<table>\n");
-        out.write("\t\t\t<tr>\n");
-        out.write("\t\t\t\t<td>\n");
-        out.write("\t\t\t\t<table border=1 align=left>\n");
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary() && theAttribute.isInt())
-                continue;
-            else {
-                out.write("\t\t\t\t\t<tr>\n");
-                out.write("\t\t\t\t\t\t<th align=left>" + theAttribute.getUpperLabel() + "</th>\n");
-                out.write("\t\t\t\t\t\t<td><input type=\"text\" name=\"" + theAttribute.getLabel() + "\" size=\"40\" value=\"");
-                generateAttributeTag(false, out, theEntity, theAttribute);
-                out.write("\"></td>\n");
-                out.write("\t\t\t\t\t</tr>\n");
-            }
-        }
-        out.write("\t\t\t\t</table>\n");
-        out.write("\t\t\t\t</td>\n");
-        out.write("\t\t\t</tr>\n");
-        out.write("\t\t\t<tr>\n");
-        out.write("\t\t\t\t<td><input type=\"submit\" name=\"submit\" value=\"Save\"> <input type=\"submit\" name=\"submit\" value=\"Cancel\"></td>\n");
-        out.write("\t\t\t</tr>\n");
-        out.write("\t\t</table>\n");
-        out.write("\t\t</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + ">\n");
-        out.write("\t\t</form>\n");
-        out.write("\t</c:when>\n");
-        out.write("\t<c:when test=\"${param.submit == 'Cancel'}\">\n");
-        out.write("\t\t<c:redirect url=\"../../index.jsp\" />\n");
-        out.write("\t</c:when>\n");
-        out.write("\t<c:when test=\"${param.submit == 'Save'}\">\n");
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isInt()) {
-                out.write("\t\t<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
-            } else if (theAttribute.isDateTime()) {
-                //out.write("\t\t<%-- We have a bean info instance and a property editor defined, but not yet successfully bound, hence... --%>\n");
-                out.write("\t\t<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd\" />\n");
-            }
-        }
-        
-        Vector<Entity> ancestors = theEntity.getAncestors();
-        for (int i = 0; i < ancestors.size(); i++) {
-            log.debug("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
-            Attribute ancestorKey = null;
-            if (ancestors.elementAt(i).getSubKeyAttributes().size() > 0)
-                ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();
-            else
-                ancestorKey = ancestors.elementAt(i).getPrimaryKeyAttributes().firstElement();
-            out.write(generateIndent(i+2) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
-        }
-        out.write(generateIndent(ancestors.size()+2) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel());
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary())
-                out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
-        }
-        out.write(">\n");
-        //out.write(generateIndent(ancestors.size()+2) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + ">\n");
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if ((theAttribute.isPrimary() && theAttribute.isInt()) || theAttribute.isDomain() || theAttribute.isImage())
-                continue;
-            out.write(generateIndent(ancestors.size()+3) + "<" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
-        }
-        out.write(generateIndent(ancestors.size()+2) + "</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + theEntity.getLowerLabel() + ">\n");
-        for (int i = ancestors.size() - 1; i >= 0; i--) {
-            out.write(generateIndent(i+2) + "</" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
-        }
+        out.write(tabs(2) + "</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+//        for (int i = ancestors.size() - 1; i >= 0; i--) {
+//            out.write(generateIndent(i+2) + "</" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
+//        }
 
-        out.write("\t\t<c:redirect url=\"" + theEntity.getLowerLabel() + ".jsp\" >\n");
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary() && theAttribute.isInt()) {
-                out.write("\t\t\t<c:param name=\"" + theAttribute.getLabel() + "\" value=\"${" + theAttribute.getLabel() + "}\"/>\n");
-            }
-        }
-        out.write("\t\t</c:redirect>\n");
+        out.write("\t\t<c:redirect url=\"/" + theEntity.getLowerLabel() + "/list.jsp\" />\n");
+//        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+//            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+//            if (theAttribute.isPrimary() && theAttribute.isInt()) {
+//                out.write("\t\t\t<c:param name=\"" + theAttribute.getLabel() + "\" value=\"${" + theAttribute.getLabel() + "}\"/>\n");
+//            }
+//        }
+        //out.write("\t\t</c:redirect>\n");
         out.write("\t</c:when>\n");
         out.write("\t<c:otherwise>\n");
         out.write("\t\tA task is required for this function.\n");
         out.write("\t</c:otherwise>\n");
-        out.write("</c:choose>\n");
-
-        generateFooterBlock(out, true);
-
+        out.write("</c:choose>");
         out.close();
     }
     
@@ -665,46 +867,77 @@ public class JSPGenerator {
         out.close();
     }
     
-    public void generateHeaderBlock(BufferedWriter out, boolean uplink) throws IOException {
-        generateHeaderBlock(out, uplink, false);
+    public void generateHeaderBlock(BufferedWriter out, boolean uplink, boolean hasDateTime, boolean menu) throws IOException {
+    	generateHeaderBlock(out, uplink, hasDateTime, menu, 0);
     }
     
-    public void generateHeaderBlock(BufferedWriter out, boolean uplink, boolean hasDateTime) throws IOException {
-        generateHeaderPrefix(out, hasDateTime);
-
-        out.write("\n<html>\n");
-        out.write("<head>\n");
-        out.write("</head>\n");
-        out.write("<body>\n");
-        out.write("<c:import url=\"" + (uplink ? "../../" : "") + "header.jsp\" />\n");
+    public void generateHeaderBlock(BufferedWriter out, boolean uplink, boolean hasDateTime, boolean menu, int spaces) throws IOException {
+        out.write(spaces(spaces) + "<html>\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<head>\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<c:import url=\"/head.jsp\" />\n");
+        out.write(spaces(spaces) + "<title>Page Title</title>\n");
+        spaces -= 4;
+        out.write(spaces(spaces) + "</head>\n");
+        out.write(spaces(spaces) + "<body>\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<div id=\"main-content\">\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<c:import url=\"/header.jsp\" />\n");
+        out.write(spaces(spaces) + "<div class=\"container-fluid\">\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<div class=\"row-fluid\">\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<div class=\"span2\" id=\"menu\">\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<c:import url=\"/menu.jsp\" />\n");
+        spaces -= 4;
+        out.write(spaces(spaces) + "</div>\n");
+        out.write(spaces(spaces) + "<div class=\"span10\" id=\"content\">\n");
     }
     
-    public void generateHeaderPrefix(BufferedWriter out, boolean hasDateTime) throws IOException {
-        out.write("<%@ taglib prefix=\"sql\" uri=\"http://java.sun.com/jsp/jstl/sql\"%>\n");
-        out.write("<%@ taglib prefix=\"c\" uri=\"http://java.sun.com/jsp/jstl/core\"%>\n");
-        if (hasDateTime)
-            out.write("<%@ taglib prefix=\"fmt\" uri=\"http://java.sun.com/jsp/jstl/fmt\"%>\n");
-        out.write("<%@ taglib prefix=\"" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
+    public String spaces(int count){
+    	String out = "";
+    	for(int i=0;i<count;i++){
+    		out += " ";
+    	}
+    	return out;
+    }
+    
+    public String tabs(int count){
+    	String out = "";
+    	for(int i=0;i<count;i++){
+    		out += "\t";
+    	}
+    	return out;
+    }
+    
+    public void generateHeaderPrefix(BufferedWriter out) throws IOException {
+        out.write("<%@ include file=\"/_include.jsp\" %>\n");
     }
 
     public void generateFooterBlock(BufferedWriter out, boolean uplink) throws IOException {
-        out.write("\n<c:import url=\"" + (uplink ? "../../" : "") + "footer.jsp\" />\n");
-        out.write("</body>\n");
-        out.write("</html>\n");
+    	generateFooterBlock(out, uplink, 0);
+    }
+    
+    public void generateFooterBlock(BufferedWriter out, boolean uplink, int spaces) throws IOException {
+        out.write(spaces(spaces + 20)+"</div>\n");
+        out.write(spaces(spaces + 16)+"</div>\n");
+        out.write(spaces(spaces + 12)+"</div>\n");
+        out.write(spaces(spaces + 8)+"</div>\n");
+        out.write(spaces(spaces + 8)+"<c:import url=\"/footer.jsp\" />\n");
+        out.write(spaces(spaces + 4)+"</body>\n");
+        out.write(spaces(spaces)+"</html>");
     }
     
     public void generateDbtest(Database theDatabase) throws IOException {
         File theIndexJSP  = new File(webAppPath + "dbtest.jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
+        generateHeaderPrefix(out);
         out.write("<%@ taglib prefix=\"" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
-        out.write("    <%@ page  errorPage=\"/error/dberror.jsp\" %>" + "\n" 
-        		+ "<" +  packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + ":dbtest/>");
-  
-
+        out.write("<%@ page  errorPage=\"/error/dberror.jsp\" %>" + "\n" + "<" +  tagLibrayPrefix + ":dbtest/>");
         out.close();
     }
-    
-    
-
 }

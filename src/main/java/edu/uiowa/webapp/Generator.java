@@ -41,45 +41,35 @@ public class Generator {
 
 	static Database theDatabase = null;
 
-
-
 	public int runGenerator(Properties props) {
 		
-		int error =0;
-		String projectName=props.getProperty("project.name");
-		String packageName=props.getProperty("package.name");
+		int error = 0;
+		String projectName = props.getProperty("project.name");
+		String packageName = props.getProperty("package.name");
 		
-		
-		
-		if(props.getProperty("pathPrefix")!=null)
+		if(props.getProperty("pathPrefix") != null){
 			pathPrefix = props.getProperty("path.prefix");
-		
+		}
 		
 		log.debug("Path Prefix:"+System.getProperty("user.dir"));
 		
-			
-		
 
-		String modelSource=props.getProperty("model.source", "clay");
-		String mode=props.getProperty("mode", "tags");
+		String modelSource = props.getProperty("model.source", "clay");
+		String mode = props.getProperty("mode", "tags");
 
 		DatabaseSchemaLoader theLoader = null;
-		if(modelSource.equalsIgnoreCase("clay"))
-		{
+		if(modelSource.equalsIgnoreCase("clay")) {
 			theLoader = new ClayLoader();
 			String clayFile = "";
 			try {
-				clayFile = props.getProperty("clay.file",
-						pathPrefix + projectName + "/WebContent/resources/" + projectName + ".clay");
+				clayFile = props.getProperty("clay.file", pathPrefix + projectName + "/WebContent/resources/" + projectName + ".clay");
 				theLoader.run(clayFile);
 			} catch (Exception e) {
 				log.error("Could not parse clay file: " + clayFile, e);
 				return 1;
 			}
 
-		}
-		else if(modelSource.equalsIgnoreCase("jdbc"))
-		{
+		} else if(modelSource.equalsIgnoreCase("jdbc")) {
 
 			theLoader = new JDBCLoader();
 			try {
@@ -98,12 +88,10 @@ public class Generator {
 		log.debug("PathPrefix:"+pathPrefix);
 
 
-		if(mode.equalsIgnoreCase("tags"))
-		{
+		if(mode.equalsIgnoreCase("tags")) {
 			String packageRoot = packageName;
 			if (Boolean.parseBoolean(props.getProperty("generate.tags", "true"))) {
-				String tagLocation = props.getProperty("tag.file.location",
-						pathPrefix + "/" + projectName+ "/"  + "src");
+				String tagLocation = props.getProperty("tag.file.location", pathPrefix + "/" + projectName+ "/"  + "src");
 				TagClassGenerator theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName);
 				try {
 					theGenerator.generateTagClasses(theDatabase);
@@ -112,27 +100,33 @@ public class Generator {
 					error=1;
 				}
 			}
+			
 			if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
-
-
 				//TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
 				TLDGenerator theTLDgenerator = new TLDGenerator(props);
 				try {
 					theTLDgenerator.generateTLD(theDatabase);
 				} catch (IOException e1) {
 					log.error("Could not generate TLD File: " +  props.getProperty("tld.file.location"), e1);
-					error=1;
+					error = 1;
 				}
 			}
+			
 			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
-				String jspLocation = props.getProperty("jsp.file.location", 
-						pathPrefix + projectName + "/WebContent/");
-				JSPGenerator theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
+				String jspLocation = props.getProperty("jsp.file.location", pathPrefix + projectName + "/WebContent/");
+				
+				JSPGenerator theJSPgenerator;
+				if(props.getProperty("jsp.taglibrary.prefix") != null){
+					theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName, props.getProperty("jsp.taglibrary.prefix"));
+				}else{
+					theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
+				}
+				
 				try {
 					theJSPgenerator.generateJSPs(theDatabase);
 				} catch (IOException e) {
 					log.error("Could not generate JSP Files: " + jspLocation, e);
-					error=1;
+					error = 1;
 				}
 			}
 		}
