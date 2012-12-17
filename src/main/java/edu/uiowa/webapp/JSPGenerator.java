@@ -446,7 +446,7 @@ public class JSPGenerator {
         out.write("\n");
         out.write(tabs(tabs)+"<h2>" + theEntity.getUnqualifiedLabel() + " List</h2>\n");
 
-        out.write(tabs(tabs)+"<table class=\"table table-bordered table-striped table-hover\">\n");
+        out.write(tabs(tabs)+"<table class=\"table table-bordered table-striped table-hover table-datatable\">\n");
         tabs++;
         out.write(tabs(tabs)+"<thead>\n");
         tabs++;
