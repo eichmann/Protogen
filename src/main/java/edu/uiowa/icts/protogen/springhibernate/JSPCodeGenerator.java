@@ -172,7 +172,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += spaces(indent) + "<a href=\"add.html\" class=\"btn\">Add</a>";
 		output += lines(1);
 		
-		output += spaces(indent) + "<table class=\"table table-bordered table-striped\">";
+		output += spaces(indent) + "<table class=\"table table-bordered table-striped table-hover table-datatable\">";
 		output += lines(1);
 		indent += 4;
 		
