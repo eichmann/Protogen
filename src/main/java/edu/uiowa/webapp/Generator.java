@@ -92,7 +92,11 @@ public class Generator {
 			String packageRoot = packageName;
 			if (Boolean.parseBoolean(props.getProperty("generate.tags", "true"))) {
 				String tagLocation = props.getProperty("tag.file.location", pathPrefix + "/" + projectName+ "/"  + "src");
-				TagClassGenerator theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName);
+				TagClassGenerator theGenerator;
+				String databaseType = props.getProperty("database.type", "postgres");
+				
+				theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName, databaseType);
+				
 				try {
 					theGenerator.generateTagClasses(theDatabase);
 				} catch (IOException e2) {

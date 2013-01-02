@@ -33,13 +33,37 @@ public class TagClassGenerator {
     File tagDirectory = null;
     
     Schema theSchema = null;
+    
+    private String databaseType = "postgres";
 
+    /**
+     * @param projectPath
+     * @param packagePrefix
+     * @param projectName
+     * @param databaseType - postgres or sqlserver supported
+     */
+    public TagClassGenerator( String projectPath, String packagePrefix, String projectName, String databaseType ) {
+        this.projectPath = projectPath;
+        this.packagePrefix = packagePrefix;
+        this.projectName = projectName;
+        this.databaseType = databaseType;
+    }
+    
+    /**
+     * @param projectPath
+     * @param packagePrefix
+     * @param projectName
+     */
     public TagClassGenerator(String projectPath, String packagePrefix, String projectName) {
         this.projectPath = projectPath;
         this.packagePrefix = packagePrefix;
         this.projectName = projectName;
     }
 
+    /**
+     * @param theDatabase
+     * @throws IOException
+     */
     public void generateTagClasses(Database theDatabase) throws IOException {
 		log.debug("Creating Tag CLasses");
         generateSourceDirectoryRoot(projectPath);
@@ -1091,7 +1115,13 @@ public class TagClassGenerator {
             }
             
         }
-        out.write("                                                        +  generateLimitCriteria());\n");
+        
+        if(!"sqlserver".equals(databaseType)){
+        	out.write("                                                        + generateLimitCriteria());\n");
+        }else{
+        	out.write("															);\n");
+        }
+        
         out.write(queryBuffer.toString());
         out.write("            rs = stat.executeQuery();\n"
                 + "\n"
@@ -1109,6 +1139,11 @@ public class TagClassGenerator {
          */
         out.write("            webapp_keySeq = 1;\n"
                 + "            stat = getConnection().prepareStatement(\"SELECT ");
+        
+        if("sqlserver".equals(databaseType)){
+        	out.write(" \" + generateLimitCriteria() + \" ");
+        }
+        
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write((i == 0 ? "" : ", ") + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + "." + theKey.getSqlLabel());
@@ -1140,7 +1175,14 @@ public class TagClassGenerator {
             
         }
         
-        out.write("                                                        + \" order by \" + generateSortCriteria() + generateLimitCriteria());\n");
+        out.write("                                                        + \" order by \" + generateSortCriteria() ");
+        
+        if(!"sqlserver".equals(databaseType)){
+        	out.write(" +  generateLimitCriteria());\n");
+        }else{
+        	out.write(");\n");
+        }
+        
         out.write(queryBuffer.toString());
         out.write("            rs = stat.executeQuery();\n"
                 + "\n"
@@ -1215,14 +1257,20 @@ public class TagClassGenerator {
                 + "        }\n"
                 + "    }\n"
                 + "\n");
-        out.write("    private String generateLimitCriteria() {\n"
-                + "        if (limitCriteria > 0) {\n"
-                + "            return \" limit \" + limitCriteria;\n"
-                + "        } else {\n"
-                + "            return \"\";\n"
-                + "        }\n"
-                + "    }\n"
-                + "\n");
+        
+        out.write("    private String generateLimitCriteria() {\n");
+        out.write("        if (limitCriteria > 0) {\n");
+        if( "sqlserver".equals(databaseType) ){
+        	out.write("            return \" top(\" + limitCriteria + \")\";\n");
+        }else{
+        	out.write("            return \" limit \" + limitCriteria;\n");
+        }
+        out.write("        } else {\n");
+        out.write("            return \"\";\n");
+        out.write("        }\n");
+        out.write("    }\n");
+        out.write("\n");
+                
         out.write("    public int doAfterBody() throws JspException {\n"
                 + "        try {\n"
                 + "            if (rs.next()) {\n");
@@ -3084,6 +3132,118 @@ public class TagClassGenerator {
 
         out.close();
     }
+
+	/**
+	 * @return the projectPath
+	 */
+	public String getProjectPath() {
+		return projectPath;
+	}
+
+	/**
+	 * @param projectPath the projectPath to set
+	 */
+	public void setProjectPath(String projectPath) {
+		this.projectPath = projectPath;
+	}
+
+	/**
+	 * @return the packagePrefix
+	 */
+	public String getPackagePrefix() {
+		return packagePrefix;
+	}
+
+	/**
+	 * @param packagePrefix the packagePrefix to set
+	 */
+	public void setPackagePrefix(String packagePrefix) {
+		this.packagePrefix = packagePrefix;
+	}
+
+	/**
+	 * @return the projectName
+	 */
+	public String getProjectName() {
+		return projectName;
+	}
+
+	/**
+	 * @param projectName the projectName to set
+	 */
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+
+	/**
+	 * @return the sourceRootDirectory
+	 */
+	public File getSourceRootDirectory() {
+		return sourceRootDirectory;
+	}
+
+	/**
+	 * @param sourceRootDirectory the sourceRootDirectory to set
+	 */
+	public void setSourceRootDirectory(File sourceRootDirectory) {
+		this.sourceRootDirectory = sourceRootDirectory;
+	}
+
+	/**
+	 * @return the packagePrefixDirectory
+	 */
+	public File getPackagePrefixDirectory() {
+		return packagePrefixDirectory;
+	}
+
+	/**
+	 * @param packagePrefixDirectory the packagePrefixDirectory to set
+	 */
+	public void setPackagePrefixDirectory(File packagePrefixDirectory) {
+		this.packagePrefixDirectory = packagePrefixDirectory;
+	}
+
+	/**
+	 * @return the tagDirectory
+	 */
+	public File getTagDirectory() {
+		return tagDirectory;
+	}
+
+	/**
+	 * @param tagDirectory the tagDirectory to set
+	 */
+	public void setTagDirectory(File tagDirectory) {
+		this.tagDirectory = tagDirectory;
+	}
+
+	/**
+	 * @return the theSchema
+	 */
+	public Schema getTheSchema() {
+		return theSchema;
+	}
+
+	/**
+	 * @param theSchema the theSchema to set
+	 */
+	public void setTheSchema(Schema theSchema) {
+		this.theSchema = theSchema;
+	}
+
+	/**
+	 * @return the databaseType
+	 */
+	public String getDatabaseType() {
+		return databaseType;
+	}
+
+	/**
+	 * @param databaseType the databaseType to set
+	 */
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
+	}
 }
 
 /*
