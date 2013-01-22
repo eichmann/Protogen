@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -129,10 +130,15 @@ public class TLDGenerator {
             else
                 generateAttribute(theEntity.getPrimaryKeyAttributes().elementAt(i).getLowerLabel(), false, true);
         }
+        
+        ArrayList<String> entityList = new ArrayList<String>();
         if (theEntity.getParents().size() > 1) {
             for (int i = 0; i < theEntity.getParents().size(); i++){
                 Entity parent = theEntity.getParents().elementAt(i).getSourceEntity();
-                generateAttribute("use" + parent.getUpperLabel(), false, true);
+                if( !entityList.contains(parent.getUpperLabel()) ){
+                	generateAttribute("use" + parent.getUpperLabel(), false, true);
+                	entityList.add(parent.getUpperLabel());
+                }
             }
             out.write("\n");
         }
@@ -141,8 +147,14 @@ public class TLDGenerator {
         if (theEntity.getParents().size() == 0)
             generateRootEntityFunctions(theEntity);
         generateEntityExistenceFunctions(theEntity);
+        
+        entityList = new ArrayList<String>();
         for (int i = 0; i < theEntity.getParents().size(); i++) {
-            generateEntityFunctions(theEntity, theEntity.getParents().elementAt(i).getSourceEntity());
+        	Entity ent = theEntity.getParents().elementAt(i).getSourceEntity();
+        	if( !entityList.contains(ent.getLabel()) ){
+        		generateEntityFunctions(theEntity, ent);
+        		entityList.add(ent.getLabel());
+        	}
         }
         
         if (theEntity.getParents().size() > 1) {
@@ -244,6 +256,7 @@ public class TLDGenerator {
     }
     
     private void generateEntityFunctions(Entity theEntity, Entity theParent) throws IOException {
+    	
         functionBuffer.append("\n\t<function>\n");
         functionBuffer.append("\t\t<name>" + theEntity.getLowerLabel() + "CountBy" + theParent.getLabel() + "</name>\n");
         functionBuffer.append("\t\t<function-class>" + packagePrefix + "." + theEntity.getUnqualifiedLowerLabel() + "." + theEntity.getUnqualifiedLabel() + "Iterator</function-class>\n");

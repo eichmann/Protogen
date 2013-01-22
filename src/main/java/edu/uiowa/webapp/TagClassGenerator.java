@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -160,31 +161,38 @@ public class TagClassGenerator {
     }
     
     private void generateParentEntityReferences(BufferedWriter out, Entity theEntity, String indentString) throws IOException {
+    	ArrayList<String> entityList = new ArrayList<String>(0);
         StringBuffer parentBuffer = new StringBuffer();
         for (int i = 0; i < theEntity.getParents().size(); i++) {
             Relationship theRelationship = theEntity.getParents().elementAt(i);
             Entity theSourceEntity = theRelationship.getSourceEntity();
-            out.write(indentString + theSourceEntity.getLabel() + " the" + theSourceEntity.getLabel() + " = ("
-                    + theSourceEntity.getLabel() + ")findAncestorWithClass(this, " + theSourceEntity.getLabel() + ".class);\n");
-            out.write(indentString + "if (the" + theSourceEntity.getLabel() + "!= null)" + "\n" + indentString + "\tparentEntities.addElement(the" + theSourceEntity.getLabel() + ");\n");
-            parentBuffer.append(indentString + "if (the" + theSourceEntity.getLabel() + " == null) {\n");
-         //   parentBuffer.append(indentString + "\tthrow new JspTagException(\"Error: no containing " + theSourceEntity.getLabel() + " for "
-         //           + theEntity.getLabel() + "\");\n");
-            parentBuffer.append(indentString + "} else {\n");
-            for (int j = 0; j < theSourceEntity.getPrimaryKeyAttributes().size(); j++) {
-                parentBuffer.append(indentString + "\t" + theEntity.getAttributeBySQLLabel(theRelationship.getForeignReferencedAttribute(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getSqlLabel())).getLabel() + " = the" + theSourceEntity.getLabel() + ".get"
-                        + Character.toUpperCase(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getLabel().charAt(0))
-                        + theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getLabel().substring(1) + "();\n");
+            if( !entityList.contains(theSourceEntity.getLabel()) ){
+            	out.write(indentString + theSourceEntity.getLabel() + " the" + theSourceEntity.getLabel() + " = (" + theSourceEntity.getLabel() + ")findAncestorWithClass(this, " + theSourceEntity.getLabel() + ".class);\n");
+            	out.write(indentString + "if (the" + theSourceEntity.getLabel() + "!= null)" + "\n" + indentString + "\tparentEntities.addElement(the" + theSourceEntity.getLabel() + ");\n");
+            	parentBuffer.append(indentString + "if (the" + theSourceEntity.getLabel() + " == null) {\n");
+            	// parentBuffer.append(indentString + "\tthrow new JspTagException(\"Error: no containing " + theSourceEntity.getLabel() + " for " + theEntity.getLabel() + "\");\n");
+            	parentBuffer.append(indentString + "} else {\n");
+            	for (int j = 0; j < theSourceEntity.getPrimaryKeyAttributes().size(); j++) {
+            		parentBuffer.append(indentString + "\t" + theEntity.getAttributeBySQLLabel(theRelationship.getForeignReferencedAttribute(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getSqlLabel())).getLabel() + " = the" + theSourceEntity.getLabel() + ".get"
+            				+ Character.toUpperCase(theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getLabel().charAt(0))
+            				+ theSourceEntity.getPrimaryKeyAttributes().elementAt(j).getLabel().substring(1) + "();\n");
+            	}
+            	parentBuffer.append(indentString + "}\n");
+            	
+            	entityList.add(theSourceEntity.getLabel());
             }
-            parentBuffer.append(indentString + "}\n");
         }
         out.write("\n" + parentBuffer.toString() + "\n");
     }
     
     private void generateParentImports(BufferedWriter out, Entity theEntity) throws IOException {
+    	ArrayList<String> entityList = new ArrayList<String>(0);
         for (int i = 0; i < theEntity.getParents().size(); i++) {
             Entity theSourceEntity = theEntity.getParents().elementAt(i).getSourceEntity();
-            out.write("import " + packagePrefix + "." + theSourceEntity.getLowerLabel() + "." + theSourceEntity.getLabel() + ";\n");
+            if( !entityList.contains(theSourceEntity.getLabel()) ){
+            	out.write("import " + packagePrefix + "." + theSourceEntity.getLowerLabel() + "." + theSourceEntity.getLabel() + ";\n");
+            	entityList.add(theSourceEntity.getLabel());
+            }
         }        
     }
 
@@ -899,10 +907,15 @@ public class TagClassGenerator {
                 + "    int rsCount = 0;\n"
                 + "\n");
         
+        // string list to avoid duplicate variables and functions
+        ArrayList<String> entityList = new ArrayList<String>();
         if (theEntity.getParents().size() > 1) {
             for (int i = 0; i < theEntity.getParents().size(); i++){
                 Entity parent = theEntity.getParents().elementAt(i).getSourceEntity();
-                out.write("   boolean use" + parent.getUpperLabel() + " = false;\n");
+                if( !entityList.contains(parent.getUpperLabel()) ){
+                	out.write("   boolean use" + parent.getUpperLabel() + " = false;\n");
+                	entityList.add(parent.getUpperLabel());
+                }
             }
             out.write("\n");
         }
@@ -931,52 +944,63 @@ public class TagClassGenerator {
             out.write("\t}\n\n");
         }
         
+        // string list to avoid duplicate variables and functions
+        entityList = new ArrayList<String>();
+        
         for (int i = 0; i < theEntity.getParents().size(); i++) {
             Entity parentEntity = theEntity.getParents().elementAt(i).getSourceEntity();
-            StringBuffer parentBuffer = new StringBuffer();
             StringBuffer keyBuffer = new StringBuffer();
             StringBuffer booleanBuffer = new StringBuffer();
-            out.write("\tpublic static String " + theEntity.getLowerLabel() + "CountBy" + parentEntity.getLabel() + "(");
-            for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
-                Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
-                out.write((j > 0 ? ", " : "") + "String " + theAttribute.getLabel());
-                keyBuffer.append("\t\t\tstat." + theAttribute.getSQLMethod(false) + "(" + (j+1) + "," + theAttribute.parseValue() + ");\n");
+            
+            if( !entityList.contains(theEntity.getLowerLabel() + "CountBy" + parentEntity.getLabel()) ){
+            	out.write("\tpublic static String " + theEntity.getLowerLabel() + "CountBy" + parentEntity.getLabel() + "(");
+            	for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
+            		Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
+            		out.write((j > 0 ? ", " : "") + "String " + theAttribute.getLabel());
+            		keyBuffer.append("\t\t\tstat." + theAttribute.getSQLMethod(false) + "(" + (j+1) + "," + theAttribute.parseValue() + ");\n");
+            	}
+            	out.write(") throws JspTagException {\n");
+            	out.write("\t\tint count = 0;\n");
+            	out.write("\t\t" + theEntity.getUnqualifiedLabel() + "Iterator theIterator = new " + theEntity.getUnqualifiedLabel() + "Iterator();\n");
+            	out.write("\t\ttry {\n"
+            			+ "\t\t\tPreparedStatement stat = theIterator.getConnection().prepareStatement(\"SELECT count(*)");
+            	out.write(" from " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " where 1=1\"\n");
+            	for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
+            		Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
+            		out.write("\t\t\t\t\t\t+ \" and " + theAttribute.getSqlLabel() + " = ?\"\n");
+            	}
+            	out.write("\t\t\t\t\t\t);\n\n");
+            	out.write(keyBuffer.toString());
+            	out.write("\t\t\tResultSet crs = stat.executeQuery();\n"
+            			+ "\n"
+            			+ "\t\t\tif (crs.next()) {\n");
+            	out.write("\t\t\t\tcount = crs.getInt(1);\n"
+            			+ "\t\t\t}\n"
+            			+ "\t\t\tstat.close();\n"
+            			+ "\t\t} catch (SQLException e) {\n"
+            			+ "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
+            			+ "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
+            			+ "\t\t} finally {\n"
+            			+ "\t\t\ttheIterator.freeConnection();\n"
+            			+ "\t\t}\n");
+            	out.write("\t\treturn \"\" + count;\n");
+            	out.write("\t}\n\n");
+            	
+            	entityList.add(theEntity.getLowerLabel() + "CountBy" + parentEntity.getLabel());
             }
-            out.write(") throws JspTagException {\n");
-            out.write("\t\tint count = 0;\n");
-            out.write("\t\t" + theEntity.getUnqualifiedLabel() + "Iterator theIterator = new " + theEntity.getUnqualifiedLabel() + "Iterator();\n");
-            out.write("\t\ttry {\n"
-                    + "\t\t\tPreparedStatement stat = theIterator.getConnection().prepareStatement(\"SELECT count(*)");
-            out.write(" from " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " where 1=1\"\n");
-            for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
-                Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
-                out.write("\t\t\t\t\t\t+ \" and " + theAttribute.getSqlLabel() + " = ?\"\n");
+            
+            if( !entityList.contains(parentEntity.getLowerLabel()+ "Has" + theEntity.getLabel()) ){
+            	out.write("\tpublic static Boolean " + parentEntity.getLowerLabel()+ "Has" + theEntity.getLabel() + "(");
+            	for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
+            		Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
+            		out.write((j > 0 ? ", " : "") + "String " + theAttribute.getLabel());
+            		booleanBuffer.append((j > 0 ? ", " : "") + theAttribute.getLabel());
+            	}
+            	out.write(") throws JspTagException {\n");
+            	out.write("\t\treturn ! " + theEntity.getLowerLabel() + "CountBy" + parentEntity.getLabel() + "(" + booleanBuffer.toString() + ").equals(\"0\");\n");
+            	out.write("\t}\n\n");
+            	entityList.add(parentEntity.getLowerLabel()+ "Has" + theEntity.getLabel());
             }
-            out.write("\t\t\t\t\t\t);\n\n");
-            out.write(keyBuffer.toString());
-            out.write("\t\t\tResultSet crs = stat.executeQuery();\n"
-                    + "\n"
-                    + "\t\t\tif (crs.next()) {\n");
-            out.write("\t\t\t\tcount = crs.getInt(1);\n"
-                    + "\t\t\t}\n"
-                    + "\t\t\tstat.close();\n"
-                    + "\t\t} catch (SQLException e) {\n"
-                    + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
-                    + "\t\t\tthrow new JspTagException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator\");\n"
-                    + "\t\t} finally {\n"
-                    + "\t\t\ttheIterator.freeConnection();\n"
-                    + "\t\t}\n");
-            out.write("\t\treturn \"\" + count;\n");
-            out.write("\t}\n\n");
-            out.write("\tpublic static Boolean " + parentEntity.getLowerLabel()+ "Has" + theEntity.getLabel() + "(");
-            for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
-                Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
-                out.write((j > 0 ? ", " : "") + "String " + theAttribute.getLabel());
-                booleanBuffer.append((j > 0 ? ", " : "") + theAttribute.getLabel());
-            }
-            out.write(") throws JspTagException {\n");
-            out.write("\t\treturn ! " + theEntity.getLowerLabel() + "CountBy" + parentEntity.getLabel() + "(" + booleanBuffer.toString() + ").equals(\"0\");\n");
-            out.write("\t}\n\n");
         }
         
             StringBuffer keyBuff = new StringBuffer();
@@ -1316,13 +1340,13 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\tfreeConnection();\n");
         out.write("\t\t\t\t\tclearServiceState();\n\n");
         
-        out.write("\t\t\t\tException e = null; // (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\tString message = null; // (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        out.write("\t\t\t\t\tException e = null; // (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\tString message = null; // (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
         
-        out.write("\t\t\t\tif(pageContext != null){\n");
-        out.write("\t\t\t\t\te = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
-        out.write("\t\t\t\t\tmessage = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
-        out.write("\t\t\t\t}\n");
+        out.write("\t\t\t\t\tif(pageContext != null){\n");
+        out.write("\t\t\t\t\t\te = (Exception) pageContext.getAttribute(\"tagErrorException\");\n");
+        out.write("\t\t\t\t\t\tmessage = (String) pageContext.getAttribute(\"tagErrorMessage\");\n\n");
+        out.write("\t\t\t\t\t}\n");
         
         out.write("\t\t\t\t\tTag parent = getParent();\n");
         out.write("\t\t\t\t\tif(parent != null){\n");
@@ -1403,17 +1427,21 @@ public class TagClassGenerator {
                 + "\n"
                 + "\n");
         
+        entityList = new ArrayList<String>();
         if (theEntity.getParents().size() > 1) {
             for (int i = 0; i < theEntity.getParents().size(); i++){
                 Entity parent = theEntity.getParents().elementAt(i).getSourceEntity();
-                out.write("   public boolean getUse" + parent.getUpperLabel() + "() {\n"
-                    + "        return use" + parent.getUpperLabel() + ";\n"
-                    + "    }\n"
-                    + "\n"
-                    + "    public void setUse" + parent.getUpperLabel() + "(boolean use" + parent.getUpperLabel() + ") {\n"
-                    + "        this.use" + parent.getUpperLabel() + " = use" + parent.getUpperLabel() + ";\n"
-                    + "    }\n"
-                    + "\n");
+                if( !entityList.contains(parent.getUpperLabel()) ){
+                	out.write("   public boolean getUse" + parent.getUpperLabel() + "() {\n"
+                			+ "        return use" + parent.getUpperLabel() + ";\n"
+                			+ "    }\n"
+                			+ "\n"
+                			+ "    public void setUse" + parent.getUpperLabel() + "(boolean use" + parent.getUpperLabel() + ") {\n"
+                			+ "        this.use" + parent.getUpperLabel() + " = use" + parent.getUpperLabel() + ";\n"
+                			+ "    }\n"
+                			+ "\n");
+                	entityList.add(parent.getUpperLabel());
+                }
             }
             out.write("\n");
         }

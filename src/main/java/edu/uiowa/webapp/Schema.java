@@ -14,6 +14,20 @@ public class Schema extends ClayElement {
     
 	private static final Log log = LogFactory.getLog(Schema.class);
 
+	public boolean containsRelationship( Relationship relationship ){
+		boolean contains = false;
+		for(Relationship r : this.getRelationships()){
+			if( r.sourceEntity != null && relationship.sourceEntity != null && r.targetEntity != null && relationship.targetEntity != null ){
+				if( r.sourceEntity.lowerLabel != null && relationship.sourceEntity.lowerLabel != null && r.targetEntity.lowerLabel != null && relationship.targetEntity.lowerLabel != null ){
+					if( r.sourceEntity.lowerLabel.equals(relationship.sourceEntity.lowerLabel) && r.targetEntity.lowerLabel.equals(relationship.targetEntity.lowerLabel) ){
+						contains = true;
+					}
+				}
+			}
+		}
+		return contains;
+	}
+	
     
     public Vector<Domain> getDomains() {
         return domains;
