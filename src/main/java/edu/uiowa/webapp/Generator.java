@@ -232,19 +232,13 @@ public class Generator {
 					log.error("Could not generate Test Classes: " + testPath, e3);
 					error=1;
 				}
-			}
-			else
+			} else {
 				log.debug("Not generating test code");
-			
-			
-
+			}
 		}
-
-
 		return error;
-
-
 	}
+	
 	public static void main(String[] args) throws Exception {
 		Properties myProps = new Properties();
 

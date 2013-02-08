@@ -35,32 +35,27 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 	 * @param pathBase
 	 * @param packageRoot
 	 */
-	public DomainCodeGenerator(SpringHibernateModel model, String pathBase,
-			String packageRoot) {
+	public DomainCodeGenerator(SpringHibernateModel model, String pathBase, String packageRoot) {
 		super(model, pathBase, packageRoot);
 		(new File(packageRootPath)).mkdirs();
 	}
 
-
 	/*
 	 * Generate Class for Composite Key
 	 * Example TableNameId.java
-	 * 
 	 */
 	private void generateDomainCompositeKeyClass(DomainClass dc,String packagePath) throws IOException {
-		
 
-		if(dc.isUsesCompositeKey()==false)
-		{
+		if( !dc.isUsesCompositeKey() ) {
 			log.debug("Does not have composite key");
 			return;
 		}
+		
 		Entity entity = dc.getEntity();
 
 		File file = new File(packagePath, entity.getUnqualifiedLabel()	+ "Id.java");
 
-		if(file.exists())
-		{
+		if( file.exists() ) {
 			log.debug("" + file.getCanonicalPath() + " Exists. Not Overwriting");
 			return;
 		}
@@ -87,50 +82,44 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		out.write(dc.getComment());
 		lines(out, 1);
 	
-
-		while (importIter.hasNext())
+		while (importIter.hasNext()){
 			out.write(importIter.next() + "\n");
+		}
+		
 		lines(out, 2);
+		
 		out.write("@Embeddable\n");
-		out.write("public class " + entity.getUnqualifiedLabel() + "Id implements Serializable\n");
-		out.write("{\n");
-		lines(out, 2);
+		out.write("@SuppressWarnings(\"serial\")\n");
+		out.write("public class " + entity.getUnqualifiedLabel() + "Id implements Serializable {\n");
+		lines(out, 1);
 		spaces(out, 4);
 		out.write("//Table attribute definitions\n");
 		Iterator<Attribute> attribIter0 = entity.getPrimaryKeyAttributes().iterator();
-		while(attribIter0.hasNext())
-		{
+		while(attribIter0.hasNext()) {
 			Attribute attrib = attribIter0.next();
 			String field = "";
-			if(attrib.getJavaTypeClass().equalsIgnoreCase("date"))
-			{
+			if(attrib.getJavaTypeClass().equalsIgnoreCase("date")) {
 				spaces(out,4);
 				out.write("@DateTimeFormat(pattern = \"yyyy-MM-dd\")\n");
-				
 			}
-			
 			
 			field = "private " + attrib.getJavaTypeClass() + " "	+ attrib.getUnqualifiedLowerLabel() + ";\n";
 			spaces(out, 4);
 			out.write(field);
-
 		}
-		lines(out, 4);
+		lines(out, 1);
 		spaces(out, 4);
 		out.write("//Table attribute definitions\n");
 		attribIter0 = entity.getPrimaryKeyAttributes().iterator();
-		while(attribIter0.hasNext())
-		{
-
+		while(attribIter0.hasNext()) {
 			Attribute attrib = attribIter0.next();
 			generateGetter(out, attrib, false);
 			lines(out, 1);
-			if(attrib.getType().equalsIgnoreCase("date"))
+			if(attrib.getType().equalsIgnoreCase("date")){
 				generateDateStringSetter(out, attrib);
+			}
 			generateSetter(out, attrib);
 			lines(out, 1);
-
-
 		}
 
 		out.write("}");
@@ -141,9 +130,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 	private void generateDateStringSetter(BufferedWriter out, Attribute attrib)
 	throws IOException {
 		spaces(out, 4);
-		out.write("public void set" + attrib.getUpperLabel() + "( String " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
-		spaces(out, 4);
-		out.write("{\n");
+		out.write("public void set" + attrib.getUpperLabel() + "( String " + attrib.getUnqualifiedLowerLabel()	+ ") {\n");
 		spaces(out, 8);
 		out.write("try{\n");
 		spaces(out, 12);
@@ -162,15 +149,11 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		
 		spaces(out, 4);
 		out.write("}\n");
-
 	}
 
-	private void generateSetter(BufferedWriter out, Attribute attrib)
-	throws IOException {
+	private void generateSetter(BufferedWriter out, Attribute attrib) throws IOException {
 		spaces(out, 4);
-		out.write("public void set" + attrib.getUpperLabel() + "("	+ attrib.getJavaTypeClass() + " " + attrib.getUnqualifiedLowerLabel()	+ ")\n");
-		spaces(out, 4);
-		out.write("{\n");
+		out.write("public void set" + attrib.getUpperLabel() + "("	+ attrib.getJavaTypeClass() + " " + attrib.getUnqualifiedLowerLabel()	+ ") {\n");
 		spaces(out, 8);
 		out.write("this." + attrib.getUnqualifiedLowerLabel() + " = "	+ attrib.getUnqualifiedLowerLabel() + ";\n");
 		spaces(out, 4);
@@ -178,15 +161,12 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 
 	}
 
-	private void generateGetter(BufferedWriter out, Attribute attrib, boolean primaryAnnotations)
-	throws IOException {
+	private void generateGetter(BufferedWriter out, Attribute attrib, boolean primaryAnnotations) throws IOException {
 
 		spaces(out, 4);
 		out.write("@Column(name = \""+attrib.getSqlLabel()+"\""+ (attrib.isPrimary() ? ", nullable = false":"")+ ")\n" );
 		spaces(out, 4);
-		out.write("public "+attrib.getJavaTypeClass()+" get" + attrib.getUpperLabel() + "()\n");
-		spaces(out, 4);
-		out.write("{\n");
+		out.write("public "+attrib.getJavaTypeClass()+" get" + attrib.getUpperLabel() + "() {\n");
 		spaces(out, 8);
 		out.write("return " + attrib.getUnqualifiedLowerLabel() + ";\n");
 		spaces(out, 4);
@@ -208,21 +188,19 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		comment += " */ \n";
 		domainClass.setComment(comment);
 		
-		if (domainClass.isUsesCompositeKey())
+		if (domainClass.isUsesCompositeKey()){
 			generateDomainCompositeKeyClass(domainClass,packagePath);
+		}
 
 		File file = new File(packagePath, domainClass.getIdentifier()	+ ".java");
-		if(!file.exists())
-		{
+		if(!file.exists()) {
 			FileWriter fstream = new FileWriter(file);
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write(domainClass.toString());
 			out.close();
-		}
-		else
+		} else {
 			log.debug("" + file.getCanonicalPath() + " Exists. Not Overwriting");
-
-
+		}
 	}
 
 	/*

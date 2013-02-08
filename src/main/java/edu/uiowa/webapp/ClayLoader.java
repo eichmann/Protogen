@@ -32,8 +32,9 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
     public void startElement (String uri, String name, String qName, Attributes atts) {
 		if (debug) {
 			log.debug("Start clay element: " + name);
-			for (int i = 0; i < atts.getLength(); i++)
+			for (int i = 0; i < atts.getLength(); i++){
 				log.debug("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
+			}
 		}
 		if (qName.equals("database-model")) {
 			currentDatabase = new Database();
@@ -41,21 +42,24 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 			Generator.theDatabase = currentDatabase;
 			currentDatabase.setLabel(getAttByName(atts, "name"));
 			currentDatabase.setUid(getAttByName(atts, "uid"));
-			if (verbose)
-			    log.debug("database: " + currentDatabase.getLabel() + "\tuid: " + currentDatabase.getUid());
+			if (verbose){
+				log.debug("database: " + currentDatabase.getLabel() + "\tuid: " + currentDatabase.getUid());
+			}
 		} else if (qName.equals("schema")) {
 			currentSchema = new Schema();
 			currentSchema.setLabel(getAttByName(atts,"name"));
 			currentSchema.setUid(getAttByName(atts, "uid"));
-			if (verbose)
-                log.debug("\tschema: " + currentSchema.getLabel() + "\tuid: " + currentSchema.getUid());
+			if (verbose){
+				log.debug("\tschema: " + currentSchema.getLabel() + "\tuid: " + currentSchema.getUid());
+			}
 			currentDatabase.getSchemas().add(currentSchema);
 		} else if (qName.equals("domain")) {
 		    currentDomain = new Domain();
 		    currentDomain.setLabel(getAttByName(atts,"name"));
 			currentDomain.setUid(getAttByName(atts, "uid"));
-			if (verbose)
-                log.debug("\t\tentity: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid());
+			if (verbose){
+				log.debug("\t\tentity: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid());
+			}
 			currentSchema.getDomains().add(currentDomain);
 			currentMode = mode.DOMAIN;
         } else if (qName.equals("table")) {
@@ -78,25 +82,29 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 				currentAttribute.setMandatory(true);
             if (getAttByName(atts,"auto-increment").equals("true"))
                 currentAttribute.setAutoIncrement(true);
-			if (debug)
-                log.debug("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\tauto-increment: " + currentAttribute.isAutoIncrement() + "\tdomain: " + currentAttribute.getDomain());
+			if (debug){
+				log.debug("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\tauto-increment: " + currentAttribute.isAutoIncrement() + "\tdomain: " + currentAttribute.getDomain());
+			}
 			currentEntity.getAttributes().add(currentAttribute);
 		} else if (qName.equals("data-type")) {
 			if (currentMode == mode.TABLE) {
 			    currentAttribute.setType(getAttByName(atts,"name"));
-			    if (verbose)
-			        log.debug("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\ttype: " + currentAttribute.getType());
+			    if (verbose){
+			    	log.debug("\t\t\tattribute: " + currentAttribute.getLabel() + "\tuid: " + currentAttribute.getUid() + "\tmandatory: " + currentAttribute.isMandatory() + "\ttype: " + currentAttribute.getType());
+			    }
 			} else {
 			    currentDomain.setType(getAttByName(atts,"name"));
-                if (verbose)
-                    log.debug("\t\t\tdomain: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid() + "\tmandatory: " + currentDomain.isMandatory() + "\ttype: " + currentDomain.getType());
+                if (verbose){
+                	log.debug("\t\t\tdomain: " + currentDomain.getLabel() + "\tuid: " + currentDomain.getUid() + "\tmandatory: " + currentDomain.isMandatory() + "\ttype: " + currentDomain.getType());
+                }
 			}
 		} else if (qName.equals("primary-key-column")) {
 		    currentAttribute = currentEntity.getAttributeByLabel(getAttByName(atts,"name"));
 		    currentAttribute.setPrimary(true);
 		    currentEntity.getPrimaryKeyAttributes().add(currentAttribute);
-		    if (verbose)
-                log.debug("\t\t\tprimary key: " + currentAttribute.getLabel());
+		    if (verbose){
+		    	log.debug("\t\t\tprimary key: " + currentAttribute.getLabel());
+		    }
         } else if (qName.equals("foreign-key")) {
         	Schema targetSchema = currentDatabase.getSchemaByName(getAttByName(atts, "referenced-table-schema"));
             currentRelationship = new Relationship();
@@ -107,8 +115,9 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
             currentRelationship.setUid(getAttByName(atts, "uid"));
             currentEntity.setParent(currentRelationship);
             currentSchema.getRelationships().add(currentRelationship);
-            if (verbose)
-                log.debug("\t\t\tforeign key: " + getAttByName(atts,"name")  + "\tuid: " + getAttByName(atts, "uid")  + "\treferenced table: " + getAttByName(atts, "referenced-table"));
+            if (verbose){
+            	log.debug("\t\t\tforeign key: " + getAttByName(atts,"name")  + "\tuid: " + getAttByName(atts, "uid")  + "\treferenced table: " + getAttByName(atts, "referenced-table"));
+            }
         } else if (qName.equals("foreign-key-column")) {
         	
             currentRelationship.setForeignReferencedAttributeMapping(getAttByName(atts,"column-name"), getAttByName(atts, "referenced-key-column-name"));
@@ -116,8 +125,9 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
             currentEntity.getAttributeByLabel(getAttByName(atts,"column-name")).setReferencedEntityName(referencedEntityName);
             referencedEntityName = null;
             
-            if (verbose)
-                log.debug("\t\t\tforeign key column: " + getAttByName(atts,"column-name")  + "\treferenced column: " + getAttByName(atts, "referenced-key-column-name"));
+            if (verbose) {
+            	log.debug("\t\t\tforeign key column: " + getAttByName(atts,"column-name")  + "\treferenced column: " + getAttByName(atts, "referenced-key-column-name"));
+            }
 		}
     }
     

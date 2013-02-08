@@ -49,14 +49,14 @@ public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		
 	
 		File file = new File(packagePath, className	+ ".java");
-		if(file.exists() && overwrite==false)
-		{
+		if( file.exists() && !overwrite ) {
 			log.debug("File Exists");
 			return;
 		}
 		
-		if(file.exists())
+		if(file.exists()){
 			log.debug("Overwriting file....");
+		}
 			
 		FileWriter fstream = new FileWriter(file);
 		BufferedWriter out = new BufferedWriter(fstream);

@@ -31,11 +31,15 @@ public abstract class JDBCReader extends Reader {
 	abstract ResultSet queryDatabase();
 	
 	public int read(char[] theChars, int offset, int length) throws IOException {
-		if (log.isDebugEnabled()) log.debug("read called: offset = " + offset + ", length = " + length);
+		if (log.isDebugEnabled()) {
+			log.debug("read called: offset = " + offset + ", length = " + length);
+		}
 		try {
 			if (rs.next()) {
 				String buffer = rs.getString(1);
-				if (log.isDebugEnabled()) log.debug(buffer);
+				if (log.isDebugEnabled()){
+					log.debug(buffer);
+				}
 				theChars = buffer.toCharArray();
 				return buffer.length();
 			} else {

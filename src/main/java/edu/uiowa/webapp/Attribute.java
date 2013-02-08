@@ -7,7 +7,22 @@ import org.apache.commons.logging.LogFactory;
 
 public class Attribute extends ClayElement {
 
-    Domain domain = null;
+    @Override
+	public String toString() {
+		return "Attribute [domain=" + domain + ", sqlType=" + sqlType
+				+ ", type=" + type + ", remarks=" + remarks + ", origLabel="
+				+ origLabel + ", mandatory=" + mandatory + ", primary="
+				+ primary + ", autoIncrement=" + autoIncrement + ", foreign="
+				+ foreign + ", sequence=" + sequence + ", counter=" + counter
+				+ ", sequenceName=" + sequenceName + ", dominantEntity="
+				+ dominantEntity + ", referencedEntityName="
+				+ referencedEntityName + ", referencedEntity="
+				+ referencedEntity + ", entity=" + entity
+				+ ", foreignAttribute=" + foreignAttribute
+				+ ", childAttributes=" + childAttributes + "]";
+	}
+
+	Domain domain = null;
     String sqlType = null;
     String type = null;
     String remarks = null;
@@ -155,8 +170,9 @@ public class Attribute extends ClayElement {
     }
     
     public Entity getDominantEntity() {
-    	if(dominantEntity==null)
+    	if(dominantEntity == null){
     		log.debug("DominantEntity is null");
+    	}
         return dominantEntity;
     }
 

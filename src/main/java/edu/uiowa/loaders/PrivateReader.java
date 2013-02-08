@@ -37,21 +37,29 @@ public class PrivateReader extends Reader {
 	}
 	
 	public int read(char[] theChars, int offset, int length) throws IOException {
-		if (log.isDebugEnabled()) log.debug("read called: offset = " + offset + ", length = " + length);
+		if (log.isDebugEnabled()){
+			log.debug("read called: offset = " + offset + ", length = " + length);
+		}
 		if (first) {
-			if (log.isDebugEnabled()) log.debug(header);
+			if (log.isDebugEnabled()){
+				log.debug(header);
+			}
 			first = false;
-			for (int i = 0; i < header.length(); i++)
+			for (int i = 0; i < header.length(); i++){
 				theChars[i] = header.charAt(i);
+			}
 			return header.length();
 		} else {
 			if (last) return -1;
 			
 			int cnt = internal.read(theChars, offset, length);
-			if (log.isDebugEnabled()) log.debug(theChars);
+			if (log.isDebugEnabled()) {
+				log.debug(theChars);
+			}
 			if (cnt == -1) {
-				for (int i = offset; i < footer.length() + offset; i++)
+				for (int i = offset; i < footer.length() + offset; i++){
 					theChars[i] = footer.charAt(i - offset);
+				}
 				cnt = footer.length();
 				last = true;
 			}

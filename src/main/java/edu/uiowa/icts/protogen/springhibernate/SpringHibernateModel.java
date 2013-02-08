@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,15 +24,11 @@ import edu.uiowa.webapp.Entity;
 import edu.uiowa.webapp.Relationship;
 import edu.uiowa.webapp.Schema;
 
-
-/*
+/**
  * Completes the database model created previously to support Spring and Hibernate code generation
  * ...used by classes that extend AbstractSpringHiberernateCodeGenerator.java 
- * 
  * @author bkusenda
- * 
  */
-
 public class SpringHibernateModel {
 
 
@@ -106,8 +101,7 @@ public class SpringHibernateModel {
 
 	private DomainClass loadEntity(Entity entity) {
 
-		if(isManyToMany(entity))
-		{
+		if(isManyToMany(entity)) {
 			log.debug("Entity is manyToMany.  Not Creating Class");
 			return null;
 		}
@@ -134,8 +128,6 @@ public class SpringHibernateModel {
 		importList.add("java.text.SimpleDateFormat");
 		importList.add("java.text.ParseException");
 		importList.add("java.util.Date");
-
-
 		importList.add("javax.persistence.*");
 		importList.add("javax.persistence.Entity");
 		importList.add("javax.persistence.Table");
@@ -145,8 +137,6 @@ public class SpringHibernateModel {
 		importList.add("javax.persistence.FetchType");
 		importList.add("javax.persistence.JoinColumn");
 		importList.add("javax.persistence.ManyToOne");
-
-
 		importList.add("org.springframework.format.annotation.DateTimeFormat");
 		importList.add("org.hibernate.annotations.*");
 		importList.add("javax.persistence.CascadeType");
@@ -166,13 +156,12 @@ public class SpringHibernateModel {
 			v.getGetterAnnotations().add("@EmbeddedId");
 			v.getGetterAnnotations().add("@AttributeOverrides( {\n");
 			Iterator<Attribute> at = entity.getPrimaryKeyAttributes().iterator();
-			while (at.hasNext())
-			{
+			while (at.hasNext()) {
 				Attribute a = at.next();
 				v.getGetterAnnotations().add("@AttributeOverride(name = \""+a.getUnqualifiedLabel()+"\", column = @Column(name = \""+a.getSqlLabel()+"\", nullable = false))");
-				if(at.hasNext())
+				if(at.hasNext()){
 					v.getGetterAnnotations().add(",");;
-
+				}
 			}
 			v.getGetterAnnotations().add("})");
 			symTable.add(v);
@@ -185,19 +174,16 @@ public class SpringHibernateModel {
 		{
 
 			Iterator<Attribute> attribIter1 = entity.getPrimaryKeyAttributes().iterator();
-			if(attribIter1.hasNext())
-			{
+			if(attribIter1.hasNext()) {
 
 				Attribute attrib = attribIter1.next();
 				//if type is number, we should disable key generation
 				boolean number= false;
-				if(attrib.getType().equalsIgnoreCase("int")||attrib.getType().equalsIgnoreCase("integer") || attrib.getType().equalsIgnoreCase("double"))
+				if(attrib.getType().equalsIgnoreCase("int")||attrib.getType().equalsIgnoreCase("integer") || attrib.getType().equalsIgnoreCase("double")){
 					number = true;
+				}
 				ClassVariable v = new ClassVariable("private", attrib.getType(), attrib.getUnqualifiedLowerLabel());
-				if(attrib.isForeign())
-				{
-					//					attrib = entity.getAttributeByLabel(attrib.getUnqualifiedLabel());
-
+				if(attrib.isForeign()) {
 					Entity parent = attrib.getReferencedEntity();//entity.getForeignReferenceEntity(attrib);
 
 					v.setAttribType(AttributeType.FOREIGNPRIMARYKEY);
@@ -220,11 +206,13 @@ public class SpringHibernateModel {
 					v.setAttribute(attrib);
 					v.setComment("Primary key");
 					
-					if(number)
+					if(number){
 						v.getGetterAnnotations().add("@javax.persistence.SequenceGenerator(  name=\"gen\",  sequenceName=\""+entity.getSchema().getSqlLabel()+".seqnum\",allocationSize=1)");
+					}
 					v.getGetterAnnotations().add("@Id");
-					if(number)
+					if(number){
 						v.getGetterAnnotations().add("@GeneratedValue( strategy=GenerationType.AUTO,generator=\"gen\")");
+					}
 					v.getGetterAnnotations().add("@Column(name = \""+attrib.getSqlLabel()+"\", unique = true, nullable = false)");		
 				}
 				symTable.add(v);
@@ -321,18 +309,17 @@ public class SpringHibernateModel {
 		attribList.addAll(foreignAndNotPrimaryKeysAttributes.values());
 		attribList.addAll(foreignAndPrimaryKeysAttributes.values());
 		log.debug("***CREATING ForeignRefCode on Entity:"+ entity.getSqlLabel() + " ---Count:" + attribList.size() );
-		Iterator<Attribute> iter2 = attribList.iterator();
+		Iterator<Attribute> attribListIter = attribList.iterator();
 		checkExists = new HashMap<String,Integer>();
 		
 		
-		parent_loop: while (iter2.hasNext()) {
+		parent_loop : while (attribListIter.hasNext()) {
 
-			Attribute at = iter2.next();
+			Attribute at = attribListIter.next();
 			log.debug("***Attribute:"+at.getUnqualifiedLabel());
 			Entity e = at.getReferencedEntity();//entity.getForeignReferenceEntity(at);
 
-			if(e != null)
-			{
+			if(e != null) {
 
 				log.debug("***Current:"+entity.getUnqualifiedLabel()+" **PARENT ENTITY = "+e.getUnqualifiedLabel()+" for "+ at.getUnqualifiedLabel());
 
@@ -353,56 +340,48 @@ public class SpringHibernateModel {
 
 				log.debug("Attribute Primary ? "+at.isPrimary());
 				
-				if(at.isPrimary() && entity.getPrimaryKeyAttributes().size()==1)
-				{
+				if(at.isPrimary() && entity.getPrimaryKeyAttributes().size() == 1) {
 					v.setRelationshipType(RelationshipType.ONETOONE);
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
 					v.getGetterAnnotations().add("@PrimaryKeyJoinColumn");
-				}
-				
-				else if(at.isPrimary() && e.getPrimaryKeyAttributes().size() > 1){
+				} else if(at.isPrimary() && e.getPrimaryKeyAttributes().size() > 1){
 					int i = e.getPrimaryKeyAttributes().size() - 1;
 					v.setRelationshipType(RelationshipType.MANYTOONE);
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
 					v.getGetterAnnotations().add("@JoinColumns({");
 					for(Attribute ta : e.getPrimaryKeyAttributes()){
-						v.getGetterAnnotations().add("\t@JoinColumn(name = \""+ta.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)"+(i>0?",":""));
+						v.getGetterAnnotations().add("\t@JoinColumn(name = \""+ta.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)"+( i > 0 ? "," : "" ));
 						i--;
 					}
 					
 					v.getGetterAnnotations().add("})");
-				}
-				
-				else if(!at.isPrimary() && attribList.size() > 1){
-					log.debug("new else");
-					
-					v.setRelationshipType(RelationshipType.MANYTOONE);
-					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
-					v.getGetterAnnotations().add("@JoinColumns({");
-
-					int i=-1;
-					Vector<Attribute> other_p_keys = e.getPrimaryKeyAttributes();
-					for(Attribute oa : other_p_keys){
-						for (Attribute a : attribList) {
-							if(a.getSqlLabel().equalsIgnoreCase(oa.getSqlLabel())){
-								i++;
-							}
-						}
-					}
-					for(Attribute oa : other_p_keys){
-						for (Attribute a : attribList) {
-							if(a.getSqlLabel().equalsIgnoreCase(oa.getSqlLabel())){
-								v.getGetterAnnotations().add("\t@JoinColumn(name = \""+oa.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)"+(i>0?",":""));
-								i--;
-							}
-						}
-					}
-					
-					v.getGetterAnnotations().add("})");
-				}
-				
-				else
-				{
+//				} else if(!at.isPrimary() && attribList.size() > 1 ) {
+//					log.debug("new else");
+//					
+//					v.setRelationshipType(RelationshipType.MANYTOONE);
+//					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class )");
+//					v.getGetterAnnotations().add("@JoinColumns({");
+//
+//					// Vector<Attribute> other_p_keys = e.getPrimaryKeyAttributes();
+//					Vector<Attribute> other_p_keys = at.getChildAttributes();
+//					int other_p_keys_count = other_p_keys.size() - 1;
+//					for(Attribute oa : other_p_keys){
+//						
+//						log.debug(oa.getSqlLabel());
+//						log.debug(oa.getReferencedEntityName());
+//						log.debug(oa.getParentAttribute());
+//						log.debug(oa.getForeignAttribute());
+//						
+//						// for (Attribute a : attribList) {
+//							// if(a.getSqlLabel().equalsIgnoreCase(oa.getSqlLabel())){
+//								v.getGetterAnnotations().add("\t@JoinColumn(name = \""+oa.getSqlLabel()+"\",nullable = false, insertable = false, updatable = false)"+(other_p_keys_count > 0 ? "," : "" ));
+//								other_p_keys_count--;
+//							//}
+//						// }
+//					}
+//					
+//					v.getGetterAnnotations().add("})");
+				} else {
 					
 					log.debug("entity: "+entity.getLabel()+" : "+at.getSqlLabel());
 					
@@ -496,15 +475,15 @@ public class SpringHibernateModel {
 		return hash;
 	}
 
-	private HashMap<String,Attribute> getHashFromAttributesFtPf(Iterator<Attribute> attribIter)
-	{
+	private HashMap<String,Attribute> getHashFromAttributesFtPf(Iterator<Attribute> attribIter) {
+		
+		log.debug("getHashFromAttributesFtPf");
+		
 		HashMap<String,Attribute> hash = new HashMap<String,Attribute>();
-		while(attribIter.hasNext())
-		{
+		while(attribIter.hasNext()) {
 			Attribute attribute = attribIter.next();
 			if(attribute.isForeign() && !attribute.isPrimary() ){
 				hash.put(attribute.getUnqualifiedLabel(), attribute);
-				log.debug("Adding F attribute: "+attribute.getUnqualifiedLabel());
 			}
 		}
 		return hash;
@@ -688,9 +667,9 @@ public class SpringHibernateModel {
 						if(c == null)
 							log.debug("************** cannot find DomainClass:"+cv.getType());
 						cv.setDomainClass(c);
-					}
-					else
+					} else {
 						log.debug("************** cannot getEntity from attribute:"+cv.getIdentifier());
+					}
 
 
 				}

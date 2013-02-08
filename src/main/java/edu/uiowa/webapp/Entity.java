@@ -264,10 +264,12 @@ public class Entity extends ClayElement {
 
     public void dump() {
         log.debug("\t\tentity: " + label + "\tuid: " + uid);
-        for (int i = 0; i < children.size(); i++)
-            log.debug("\t\t\tchild " + children.elementAt(i).targetEntity.getLabel());
-        for (int i = 0; i < attributes.size(); i++)
-            attributes.elementAt(i).dump();
+        for (int i = 0; i < children.size(); i++){
+        	log.debug("\t\t\tchild " + children.elementAt(i).targetEntity.getLabel());
+        }
+        for (int i = 0; i < attributes.size(); i++){
+        	attributes.elementAt(i).dump();
+        }
     }
 
 	public DomainClass getDomainClass() {

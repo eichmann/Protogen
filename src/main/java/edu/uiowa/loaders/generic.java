@@ -28,7 +28,6 @@ public class generic extends DefaultHandler {
 		handler.run(args);
 	}
 	
-	
 	private static final Log log = LogFactory.getLog(generic.class);
 
 	public void run(String args[]) throws Exception {
@@ -47,7 +46,9 @@ public class generic extends DefaultHandler {
                 if (args[i].startsWith("-wrapper=")) {
                     wrapWithTag = true;
                     wrapperTag = args[i].substring(args[i].indexOf('=')+1);
-                    if (log.isDebugEnabled()) log.debug("wrapper tag:" + wrapperTag);
+                    if (log.isDebugEnabled()){
+                    	log.debug("wrapper tag:" + wrapperTag);
+                    }
                 } else {
                     if (wrapWithTag) {
                         log.debug("Reading with wrapper " + wrapperTag + "  " + args[i]);
@@ -57,7 +58,6 @@ public class generic extends DefaultHandler {
                         try {
                             processFile(args[i]);
                         } catch (Exception e) {
-                            // TODO Auto-generated catch block
                             log.error("Failed Reading", e);
                         }
                     }
@@ -72,7 +72,6 @@ public class generic extends DefaultHandler {
 				try {
                     processFile(current);
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     log.error("Faild Processing File", e);
                 }
 			}
@@ -84,8 +83,9 @@ public class generic extends DefaultHandler {
 		xr.setContentHandler(this);
 		xr.setErrorHandler(this);
 		xr.setFeature("http://xml.org/sax/features/validation", false);
-
-		if (verbose) log.info("Reading " + arg);
+		if (verbose){
+			log.info("Reading " + arg);
+		}
 		processFile(arg);
     }
     
@@ -100,8 +100,9 @@ public class generic extends DefaultHandler {
             IODesc = new BufferedReader(new InputStreamReader(conn.getInputStream()), 200000);
         } else if (file.endsWith(".z") || file.endsWith(".gz")) {
 			IODesc = new BufferedReader(new InputStreamReader(new GZIPInputStream((new URL(file)).openConnection().getInputStream())), 200000);
-		} else
+		} else {
 			IODesc = new BufferedReader(new InputStreamReader((new URL(file)).openConnection().getInputStream()), 200000);
+		}
 
 	    xr.parse(new InputSource(IODesc));
 	    IODesc.close();
@@ -128,33 +129,36 @@ public class generic extends DefaultHandler {
 
 
     public void startDocument () {
-		if (log.isDebugEnabled()) log.debug("Start document");
+		if (log.isDebugEnabled()){
+			log.debug("Start document");
+		}
     }
 
 
     public void endDocument () {
-		if (log.isDebugEnabled()) log.debug("End document");
+		if (log.isDebugEnabled()){
+			log.debug("End document");
+		}
     }
 
 
     public void startElement (String uri, String name, String qName, Attributes atts) {
 		if (log.isDebugEnabled()) {
-			//if ("".equals (uri))
-			    log.debug("Start element: " + qName);
-			for (int i = 0; i < atts.getLength(); i++)
-				log.debug("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
-			//else
-			//    System.out.println("Start element: {" + uri + "}" + name + " " + atts);
+			if ("".equals (uri)){
+				log.debug("Start element: " + qName);
+				for (int i = 0; i < atts.getLength(); i++){
+					log.debug("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
+				}
+			} else {
+				//log.debug("Start element: {" + uri + "}" + name + " " + atts);
+			}
 		}
     }
 
 
     public void endElement (String uri, String name, String qName) {
 		if (log.isDebugEnabled()) {
-			//if ("".equals (uri))
-			    log.debug("End element: " + qName);
-			//else
-			//    System.out.println("End element:   {" + uri + "}" + name);
+		    log.debug("End element: " + qName);
 		}
 		buffer = new StringBuffer();
     }
@@ -193,14 +197,11 @@ public class generic extends DefaultHandler {
     
     public String getAttByName(Attributes atts, String name) {
     	String response = null;
-    	
 		for (int i = 0; i < atts.getLength(); i++) {
-			//System.out.println("\tattribute " + i + ": " + atts.getQName(i) + " > " + atts.getValue(i));
-			if (name.equals(atts.getQName(i)))
+			if (name.equals(atts.getQName(i))){
 				return atts.getValue(i);
+			}
 		}
-
 		return response;
     }
-    
 }

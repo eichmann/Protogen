@@ -430,18 +430,14 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 
 
-			if(getAttribute(e, aLabel) == null)
-			{
+			if(getAttribute(e, aLabel) == null) {
 				a.setLabel(aLabel);
 				a.setType(type);
 				a.setEntity(e);
 				e.getAttributes().add(a);
 			}
 
-			log.debug("Creating new attribute" +
-					"\n     label:   "+aLabel+
-					"\n     type:    "+type+
-					"\n     eLabel:  "+e.getUnqualifiedLabel());
+			log.debug("Creating new attribute" + "\n     label:   "+aLabel+ "\n     type:    "+type+ "\n     eLabel:  "+e.getUnqualifiedLabel());
 
 		}
 		rs.close();
@@ -453,40 +449,25 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		{
 			String aLabel = rs2.getString(4);
 			log.debug("......"+aLabel);
-			for(Attribute a :e.getAttributes())
-			{
-				if(aLabel.equalsIgnoreCase(a.getLabel()))
-				{
+			for(Attribute a :e.getAttributes()) {
+				if(aLabel.equalsIgnoreCase(a.getLabel())) {
 					a.setPrimary(true);
 					log.debug("..........is primary");
 					boolean exists = false;
-					for(Attribute aa : e.getPrimaryKeyAttributes())
-					{
-
-						if(aa.getLabel().equalsIgnoreCase(aLabel))
-						{
-
+					for(Attribute aa : e.getPrimaryKeyAttributes()) {
+						if(aa.getLabel().equalsIgnoreCase(aLabel)) {
 							exists=true;
 							continue;
 						}
-
-
 					}
-					if(!exists)
-					{
+					if(!exists) {
 						log.debug("................adding");
 						e.getPrimaryKeyAttributes().add(a);
 					}
-
-
-
 				}
-
 			}
-
 		}
 		rs2.close();
-
 		return e;
 	}
 
@@ -506,19 +487,17 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	}
 
-	private void printColumns(ResultSet rs) throws SQLException
-	{
+	private void printColumns(ResultSet rs) throws SQLException {
 		int count = rs.getMetaData().getColumnCount();
-
 		if(log.isDebugEnabled()) {
 			StringBuffer  temp = new StringBuffer("......Columns:");
-			for (int i =0;i<count;i++)
-			{
+			for (int i =0;i<count;i++) {
 				temp.append(""+i+"-"+rs.getMetaData().getColumnName(i+1));
-				if(i<count -1)
+				if(i<count -1){
 					temp.append(",");
-				else
+				} else {
 					temp.append("");
+				}
 
 			}
 			log.debug(temp);
