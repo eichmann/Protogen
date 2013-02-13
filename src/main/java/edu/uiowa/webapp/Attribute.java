@@ -18,7 +18,7 @@ public class Attribute extends ClayElement {
 				+ dominantEntity + ", referencedEntityName="
 				+ referencedEntityName + ", referencedEntity="
 				+ referencedEntity + ", entity=" + entity
-				+ ", foreignAttribute=" + foreignAttribute
+				// + ", foreignAttribute=" + foreignAttribute
 				+ ", childAttributes=" + childAttributes + "]";
 	}
 
