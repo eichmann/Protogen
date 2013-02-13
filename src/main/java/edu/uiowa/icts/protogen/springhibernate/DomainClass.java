@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.webapp.Entity;
 import edu.uiowa.webapp.Schema;
 
 public class DomainClass
 {
+	
+	private static final Log log = LogFactory.getLog(DomainClass.class);
 	
 	public enum ClassType {
 	    ENTITY, COMPOSITEID, PLAIN
@@ -380,8 +385,13 @@ public class DomainClass
 		while(symIter.hasNext())
 		{
 			ClassVariable cv = symIter.next();
-			if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE)
+			
+			
+			log.debug( cv.getLowerIdentifier() + "" + cv.getAttribType()  );
+			
+			if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE){
 				cvList.add(cv);
+			}
 			
 		}
 		
@@ -395,8 +405,12 @@ public class DomainClass
 		
 		for(ClassVariable cv: symTable)
 		{
-			if(!cv.isPrimary() )
+			
+			log.debug( cv.getLowerIdentifier() + "" + cv.getAttribType()  );
+			
+			if(!cv.isPrimary() ){
 				cvList.add(cv);
+			}
 		
 		}
 		

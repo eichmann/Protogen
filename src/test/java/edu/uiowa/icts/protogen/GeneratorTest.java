@@ -2,13 +2,14 @@ package edu.uiowa.icts.protogen;
 
 import java.util.Properties;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.webapp.Generator;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 /**
  * Unit test for simple App.
@@ -50,21 +51,21 @@ public class GeneratorTest  extends TestCase
     	props.setProperty("project.name",projectName);
     	props.setProperty("mode", "spring");
     	props.setProperty("model.source", "clay");
-    	props.setProperty("clay.file",pathPrefix+"/src/test/resources/pilot-base.clay");
+    	props.setProperty("clay.file",pathPrefix+"/src/test/resources/ryanlorentzen.clay");
     	props.setProperty("generate.domain", "true");
     	props.setProperty("generate.dao", "true");
     	props.setProperty("generate.controller", "true");
     	props.setProperty("generate.jsp", "true");
     	props.setProperty("generate.tests", "true");
-    	props.setProperty("domain.file.location",pathPrefix + "/target/test/java"  + "src");
-    	props.setProperty("dao.file.location",pathPrefix + "/target/test/java"  + "src");
-    	props.setProperty("controller.file.location",pathPrefix + "/target/test/java"  + "src");
-    	props.setProperty("jsp.file.location",pathPrefix + "/target/test/jsp"  + "src");
-    	props.setProperty("test.file.location",pathPrefix + "/target/test/javatest"  + "src");
-    	Generator gen = new Generator();
-    	int result = gen.runGenerator(props);
-        assertEquals("Error during domain code generation",0,result);
+    	props.setProperty("domain.file.location",pathPrefix + "/target/clay/test/java"  + "src");
+    	props.setProperty("dao.file.location",pathPrefix + "/target/clay/test/java"  + "src");
+    	props.setProperty("controller.file.location",pathPrefix + "/target/clay/test/java"  + "src");
+    	props.setProperty("jsp.file.location",pathPrefix + "/target/clay/test/jsp"  + "src");
+    	props.setProperty("test.file.location",pathPrefix + "/target/clay/test/javatest"  + "src");
     	
+//    	Generator gen = new Generator();
+//    	int result = gen.runGenerator(props);
+//        assertEquals("Error during domain code generation",0,result);
     	
     }
 }

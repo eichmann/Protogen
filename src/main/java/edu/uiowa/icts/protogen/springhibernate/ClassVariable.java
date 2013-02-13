@@ -254,11 +254,11 @@ public class ClassVariable
 			else 
 				output = getterAnnotationsToString(indent);
 			
-			if(attribType == AttributeType.COMPOSITEKEY)
-				output += indent +"public " + getType() + " get"+"Id()\n";
-			else
-				output +=indent +"public " + getType() + " get"+getUpperIdentifier()+"()\n";
-			output +=indent +"{\n";
+			if(attribType == AttributeType.COMPOSITEKEY){
+				output += indent +"public " + getType() + " get"+"Id(){\n";
+			} else {
+				output +=indent +"public " + getType() + " get"+getUpperIdentifier()+"(){\n";
+			}
 			output +=indent + indent+"return " + identifier  + ";\n";
 			output +=indent +"}\n";
 			return output;
@@ -268,12 +268,10 @@ public class ClassVariable
 		{	
 			String output = "\n";
 			if(attribType == AttributeType.COMPOSITEKEY)
-				output +=indent +"public void setId("+type +" "+ identifier+")\n";
+				output +=indent +"public void setId("+type +" "+ identifier+"){\n";
 			else
-				output += indent+"public void set"+getUpperIdentifier()+"("+getType() +" "+ identifier+")\n";
+				output += indent+"public void set"+getUpperIdentifier()+"("+getType() +" "+ identifier+"){\n";
 			
-			
-			output +=indent +"{\n";
 			output +=indent +indent +"this." + identifier  + " = " + identifier + ";\n";
 			output +=indent +"}\n";
 			
@@ -290,8 +288,7 @@ public class ClassVariable
 		{	
 			String output = "\n";
 
-			output += indent+"public void set"+getUpperIdentifier()+"(String "+ identifier+")\n";
-			output += indent +"{\n";
+			output += indent+"public void set"+getUpperIdentifier()+"(String "+ identifier+"){\n";
 			output += indent + indent + "try{\n";
 			output += indent + indent + indent + "DateFormat formatter = new SimpleDateFormat(\"MM/dd/yyyy\");\n";
 			output += indent + indent + indent + "formatter.setLenient(true);\n";

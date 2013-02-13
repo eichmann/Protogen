@@ -49,14 +49,14 @@ public class JDBCTest  extends TestCase {
     	props.setProperty("generate.controller", "true");
     	props.setProperty("generate.jsp", "true");
     	props.setProperty("generate.tests", "true");
-    	props.setProperty("domain.file.location", pathPrefix + "/target/test/java"  + "src");
-    	props.setProperty("dao.file.location", pathPrefix + "/target/test/java"  + "src");
-    	props.setProperty("controller.file.location", pathPrefix + "/target/test/java"  + "src");
-    	props.setProperty("jsp.file.location", pathPrefix + "/target/test/jsp"  + "src");
-    	props.setProperty("test.file.location", pathPrefix + "/target/test/javatest"  + "src");
+    	props.setProperty("domain.file.location", pathPrefix + "/target/jdbc/test/java"  + "src");
+    	props.setProperty("dao.file.location", pathPrefix + "/target/jdbc/test/java"  + "src");
+    	props.setProperty("controller.file.location", pathPrefix + "/target/jdbc/test/java"  + "src");
+    	props.setProperty("jsp.file.location", pathPrefix + "/target/jdbc/test/jsp"  + "src");
+    	props.setProperty("test.file.location", pathPrefix + "/target/jdbc/test/javatest"  + "src");
     	
     	props.setProperty("model.source","jdbc");
-    	props.setProperty("db.schema","rrlorentzen");
+    	props.setProperty("db.schema","ryanlorentzen");
     	props.setProperty("db.url","jdbc:postgresql://localhost/test");
     	props.setProperty("db.username","test");
     	props.setProperty("db.password","test");

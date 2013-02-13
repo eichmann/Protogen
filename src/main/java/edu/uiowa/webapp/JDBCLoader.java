@@ -19,7 +19,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	private Database database = null;
 	private Connection conn = null;
-	private String currentSchema=null;
+	// private String currentSchema=null;
 
 	public JDBCLoader() {
 
@@ -62,6 +62,16 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 		updateForeignKeys(dbMeta);
 
+		for(Schema s : database.getSchemas()) {
+			for(Entity e : s.getEntities()) {
+				for( Attribute a : e.getAttributes() ){
+					if( a.getForeignAttribute() != null ){
+						log.debug(e.label + " - " + a.getForeignAttribute().getEntity().label);
+					}
+				}
+			}
+		}
+		
 		for(Schema s:database.getSchemas()) {
 			for (int i = 0; i < s.getRelationships().size(); i++) {
 				Relationship currentRelationship = s.getRelationships().elementAt(i);
@@ -72,28 +82,31 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 				currentRelationship.getSourceEntity().setChild(currentRelationship);
 			}
 			
-			for(Entity e:s.getEntities()) {
+			for(Entity e : s.getEntities()) {
 				e.generateParentKeys();
 				e.generateSubKeys();
 				e.matchRemarks();
 			}
 		}
-
+		
+		for(Schema s : database.getSchemas()) {
+			for(Entity e:s.getEntities()) {
+				for( Attribute a : e.getAttributes() ){
+					if( a.getChildAttributes() != null ){
+						for( Attribute aa : a.getChildAttributes() ){
+							log.debug(aa.label);
+						}
+					}
+				}
+			}
+		}
+		
 		conn.close();
 	}
 
 	public void run(String filename) throws Exception {
-
-
-
-
 		Properties prop = PropertyLoader.loadProperties(filename);
 		run(prop);
-
-
-
-
-
 	}
 
 	private void updateForeignKeys(DatabaseMetaData dbMeta) throws SQLException
@@ -230,7 +243,6 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					log.debug("relationship exists: "+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn); 
 				}
 				
-				fka.setForeign(true);
 				fka.setReferencedEntityName(pktable);
 				
 				log.debug("Relationship:"+r);
@@ -242,6 +254,10 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		int count =0;
 		for(Schema s:database.getSchemas())
 			for(Entity e:s.getEntities()) {
+				
+				log.debug(s.getLabel());
+				log.debug(e.getLabel());
+				
 				ResultSet rs = dbMeta.getExportedKeys(null, s.getLabel(), e.getLabel());
 
 				if(count==0) {
@@ -283,6 +299,9 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					String fkcolumn = rs.getString("fkcolumn_name");
 					
 					log.debug("...."+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn);
+					
+					if(pktable.equalsIgnoreCase(fktable) && pkcolumn.equalsIgnoreCase(fkcolumn))
+						continue;
 
 					Schema pks = getSchema(pkschema);
 					Entity pke = getEntity(pks, pktable);
@@ -292,16 +311,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					Entity fke = getEntity(fks, fktable);
 					Attribute  fka = getAttribute(fke, fkcolumn);
 
-					fka.setForeign(true);
 					fka.setForeignAttribute(pka);
-					fka.setParentAttribute(pka);
-
-					log.debug("pka label: "+pka.getLabel());
-					log.debug("fka label: "+fka.getLabel());
-
-
-					pka.setParentAttribute(fka);
-					fka.getChildAttributes().add(pka);
 
 					Relationship r = new Relationship();
 					r.setSourceEntity(pke);
@@ -325,7 +335,6 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 						log.debug("relationship exists: "+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn); 
 					}
 					
-					fka.setForeign(true);
 					fka.setReferencedEntityName(pktable);
 					
 					log.debug("Relationship:"+r);
@@ -419,7 +428,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		while(rs.next()) {
 			String x = rs.getString(3);
 			if(!x.endsWith("_pkey")){
-				Entity e = createEntity(dbMeta,rs.getString(3));
+				Entity e = createEntity(dbMeta, label, rs.getString(3));
 				e.setSchema(schema);
 				schema.getEntities().add(e);
 			}else{
@@ -431,14 +440,17 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		return schema;
 	}
 
-	private Entity createEntity(DatabaseMetaData dbMeta, String label) throws SQLException
+	private Entity createEntity(DatabaseMetaData dbMeta, String schema, String tableLabel) throws SQLException
 	{
-		log.debug("...Table: "+label);
+		log.debug("...Table: "+tableLabel);
 
 		Entity e = new Entity();
-		e.setLabel(label);
+		e.setLabel(tableLabel);
 
-		ResultSet rs= dbMeta.getColumns(null,currentSchema, label, "%");
+		log.debug(schema);
+		log.debug(tableLabel);
+		
+		ResultSet rs= dbMeta.getColumns(null, schema, tableLabel, "%");
 		printColumns(rs);
 
 		while(rs.next())
@@ -463,7 +475,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		}
 		rs.close();
 		log.debug("......Primary Keys:");
-		ResultSet rs2 = dbMeta.getPrimaryKeys(null, currentSchema,label );
+		ResultSet rs2 = dbMeta.getPrimaryKeys(null, schema,tableLabel );
 		printColumns(rs2);
 
 		while(rs2.next())
@@ -526,4 +538,3 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	}
 }
-

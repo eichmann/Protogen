@@ -308,6 +308,7 @@ public class SpringHibernateModel {
 
 		attribList.addAll(foreignAndNotPrimaryKeysAttributes.values());
 		attribList.addAll(foreignAndPrimaryKeysAttributes.values());
+		
 		log.debug("***CREATING ForeignRefCode on Entity:"+ entity.getSqlLabel() + " ---Count:" + attribList.size() );
 		Iterator<Attribute> attribListIter = attribList.iterator();
 		checkExists = new HashMap<String,Integer>();
@@ -344,6 +345,9 @@ public class SpringHibernateModel {
 					v.setRelationshipType(RelationshipType.ONETOONE);
 					v.getGetterAnnotations().add("@ManyToOne(fetch = FetchType.LAZY,  targetEntity="+e.getUnqualifiedLabel()+".class)");
 					v.getGetterAnnotations().add("@PrimaryKeyJoinColumn");
+					
+					log.debug(entity.getLabel() + "." +  e.getUnqualifiedLabel());
+					
 				} else if(at.isPrimary() && e.getPrimaryKeyAttributes().size() > 1){
 					int i = e.getPrimaryKeyAttributes().size() - 1;
 					v.setRelationshipType(RelationshipType.MANYTOONE);
@@ -393,8 +397,13 @@ public class SpringHibernateModel {
 						v.getGetterAnnotations().add("@JoinColumn(name = \""+at.getSqlLabel()+"\",nullable = true)");//, insertable = false, updatable = false)");
 					}
 				}
+				
+				log.debug(at);
+				
 				v.setAttribute(at);
 				v.setAttribType(AttributeType.FOREIGNATTRIBUTE);
+				
+				log.debug(at);
 
 				symTable.add(v);
 				symTableHash.add(v.getIdentifier());
@@ -550,14 +559,11 @@ public class SpringHibernateModel {
 			//Entity e2 = child.getForeignReferenceEntity(a);
 			Entity e2 = a.getReferencedEntity();
 
-			if(e2 != null && parent.getUnqualifiedLabel().equals(e2.getUnqualifiedLabel()))
+			if(e2 != null && parent.getUnqualifiedLabel().equals(e2.getUnqualifiedLabel())){
 				thisKey = a.getSqlLabel();
-			else
-			{
-				if(e2 !=null) 
-				{
+			} else {
+				if(e2 !=null) {
 					targetEntity = e2.getUpperLabel();
-					log.debug("HEREEE0");
 					thatKey = a.getSqlLabel();
 					v.setIdentifier(plural(e2.getUnqualifiedLowerLabel()));
 					v.setType("Set<"+targetEntity+">");
@@ -594,22 +600,27 @@ public class SpringHibernateModel {
 
 
 
-	private ClassVariable findReferencedClassVariable(ClassVariable cv)
-	{
+	private ClassVariable findReferencedClassVariable(ClassVariable cv) {
 
 		DomainClass dc = findDomainByIdentifier(cv.getAttribute().getReferencedEntity().getUnqualifiedLabel());
 
-
 		Iterator<ClassVariable> cvIter = dc.getSymTable().iterator();
 
-		while(cvIter.hasNext())
-		{
+		while(cvIter.hasNext()) {
 			ClassVariable cv1 = cvIter.next();
-
-			if(cv1.getAttribute()!= null && cv1.getAttribType() !=  AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel()))
-				return cv1;
-			//				else
-				//					log.debug("Error on "+ cv.getIdentifier() +" with "+cv.getIdentifier());
+			if( cv1.getAttribute()!= null ){
+				
+				// log.debug("CV1 = "+cv1.getAttribType()+"."+cv1.getAttribute().getUnqualifiedLabel() + " : CV = " + cv.getAttribType()+"."+cv.getAttribute().getUnqualifiedLabel());
+				
+				if(cv1.getAttribType() != AttributeType.CHILD && cv1.getAttribute().getUnqualifiedLabel().equals(cv.getAttribute().getUnqualifiedLabel())){
+					// log.debug("found reference - "+ cv.getIdentifier() +" with "+cv1.getIdentifier());
+					return cv1;
+				} else {
+					// log.debug("Error on "+ cv.getIdentifier() +" with "+cv1.getIdentifier());
+				}
+			}else{
+				// log.debug(" attribute is null ");
+			}
 		}
 
 		return null;

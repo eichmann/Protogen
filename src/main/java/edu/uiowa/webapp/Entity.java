@@ -206,9 +206,14 @@ public class Entity extends ClayElement {
         parentLoop: for (int j = 0; j < getPrimaryKeyAttributes().size(); j++) {
             Attribute primaryKey = getPrimaryKeyAttributes().elementAt(j);
             for (int k = 0; k < parentKeyAttributes.size(); k++) {
-                if (primaryKey.getLabel().equals(parentKeyAttributes.elementAt(k).getLabel()))
+            	
+            	log.debug( this.label + " - " + primaryKey.getLabel() + " - " + parentKeyAttributes.elementAt(k).getLabel());
+            	
+                if (primaryKey.getLabel().equalsIgnoreCase(parentKeyAttributes.elementAt(k).getLabel()))
                     continue parentLoop;
             }
+            
+            log.debug(" adding "+primaryKey.getLabel()+" to "+this.label);
             subKeyAttributes.addElement(primaryKey);
         }
 

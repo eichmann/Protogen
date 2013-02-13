@@ -30,7 +30,7 @@ public class Attribute extends ClayElement {
     boolean mandatory = false;
     boolean primary = false;
     boolean autoIncrement = false;
-    boolean foreign = false;
+    private boolean foreign = false;
     boolean sequence = false;
     boolean counter = false;
     String sequenceName = null;
@@ -213,6 +213,12 @@ public class Attribute extends ClayElement {
     }
 
     public void setForeign(boolean foreign) {
+    	StackTraceElement[] cause = Thread.currentThread().getStackTrace();
+    	for( StackTraceElement ste : cause ){
+    		log.debug(ste.getMethodName());
+    	}
+    	
+    	log.debug("Attribute.setForeign called");
         this.foreign = foreign;
     }
 
