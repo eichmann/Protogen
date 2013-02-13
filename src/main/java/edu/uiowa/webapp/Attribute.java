@@ -238,7 +238,11 @@ public class Attribute extends ClayElement {
         sqlType = Character.toUpperCase(type.charAt(0)) + type.toLowerCase().substring(1);
         if (type.toLowerCase().equals("int"))
             type = "int";
+        else if (type.toLowerCase().equals("int identity"))
+            type = "int";
         else if (type.toLowerCase().equals("smallint"))
+            type = "int";
+        else if (type.toLowerCase().equals("tinyint"))
             type = "int";
         else if (type.toLowerCase().equals("integer"))
             type = "int";
@@ -262,6 +266,8 @@ public class Attribute extends ClayElement {
             type = "String";
         else if (type.toLowerCase().equals("varchar") || type.toLowerCase().equals("varchar2") || type.toLowerCase().equals("clob") || type.toLowerCase().equals("char"))
             type = "String";
+        else if (type.toLowerCase().equals("datetime"))
+            type = "Date";
         else if (type.toLowerCase().equals("date"))
             type = "Date";
         else if (type.toLowerCase().equals("time"))

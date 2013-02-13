@@ -128,8 +128,12 @@ public class Entity extends ClayElement {
 
     public void relabel() {
         relabel(true);
-        for (int i = 0; i < attributes.size(); i++)
-            attributes.elementAt(i).relabel();
+        for (int i = 0; i < attributes.size(); i++){
+        	attributes.elementAt(i).relabel();
+        }
+        for (int i = 0; i < primaryKeyAttributes.size(); i++){
+        	primaryKeyAttributes.elementAt(i).relabel();
+        }
     }
     
     public boolean hasDateTime() {

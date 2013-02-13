@@ -63,9 +63,9 @@ public class GeneratorTest  extends TestCase
     	props.setProperty("jsp.file.location",pathPrefix + "/target/clay/test/jsp"  + "src");
     	props.setProperty("test.file.location",pathPrefix + "/target/clay/test/javatest"  + "src");
     	
-//    	Generator gen = new Generator();
-//    	int result = gen.runGenerator(props);
-//        assertEquals("Error during domain code generation",0,result);
+    	Generator gen = new Generator();
+    	int result = gen.runGenerator(props);
+        assertEquals("Error during domain code generation",0,result);
     	
     }
 }

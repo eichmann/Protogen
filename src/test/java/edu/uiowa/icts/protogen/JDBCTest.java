@@ -56,7 +56,7 @@ public class JDBCTest  extends TestCase {
     	props.setProperty("test.file.location", pathPrefix + "/target/jdbc/test/javatest"  + "src");
     	
     	props.setProperty("model.source","jdbc");
-    	props.setProperty("db.schema","ryanlorentzen");
+    	props.setProperty("db.schema","dbo");
     	props.setProperty("db.url","jdbc:postgresql://localhost/test");
     	props.setProperty("db.username","test");
     	props.setProperty("db.password","test");

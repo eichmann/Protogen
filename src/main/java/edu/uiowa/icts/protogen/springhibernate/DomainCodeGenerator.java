@@ -65,6 +65,9 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 
 		out.write("package " + dc.getPackageName() + ";\n");
 		List<String> importList = new ArrayList<String>();
+		
+		importList.add("import org.apache.commons.logging.LogFactory;");
+		importList.add("import org.apache.commons.logging.Log;");
 		importList.add("import java.util.Set;");
 		importList.add("import java.util.*;");
 		importList.add("import " +  model.getPackageRoot()+ ".*;");
@@ -91,9 +94,15 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		out.write("@Embeddable\n");
 		out.write("@SuppressWarnings(\"serial\")\n");
 		out.write("public class " + entity.getUnqualifiedLabel() + "Id implements Serializable {\n");
+		
+		lines(out, 1);
+		spaces(out, 4);
+		out.write("private static final Log log = LogFactory.getLog(" + entity.getUnqualifiedLabel() + "Id.class);\n\n");
+		
 		lines(out, 1);
 		spaces(out, 4);
 		out.write("//Table attribute definitions\n");
+		
 		Iterator<Attribute> attribIter0 = entity.getPrimaryKeyAttributes().iterator();
 		while(attribIter0.hasNext()) {
 			Attribute attrib = attribIter0.next();

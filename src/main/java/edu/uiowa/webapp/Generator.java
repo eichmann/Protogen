@@ -78,6 +78,7 @@ public class Generator {
 				log.error("Could load JDBC", e);
 				error=1;
 			}
+			
 			theLoader.getDatabase().setLabel(projectName);
 			theLoader.getDatabase().relabel();
 		}
