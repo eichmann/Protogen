@@ -35,11 +35,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	public void run(Properties prop) throws Exception {
 
-
-
 		String schema= prop.getProperty("db.schema");
-
-
 
 		connect(prop);
 		DatabaseMetaData dbMeta = conn.getMetaData();
@@ -47,50 +43,36 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 		log.debug("Database: "+dbMeta.getDatabaseProductName()+" "+dbMeta.getDatabaseProductVersion());
 		log.debug("JDBC Version: "+dbMeta.getDriverName()+"."+dbMeta.getDriverVersion());
 
-
 		setupDatabase(dbMeta);
 
-
 		/*
-		 * if schema is defined, use;otherwise run on all schemas
+		 * if schema is defined, use, otherwise run on all schemas
 		 */
-		if(schema!=null)
-		{
+		if(schema != null) {
 			Schema s = createSchema(dbMeta, schema);
 			database.getSchemas().add(s);
-
-		}
-		else
-		{
-
+		} else {
 			ResultSet schemasRS = dbMeta.getSchemas();
 			log.debug("All Schemas");
-			while(schemasRS.next())
-			{
-
+			while(schemasRS.next()) {
 				Schema s = createSchema(dbMeta, schemasRS.getString(1));
 				database.getSchemas().add(s);
-
 			}
 		}
 
 		updateForeignKeys(dbMeta);
 
-		for(Schema s:database.getSchemas())
-		{
+		for(Schema s:database.getSchemas()) {
 			for (int i = 0; i < s.getRelationships().size(); i++) {
 				Relationship currentRelationship = s.getRelationships().elementAt(i);
 				if (currentRelationship.sourceEntity == null) {
-					{
-						log.debug("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + s.getEntityByLabel(currentRelationship.getSourceEntityName()));
-						currentRelationship.setSourceEntity(s.getEntityByLabel(currentRelationship.getSourceEntityName()));
-					}
+					log.debug("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + s.getEntityByLabel(currentRelationship.getSourceEntityName()));
+					currentRelationship.setSourceEntity(s.getEntityByLabel(currentRelationship.getSourceEntityName()));
 				}
 				currentRelationship.getSourceEntity().setChild(currentRelationship);
 			}
-			for(Entity e:s.getEntities())
-			{
-
+			
+			for(Entity e:s.getEntities()) {
 				e.generateParentKeys();
 				e.generateSubKeys();
 				e.matchRemarks();
@@ -199,8 +181,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 			count++;
 			rs.close();
 			return;
-		}
-		else if(dbMeta.getDatabaseProductName().equalsIgnoreCase("Teiid Server")){
+		} else if(dbMeta.getDatabaseProductName().equalsIgnoreCase("Teiid Server")) {
 			log.debug("...using teiid server lookup");
 			
 			ArrayList<String> rels = new ArrayList<String>();
@@ -260,22 +241,48 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 		int count =0;
 		for(Schema s:database.getSchemas())
-			for(Entity e:s.getEntities())
-			{
-				ResultSet rs= dbMeta.getExportedKeys(null, s.getLabel(), e.getLabel());
+			for(Entity e:s.getEntities()) {
+				ResultSet rs = dbMeta.getExportedKeys(null, s.getLabel(), e.getLabel());
 
-				if(count==0)
+				if(count==0) {
 					printColumns(rs);
-				while(rs.next())
-				{
+				}
+				
+				ArrayList<String> rels = new ArrayList<String>();
+				while(rs.next()) {
 
-					String pkschema= rs.getString(2);
-					String pktable= rs.getString(3);
-					String pkcolumn = rs.getString(4);
-					String fkschema= rs.getString(6);
-					String fktable= rs.getString(7);
-					String fkcolumn = rs.getString(8);
-					log.debug("...."+pkcolumn+" -> "+fkcolumn);
+					/*
+					pktable_cat = null
+					pktable_schem = rrlorentzen
+					pktable_name = movie
+					pkcolumn_name = movie_id
+					fktable_cat = null
+					fktable_schem = rrlorentzen
+					fktable_name = review
+					fkcolumn_name = movie_id
+					key_seq = 1
+					update_rule = 3
+					delete_rule = 3
+					fk_name = fk_review_2
+					pk_name = movie_pkey
+					deferrability = 7
+					*/
+					
+					log.debug("------------------------------------------");
+					for( int i=1; i <= rs.getMetaData().getColumnCount(); i++ ){
+						log.debug(rs.getMetaData().getColumnLabel(i)+" = "+rs.getString(i));
+					}
+					log.debug("------------------------------------------");
+					
+					String pkschema = rs.getString("pktable_schem");
+					String pktable= rs.getString("pktable_name");
+					String pkcolumn = rs.getString("pkcolumn_name");
+					
+					String fkschema= rs.getString("fktable_schem");
+					String fktable= rs.getString("fktable_name");
+					String fkcolumn = rs.getString("fkcolumn_name");
+					
+					log.debug("...."+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn);
 
 					Schema pks = getSchema(pkschema);
 					Entity pke = getEntity(pks, pktable);
@@ -297,14 +304,31 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 					fka.getChildAttributes().add(pka);
 
 					Relationship r = new Relationship();
-					r.setSourceEntity(fke);
-					r.setTargetEntity(pke);
-					r.setForeignReferencedAttributeMapping(pkcolumn, fkcolumn);
+					r.setSourceEntity(pke);
+					r.setSourceEntityName(pke.getLabel());
+					
+					r.setTargetEntity(fke);
+					
 					r.setLabel("foreign_key");
-					pka.setReferencedEntityName(fktable);
-					pka.setParentAttribute(fka);
-					fke.setChild(r);
-					s.getRelationships().add(r);
+					
+					fke.setParent(r);
+					fks.getRelationships().add(r);
+					
+					if(!rels.contains(pktable+"."+pkcolumn+"->"+fktable+"."+fkcolumn)){
+						rels.add(pktable+"."+pkcolumn+"->"+fktable+"."+fkcolumn);
+						
+						fke.setParent(r);
+						fks.getRelationships().add(r);
+						
+						r.setForeignReferencedAttributeMapping(fka.getLabel(),pka.getLabel());
+					}else{
+						log.debug("relationship exists: "+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn); 
+					}
+					
+					fka.setForeign(true);
+					fka.setReferencedEntityName(pktable);
+					
+					log.debug("Relationship:"+r);
 				}
 				count++;
 
@@ -385,17 +409,14 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	}
 
-	private Schema createSchema(DatabaseMetaData dbMeta, String label) throws SQLException
-	{
+	private Schema createSchema(DatabaseMetaData dbMeta, String label) throws SQLException {
 		Schema schema = new Schema();
 		schema.setLabel(label);
 		String[] types = {"TABLE"};
 		ResultSet rs = dbMeta.getTables(null, label, "%",types);
 		log.debug("------------");
-		log.debug("Tables in "+schema);
-		while(rs.next())
-		{
-
+		// log.debug("Tables in "+schema);
+		while(rs.next()) {
 			String x = rs.getString(3);
 			if(!x.endsWith("_pkey")){
 				Entity e = createEntity(dbMeta,rs.getString(3));

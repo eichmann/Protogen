@@ -260,6 +260,8 @@ public class Attribute extends ClayElement {
             type = "Date";
         else if (type.toLowerCase().equals("time"))
             type = "Date";
+        else if (type.toLowerCase().equals("timetz"))
+            type = "Date";
         else if (type.toLowerCase().equals("timestamp"))
             type = "Date";
         else if (type.toLowerCase().equals("timestamptz"))
