@@ -382,38 +382,23 @@ public class DomainClass
 	public List<ClassVariable> getForeignClassVariables() {
 		List<ClassVariable> cvList = new ArrayList<ClassVariable>();
 		Iterator<ClassVariable> symIter = symTable.iterator();
-		while(symIter.hasNext())
-		{
+		while(symIter.hasNext()) {
 			ClassVariable cv = symIter.next();
-			
-			
-			log.debug( cv.getLowerIdentifier() + "" + cv.getAttribType()  );
 			
 			if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE){
 				cvList.add(cv);
 			}
-			
 		}
-		
 		return cvList;
 	}
 	
 	public List<ClassVariable> getNonKeys() {
 		List<ClassVariable> cvList = new ArrayList<ClassVariable>();
-	
-		
-		
-		for(ClassVariable cv: symTable)
-		{
-			
-			log.debug( cv.getLowerIdentifier() + "" + cv.getAttribType()  );
-			
+		for(ClassVariable cv: symTable) {
 			if(!cv.isPrimary() ){
 				cvList.add(cv);
 			}
-		
 		}
-		
 		return cvList;
 	}
 
