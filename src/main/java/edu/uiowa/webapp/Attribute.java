@@ -213,12 +213,12 @@ public class Attribute extends ClayElement {
     }
 
     public void setForeign(boolean foreign) {
-    	StackTraceElement[] cause = Thread.currentThread().getStackTrace();
-    	for( StackTraceElement ste : cause ){
-    		log.debug(ste.getMethodName());
-    	}
-    	
-    	log.debug("Attribute.setForeign called");
+//    	StackTraceElement[] cause = Thread.currentThread().getStackTrace();
+//    	for( StackTraceElement ste : cause ){
+//    		log.debug(ste.getMethodName());
+//    	}
+//    	
+//    	log.debug("Attribute.setForeign called");
         this.foreign = foreign;
     }
 
