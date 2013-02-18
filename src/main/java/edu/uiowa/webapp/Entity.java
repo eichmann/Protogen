@@ -131,9 +131,11 @@ public class Entity extends ClayElement {
         for (int i = 0; i < attributes.size(); i++){
         	attributes.elementAt(i).relabel();
         }
-        for (int i = 0; i < primaryKeyAttributes.size(); i++){
-        	primaryKeyAttributes.elementAt(i).relabel();
-        }
+        
+        // breaks hibernate primary key columns in domain objects 
+//        for (int i = 0; i < primaryKeyAttributes.size(); i++){
+//        	primaryKeyAttributes.elementAt(i).relabel();
+//        }
     }
     
     public boolean hasDateTime() {
