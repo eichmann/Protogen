@@ -18,7 +18,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
@@ -50,25 +49,29 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		
 		List<String> importList = new ArrayList<String>();
 		
-		importList.add("import java.io.IOException;");
-		importList.add("import java.util.ArrayList;");
-		importList.add("import java.util.List;");
-		importList.add("import javax.servlet.http.HttpServletRequest;");
-		importList.add("import javax.servlet.http.HttpServletResponse;");
-		importList.add("import java.io.ByteArrayInputStream;");
-		importList.add("import java.io.InputStream;");
-		importList.add("import org.apache.commons.io.IOUtils;");
-		
-		importList.add("import java.util.Date;");
+		importList.add("import "+dc.getPackageName()+".*;");
+		importList.add("import "+daoPackageName+".*;");
 		importList.add("import edu.uiowa.icts.spring.*;");
 		importList.add("import edu.uiowa.icts.util.SortColumn;");
+		
+		importList.add("import java.io.IOException;");
+		importList.add("import java.io.StringReader;");
+		
+		importList.add("import javax.servlet.http.HttpServletRequest;");
+		importList.add("import javax.servlet.http.HttpServletResponse;");
+
+		importList.add("import java.util.ArrayList;");
+		importList.add("import java.util.List;");
+		importList.add("import java.util.Date;");
+		
 		importList.add("import org.json.JSONArray;");
 		importList.add("import org.json.JSONException;");
 		importList.add("import org.json.JSONObject;");
-		importList.add("import "+dc.getPackageName()+".*;");
-		importList.add("import "+daoPackageName+".*;");
+		
+		importList.add("import org.apache.commons.io.IOUtils;");
 		importList.add("import org.apache.commons.logging.LogFactory;");
 		importList.add("import org.apache.commons.logging.Log;");
+		
 		importList.add("import org.springframework.stereotype.Controller;");
 		importList.add("import org.springframework.ui.ModelMap;");
 		importList.add("import org.springframework.web.bind.annotation.RequestMapping;");
@@ -272,32 +275,55 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent*2)+"@RequestParam(value=\"sSearch\", required=false) String search, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"display\", required=false, defaultValue=\"list\") String display ) {\n\n");
 		output.append(indent(indent*2)+"ArrayList<SortColumn> sorts = new ArrayList<SortColumn>();\n");
-		output.append(indent(indent*2)+"String[] colArr = columns.split(\",\");\n\n");
-			
-		output.append(indent(indent*2)+"for( int i = 0; i < sortingColsCount; i++){\n");
-		output.append(indent(indent*3)+"if( i < colArr.length ){\n");
-		output.append(indent(indent*4)+"Integer colnum = null;\n");
-		output.append(indent(indent*4)+"String col = request.getParameter(\"iSortCol_\"+i);\n");
-		output.append(indent(indent*4)+"if(col != null){\n");
-		output.append(indent(indent*5)+"try {\n");
-		output.append(indent(indent*6)+"colnum = Integer.parseInt(col);\n");
-		output.append(indent(indent*5)+"} catch (NumberFormatException e) {\n");
-		output.append(indent(indent*6)+"continue;\n");
-		output.append(indent(indent*5)+"}\n");
-		output.append(indent(indent*5)+"if(colnum != null){\n");
-		output.append(indent(indent*6)+"sorts.add(new SortColumn(colArr[colnum], request.getParameter(\"sSortDir_\"+i)));\n");
-		output.append(indent(indent*5)+"}\n");
-		output.append(indent(indent*4)+"}\n");
-		output.append(indent(indent*3)+"}\n");
-		output.append(indent(indent*2)+"}\n\n");
-		
-		output.append(indent(indent*2)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list(start, limit, sorts);\n");
-		
+	
 		indent += 4;
 		output.append(indent(indent)+"try {\n");
 		
 		indent += 4;
 		
+		output.append(indent(indent)+"String[] colArr = columns.split(\",\");\n\n");
+		output.append(indent(indent)+"for( int i = 0; i < sortingColsCount; i++){\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"if( i < colArr.length ){\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"Integer colnum = null;\n");
+		output.append(indent(indent)+"String col = request.getParameter(\"iSortCol_\"+i);\n");
+		output.append(indent(indent)+"if(col != null){\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"try {\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"colnum = Integer.parseInt(col);\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"} catch (NumberFormatException e) {\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"continue;\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n");
+		output.append(indent(indent)+"if(colnum != null){\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"sorts.add(new SortColumn(colArr[colnum], request.getParameter(\"sSortDir_\"+i)));\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n\n");
+
+		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list(start, limit, sorts);\n");
 		output.append(indent(indent)+"Long count = "+accessor+".count();\n");
 		output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
 		output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
@@ -396,25 +422,26 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"}\n");
         output.append(indent(indent)+"ob.put(\"aaData\", jsonArray);\n\n");
         	
-        output.append(indent(indent)+"InputStream inputStream = new ByteArrayInputStream(ob.toString().getBytes());\n");
-        output.append(indent(indent)+"IOUtils.copy(inputStream, response.getOutputStream());\n");
-        output.append(indent(indent)+"inputStream.close();\n");
+        output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n");
+        output.append(indent(indent)+"IOUtils.copy(reader, response.getOutputStream());\n");
+        output.append(indent(indent)+"reader.close();\n");
         
         indent -= 4;
         	
-        output.append(indent(indent)+"} catch (IOException e) {\n");
+        output.append(indent(indent)+"} catch (Exception e) {\n");
         
         indent += 4;
         
         output.append(indent(indent)+"log.error(\"error builing datatable json object\",e);\n");
-        
-        indent -= 4;
-        
-        output.append(indent(indent)+"} catch (JSONException e) {\n");
-        
-        indent += 4;
-        
-        output.append(indent(indent)+"log.error(\"error builing datatable json object\",e);\n");
+        output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
+        output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
+        output.append(indent(indent)+"ob.put(\"iTotalDisplayRecords\", 0);\n");
+        output.append(indent(indent)+"ob.put(\"iTotalRecords\", 0);\n");
+        output.append(indent(indent)+"ob.put(\"error\", e.getMessage());\n");
+        output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n"); 
+        output.append(indent(indent)+"IOUtils.copy(reader, response.getOutputStream());\n");
+        output.append(indent(indent)+"reader.close();\n");
+        output.append(indent(indent)+"return;\n");
         
         indent -= 4;
         
