@@ -182,7 +182,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += spaces(indent) + "<table id=\""+ec.getIdentifier().toLowerCase()+"Table\" class=\"table table-bordered table-striped table-hover\">";
 		output += lines(1);
 		indent += 4;
-		output += "<%-- table filled by setDataTable call below --%>";
+		output += spaces(indent) + "<%-- table filled by setDataTable call below --%>";
 		output += lines(1);
 		indent -= 4;
 		output += spaces(indent) + "</table>";
