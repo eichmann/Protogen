@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.webapp.Attribute;
 
 
@@ -170,12 +169,22 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		
 		output += lines(1);
 		output += spaces(indent) + "<a href=\"add.html\" class=\"btn\">Add</a>";
+		output += lines(2);
+		output += spaces(indent) + "<div id=\"error_div\" class=\"alert alert-error\" style=\"display: none;\">";
 		output += lines(1);
+		indent += 4;
+		output += spaces(indent) + "<%-- div for showing errors, see messager.js.showMessage --%>";
+		output += lines(1);
+		indent -= 4;
+		output += spaces(indent) + "</div>";
+		output += lines(2);
 		
 		output += spaces(indent) + "<table id=\""+ec.getIdentifier().toLowerCase()+"Table\" class=\"table table-bordered table-striped table-hover\">";
 		output += lines(1);
+		indent += 4;
 		output += "<%-- table filled by setDataTable call below --%>";
 		output += lines(1);
+		indent -= 4;
 		output += spaces(indent) + "</table>";
 		output += lines(2);
 		
