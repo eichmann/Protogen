@@ -364,9 +364,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 			}
 		}
         
-        output.append(indent(indent)+"urls += \"<a href=\\\"show.html?\\\"\"+"+params+"\">[view]</a>\";\n");
-        output.append(indent(indent)+"urls += \"<a href=\\\"edit.html?\\\"\"+"+params+"\">[edit]</a>\";\n");
-        output.append(indent(indent)+"urls += \"<a href=\\\"delete.html?\\\"\"+"+params+"\">[delete]</a>\";\n");
+        output.append(indent(indent)+"urls += \"<a href=\\\"show.html?\"+"+params+"\"\\\">[view]</a>\";\n");
+        output.append(indent(indent)+"urls += \"<a href=\\\"edit.html?\"+"+params+"\"\\\">[edit]</a>\";\n");
+        output.append(indent(indent)+"urls += \"<a href=\\\"delete.html?\"+"+params+"\"\\\">[delete]</a>\";\n");
 
         indent -= 4;
         
