@@ -446,7 +446,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"} catch (Exception e) {\n");
         
         indent += 4;
+        output.append(indent(indent)+"try {\n");
         
+        indent += 4;
         output.append(indent(indent)+"log.error(\"error builing datatable json object\",e);\n");
         output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
         output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
@@ -457,9 +459,22 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"IOUtils.copy(reader, response.getOutputStream());\n");
         output.append(indent(indent)+"reader.close();\n");
         output.append(indent(indent)+"return;\n");
+        indent -= 4;
+        output.append(indent(indent)+"} catch (JSONException je) {\n");
+        
+        indent += 4;
+        output.append(indent(indent)+"log.error(\"error writing json error to page\", je);\n");
         
         indent -= 4;
+        output.append(indent(indent)+"} catch (IOException ioe) {\n");
         
+        indent += 4;
+        output.append(indent(indent)+"log.error(\"error writing json error to page\", ioe);\n");
+        
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
+        
+        indent -= 4;
         output.append(indent(indent)+"}\n");
 		
         indent -= 4;
