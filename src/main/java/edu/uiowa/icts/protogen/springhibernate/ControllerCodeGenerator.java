@@ -322,9 +322,24 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		
 		indent -= 4;
 		output.append(indent(indent)+"}\n\n");
+		
+		output.append(indent(indent)+"ArrayList<String> searchColumns = new ArrayList<String>();\n");
+		output.append(indent(indent)+"for(String column : colArr){\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"if( !\"urls\".equals(column) ){\n");
+		
+		indent += 4;
+		output.append(indent(indent)+"searchColumns.add(column);\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n\n");
 
-		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list(start, limit, sorts);\n");
-		output.append(indent(indent)+"Long count = "+accessor+".count();\n");
+		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( start, limit, search, searchColumns, sorts );\n");
+		output.append(indent(indent)+"Integer count = "+accessor+".count( search, searchColumns );\n\n");
 		output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
 		output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
 		output.append(indent(indent)+"ob.put(\"iTotalDisplayRecords\", count);\n");
