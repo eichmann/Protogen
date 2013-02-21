@@ -336,20 +336,20 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		indent -= 4;
 		output.append(indent(indent)+"}\n\n");
 		
+		output.append(indent(indent)+"Boolean searchable;\n");
 		output.append(indent(indent)+"ArrayList<String> searchColumns = new ArrayList<String>();\n");
-		output.append(indent(indent)+"for(String column : colArr){\n");
+		output.append(indent(indent)+"for( int i = 0; i < numberColumns; i++ ){\n");
 		
 		indent += 4;
-		output.append(indent(indent)+"if( !\"urls\".equals(column) ){\n");
+		output.append(indent(indent)+"searchable = Boolean.valueOf(request.getParameter(\"bSearchable_\"+i));\n");
+		output.append(indent(indent)+"if( searchable ){\n");
 		
 		indent += 4;
-		output.append(indent(indent)+"searchColumns.add(column);\n");
-		
-		indent -= 4;
-		output.append(indent(indent)+"}\n");
-		
-		indent -= 4;
-		output.append(indent(indent)+"}\n\n");
+		output.append(indent(indent)+"searchColumns.add(colArr[i]);\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n\n");
 
 		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( start, limit, search, searchColumns, sorts );\n");
 		output.append(indent(indent)+"Integer count = "+accessor+".count( search, searchColumns );\n\n");

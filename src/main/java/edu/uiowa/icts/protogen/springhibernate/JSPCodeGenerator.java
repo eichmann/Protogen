@@ -214,15 +214,15 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			cv = cvIter.next();
 			if ( cv.isPrimary() && ec.isUsesCompositeKey() ) {
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
-					output += spaces(indent) + "cols.push({ \"sName\": \"" + a.getLowerLabel() + "\", \"sTitle\":\"" + a.getLabel() + "\",	\"sClass\":\"\", \"bSortable\":true });";
+					output += spaces(indent) + "cols.push({ \"sName\": \"" + a.getLowerLabel() + "\", \"sTitle\":\"" + a.getLabel() + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
 					output += lines(1);
 				}
 			} else {
-				output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":true });";
+				output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
 				output += lines(1);
 			}
 		}
-		output += spaces(indent) + "cols.push({ \"sName\": \"urls\", \"sTitle\":\"\", \"sClass\":\"\", \"bSortable\":false });";
+		output += spaces(indent) + "cols.push({ \"sName\": \"urls\", \"sTitle\":\"\", \"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
 		output += lines(1);
 		output += spaces(indent) + "setDataTable('"+ec.getIdentifier().toLowerCase()+"Table',10,0,'${datatableUrl}',cols);";
 		indent -= 4;
