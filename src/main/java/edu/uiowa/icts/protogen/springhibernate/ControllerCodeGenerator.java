@@ -130,6 +130,8 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		spaces(out, 4);
 		out.write("private static final Log log = LogFactory.getLog("+className+".class);\n\n");
 
+		out.write(generateNoScriptListMethod(dc, accessor,jspPath, 4));
+		lines(out,2);
 		out.write(generateListMethod(dc, accessor,jspPath, 4));
 		lines(out,2);
 		out.write(generateDataTableMethod(dc, accessor,jspPath, 4));
@@ -254,9 +256,18 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		StringBuffer output = new StringBuffer();
 		output.append(indent(indent)+"@RequestMapping(value = \"list.html\", method = RequestMethod.GET)\n");
 		output.append(indent(indent)+"public ModelAndView list() {\n");
+		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/list\");\n");
+		output.append(indent(indent)+"}");
+		return output.toString();
+	}
+	
+	public String generateNoScriptListMethod(DomainClass dc ,String accessor,String jspPath, int indent) {
+		StringBuffer output = new StringBuffer();
+		output.append(indent(indent)+"@RequestMapping(value = \"list_alt.html\", method = RequestMethod.GET)\n");
+		output.append(indent(indent)+"public ModelAndView listNoScript() {\n");
 		output.append(indent(indent*2)+"ModelMap model = new ModelMap();\n");
 		output.append(indent(indent*2)+"model.addAttribute(\""+dc.getLowerIdentifier()+"List\","+accessor+".list());\n");
-		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/list\",model);\n");
+		output.append(indent(indent*2)+"return new ModelAndView(\""+jspPath+"/list_alt\", model);\n");
 		output.append(indent(indent)+"}");
 		return output.toString();
 	}
@@ -277,9 +288,11 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent*2)+"ArrayList<SortColumn> sorts = new ArrayList<SortColumn>();\n");
 	
 		indent += 4;
-		output.append(indent(indent)+"try {\n");
+		output.append(indent(indent)+"try {\n\n");
 		
 		indent += 4;
+		
+		output.append(indent(indent)+"response.setContentType(\"application/json\");\n\n");
 		
 		output.append(indent(indent)+"String[] colArr = columns.split(\",\");\n\n");
 		output.append(indent(indent)+"for( int i = 0; i < sortingColsCount; i++){\n");

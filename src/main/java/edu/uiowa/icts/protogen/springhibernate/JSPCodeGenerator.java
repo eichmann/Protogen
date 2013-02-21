@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
+import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.webapp.Attribute;
 
 
@@ -47,6 +48,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			DomainClass ec = ecIter.next();
 			generateShowJSP(ec);
 			generateListJSP(ec);
+			generateListAltJSP(ec);
 			generateEditJSP(ec);
 		}
 	}
@@ -352,7 +354,159 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		log.debug(".........done");
 	}
 	
+	private void generateListAltJSP(DomainClass ec) throws IOException {
+		
+		log.debug("GeneratingListJSP:"+ec.getIdentifier());
+		log.debug("...."+ ec.getIdentifier());
+		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
+		
+		(new File(directory )).mkdirs();
+		
+		String jspFile = directory+ "/list_alt.jsp";
+		int indent = 0;
+		
+		String output= spaces(indent) + "<%@ include file=\"/WEB-INF/include.jsp\"  %>";
+		output += lines(2);
+
+		output += "<h2>"+ec.getIdentifier()+" List</h2>";
+		output += lines(1);
+		
+		output += lines(1);
+		output += spaces(indent) + "<a href=\"add.html\" class=\"btn\">Add</a>";
+		output += lines(2);
+		output += spaces(indent) + "<div id=\"error_div\" class=\"alert alert-error\" style=\"display: none;\">";
+		output += lines(1);
+		indent += 4;
+		output += spaces(indent) + "<%-- div for showing errors, see messager.js.showMessage --%>";
+		output += lines(1);
+		indent -= 4;
+		output += spaces(indent) + "</div>";
+		output += lines(2);
+		
+		output += spaces(indent) + "<table class=\"table table-bordered table-striped table-hover\">";
+		output += lines(1);
+		indent += 4;
+		
+		output += spaces(indent) + "<thead>";
+		output += lines(1);
+		indent += 4;
 	
+		Iterator<ClassVariable> cvIter = ec.listAllIter();
+		output += spaces(indent) + "<tr>";
+		output += lines(1);
+		indent += 4;
+
+		while(cvIter.hasNext()) {
+			ClassVariable cv = cvIter.next();	
+			output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
+			output += lines(1);
+		}
+		output += spaces(indent) + "<th></th>";
+		output += lines(1);
+		indent -= 4;
+		
+		output += spaces(indent) + "</tr>";
+		output += lines(1);
+		indent -=4;
+
+		output += spaces(indent) + "</thead>";
+		output += lines(1);
+		
+		cvIter = ec.listAllIter();
+		output += spaces(indent) + "<tbody>";
+		
+		output += lines(1);
+		indent += 4;
+		
+		output += spaces(indent) + "<c:forEach items=\"${"+ec.getLowerIdentifier()+"List}\" var=\""+ec.getLowerIdentifier()+"\"  varStatus=\"status\">";
+		output += lines(1);
+		indent += 4;
+		
+		output += spaces(indent) + "<tr>";
+		output += lines(1);
+		indent +=4;
+		
+		String links="";
+		while(cvIter.hasNext()) {
+			
+			ClassVariable cv = cvIter.next();
+			log.debug(cv.getLowerIdentifier()+" : "+cv.getRelationshipType()+" : "+cv.getAttribType());
+			
+			if (cv.isPrimary()) {
+				if(ec.isUsesCompositeKey() && cv.isPrimary()) {
+
+					List<String[]> compositeKeys = new ArrayList<String[]>();
+					for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
+						compositeKeys.add(new String[] {a.getLowerLabel(), ec.getLowerIdentifier()+".id."+a.getLowerLabel() });
+					}
+				
+					String params = "";
+					String label = "";
+					for(String[] starray :compositeKeys) {
+						params += starray[0]+"=${"+starray[1] + "}&";
+						label += "("+starray[0]+",${"+starray[1]+"})";
+					}
+					params = params.substring(0, params.length()-1);
+					links += "<td><a href=\"edit.html?"+params+"\">[edit]</a> ";
+					links += "<a href=\"show.html?"+params+"\">[view]</a>";
+					links += " <a href=\"delete.html?"+params+"\">[delete]</a></td>";
+					output += "<td><a href=\"edit.html?"+params+"\">"+label+"</a></td> ";
+				} else {
+					links += spaces(indent) + "<td>";
+					indent += 4;
+					links += lines(1);
+					links += spaces(indent) + "<a href=\"edit.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">edit</a> ";
+					links += lines(1);
+					links += spaces(indent) + "<a href=\"show.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">view</a>";
+					links += lines(1);
+					links += spaces(indent) + "<a href=\"delete.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">delete</a>";
+					links += lines(1);
+					indent -= 4;
+					links += spaces(indent) + "</td>";
+					
+					output += spaces(indent) +"<td><a href=\"edit.html?"+cv.getIdentifier()+"=${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}\">${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</a></td>";
+				}
+			} else if( cv.getRelationshipType() == RelationshipType.ONETOMANY) {
+				output += spaces(indent) +"<td>"+cv.getLowerIdentifier() + "</td>";
+	//			output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getIdentifier() + "}</td>";
+			} else if( cv.getRelationshipType() == RelationshipType.MANYTOMANY) {
+				//output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getLowerIdentifier() + "}</td>";
+				output += spaces(indent) +"<td>"+cv.getLowerIdentifier() + "</td>";
+			} else if(cv.getRelationshipType() == RelationshipType.MANYTOONE){
+				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getDomainClass().getLowerIdentifier()+"."+cv.getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</td>";
+			} else if(cv.getAttribType() == AttributeType.CHILD){
+				output += spaces(indent) +"<td>"+cv.getIdentifier() + "</td>";
+			}else{
+				output += spaces(indent) +"<td>${" +ec.getLowerIdentifier()+"."+cv.getIdentifier() + "}</td>";
+			}
+			output += lines(1);
+		}
+		
+		output += links;
+		indent -= 4;
+		output += lines(1);
+		
+		output += spaces(indent) + "</tr>";
+		output += lines(1);
+		indent -= 4;
+		
+		output += spaces(indent) + "</c:forEach>";
+		indent -= 4;
+		output += lines(1);
+		
+		output += spaces(indent) + "</tbody>";
+		indent -= 4;
+		output += lines(1);
+		
+		output += spaces(indent) + "</table>";
+	
+		File file = new File(jspFile);
+		FileWriter fstream = new FileWriter(file);
+		BufferedWriter out = new BufferedWriter(fstream);
+		out.write(output);
+		out.close();
+		log.debug(".........done");
+	}
 	
 
 	private void generateEditJSP(DomainClass ec) throws IOException {
