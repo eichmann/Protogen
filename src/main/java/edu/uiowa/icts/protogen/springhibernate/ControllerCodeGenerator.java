@@ -463,11 +463,20 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         
         indent += 4;
         output.append(indent(indent)+"log.error(\"error builing datatable json object\",e);\n");
+        
+        output.append(indent(indent)+"String stackTrace = \"\";\n");
+        output.append(indent(indent)+"for( StackTraceElement ste : e.getStackTrace() ){\n");
+        indent += 4;
+        output.append(indent(indent)+"stackTrace += ste.toString()+\"<br/>\";\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
+        
         output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
         output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
         output.append(indent(indent)+"ob.put(\"iTotalDisplayRecords\", 0);\n");
         output.append(indent(indent)+"ob.put(\"iTotalRecords\", 0);\n");
         output.append(indent(indent)+"ob.put(\"error\", e.getMessage());\n");
+        output.append(indent(indent)+"ob.put(\"stackTrace\", stackTrace);\n");
         output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n"); 
         output.append(indent(indent)+"IOUtils.copy(reader, response.getOutputStream());\n");
         output.append(indent(indent)+"reader.close();\n");
