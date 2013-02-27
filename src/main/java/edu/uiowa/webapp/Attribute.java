@@ -249,7 +249,11 @@ public class Attribute extends ClayElement {
         else if (type.toLowerCase().equals("int4"))
             type = "int";
         else if (type.toLowerCase().equals("numeric"))
-            type = "int";
+            type = "float"; // could be double
+        else if (type.toLowerCase().equals("money"))
+            type = "float"; // floats are single precision, do not need double precision for money 
+        else if (type.toLowerCase().equals("numeric identity"))
+        	type = "int"; // usually primary key column
         else if (type.toLowerCase().equals("number"))
             type = "int";
         else if (type.toLowerCase().equals("decimal"))
