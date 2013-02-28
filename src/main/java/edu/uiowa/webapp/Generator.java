@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.BaseTestCodeGenerator;
+import edu.uiowa.icts.protogen.springhibernate.ColumnDeobfuscationCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ControllerCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.DAOCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.JSPCodeGenerator;
@@ -134,103 +135,105 @@ public class Generator {
 					error = 1;
 				}
 			}
-		}
-		else
-		{
+		} else {
 
 			SpringHibernateModel model = new SpringHibernateModel(theDatabase, packageName);
 
 			/*
 			 * generate.domain = true 
-			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.domain", "true"))) {
 				String domainPath = props.getProperty("domain.file.location",pathPrefix + projectName+ "/"  + "src");
 				DomainCodeGenerator codeGen = new DomainCodeGenerator(model,domainPath,packageName);
-					try {
-						log.debug("***********Writing domain code*****************");
-						codeGen.generate();
-					} catch (IOException e) {
-						log.debug("Error writing domain code");
-						log.error("Error writing domain code", e);
-						error=1;
-					}
-			}
-			else
+				try {
+					log.debug("***********Writing domain code*****************");
+					codeGen.generate();
+				} catch (IOException e) {
+					log.debug("Error writing domain code");
+					log.error("Error writing domain code", e);
+					error=1;
+				}
+			} else {
 				log.debug("Not generating domain code");
+			}
 
 			/*
 			 * generate.dao = true 
-			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.dao", "true"))) {
 				String daoPath = props.getProperty("dao.file.location",	pathPrefix +projectName+ "/"  + "src");
 				
-				DAOCodeGenerator codeGen = new DAOCodeGenerator(model,daoPath,packageName);
+				DAOCodeGenerator codeGen = new DAOCodeGenerator(model,daoPath,packageName,props);
 				
 				try {
-						codeGen.generate();
-				
+					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate DAO Classes: " +daoPath, e3);
 					error=1;
 				}
-			}
-			else
+			} else {
 				log.debug("Not generating dao code");
-
-			
+			}
 
 			/*
 			 * generate.controller = true 
-			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.controller", "true"))) {
 				String controllerPath = props.getProperty("controller.file.location",	pathPrefix +projectName+ "/"  + "src");
 				ControllerCodeGenerator codeGen = new ControllerCodeGenerator(model,controllerPath,packageName);
 				try {
-					
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate Controller Classes: " +controllerPath, e3);
 					error=1;
 				}
-			}
-			else
+			} else {
 				log.debug("Not generating controller code");
+			}
 			
 			
 			/*
 			 * generate.jsp = true 
-			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.jsp", "true"))) {
 				String jspPath = props.getProperty("jsp.file.location",	pathPrefix +projectName+ "/"  + "src");
-				JSPCodeGenerator codeGen = new JSPCodeGenerator(model,jspPath,packageName);
+				JSPCodeGenerator codeGen = new JSPCodeGenerator(model,jspPath,packageName,props);
 				try {
-					
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate JSP files: " +jspPath, e3);
 					error=1;
 				}
-			}
-			else
+			} else {
 				log.debug("Not generating jsp code");
-			
+			}
 			
 			/*
 			 * generate.test = true 
-			 * 
 			 */
 			if (Boolean.parseBoolean(props.getProperty("generate.test", "true"))) {
 				String testPath = props.getProperty("test.file.location",	pathPrefix +projectName+ "/"  + "src");
 				BaseTestCodeGenerator codeGen = new BaseTestCodeGenerator(model,testPath,packageName);
 				try {
-					
 					codeGen.generate();
 				} catch (Exception e3) {
 					log.error("Could not generate Test Classes: " + testPath, e3);
+					error=1;
+				}
+			} else {
+				log.debug("Not generating test code");
+			}
+			
+			/*
+			 * deobfuscate.column.names = true
+			 */
+			if (Boolean.parseBoolean(props.getProperty("deobfuscate.column.names", "false"))) {
+				String path = props.getProperty("dao.file.location", pathPrefix + projectName+ "/"  + "src");
+				ColumnDeobfuscationCodeGenerator codeGen = new ColumnDeobfuscationCodeGenerator(model,path,packageName,props);
+				try {
+					codeGen.generate();
+				} catch (Exception e3) {
+					log.error("Could not generate Column Deobfuscation files: " + path, e3);
 					error=1;
 				}
 			} else {

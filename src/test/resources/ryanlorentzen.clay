@@ -203,6 +203,43 @@
 <foreign-key-list/>
 <index-list/>
 </table>
+<table alias="" name="MST_DICT" remarks="" uid="75978078:13d2217f23a:-7fcb">
+<table-description/>
+<table-figure-bounds height="102" width="194" x="134" y="435"/>
+<column-list>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="DICT_ID" remarks="" uid="75978078:13d2217f23a:-7fc7">
+<column-description/>
+<data-type jdbc-type="4" name="INTEGER" selected-variant-pattern="INTEGER">
+<variant type-name-pattern="INTEGER"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="DICT_TAB_NAME" remarks="" uid="75978078:13d2217f23a:-7fc6">
+<column-description/>
+<data-type jdbc-type="-1" literal-prefix="'" literal-suffix="'" name="TEXT" selected-variant-pattern="TEXT">
+<variant type-name-pattern="TEXT"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="DICT_COL_NAME" remarks="" uid="75978078:13d2217f23a:-7fc5">
+<column-description/>
+<data-type jdbc-type="-1" literal-prefix="'" literal-suffix="'" name="TEXT" selected-variant-pattern="TEXT">
+<variant type-name-pattern="TEXT"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="DICT_COL_DESC" remarks="" uid="75978078:13d2217f23a:-7fc4">
+<column-description/>
+<data-type jdbc-type="-1" literal-prefix="'" literal-suffix="'" name="TEXT" selected-variant-pattern="TEXT">
+<variant type-name-pattern="TEXT"/>
+</data-type>
+</column>
+</column-list>
+<primary-key alias="" name="PK_MST_DICT" remarks="" uid="75978078:13d2217f23a:-7fca">
+<primary-key-description/>
+<primary-key-column name="DICT_ID"/>
+</primary-key>
+<unique-key-list/>
+<foreign-key-list/>
+<index-list/>
+</table>
 </table-list>
 </schema>
 </schema-list>

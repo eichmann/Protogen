@@ -5,6 +5,7 @@
 .settings/org.eclipse.m2e.core.prefs -text svneol=unset#text/plain
 .settings/org.eclipse.wst.common.component -text
 .settings/org.eclipse.wst.common.project.facet.core.xml svneol=native#text/xml
+.settings/org.hibernate.eclipse.console.prefs -text svneol=unset#text/plain
 .settings/org.maven.ide.eclipse.prefs -text
 /pom.xml -text
 src/main/java/META-INF/MANIFEST.MF svneol=native#text/plain
@@ -12,6 +13,7 @@ src/main/java/dispatcher-servlet.tmplt -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/AbstractSpringHibernateCodeGenerator.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/BaseTestCodeGenerator.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ClassVariable.java -text
+src/main/java/edu/uiowa/icts/protogen/springhibernate/ColumnDeobfuscationCodeGenerator.java -text svneol=unset#text/plain
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ControllerCodeGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/DAOCodeGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/DomainClass.java -text

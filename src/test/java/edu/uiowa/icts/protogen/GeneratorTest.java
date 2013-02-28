@@ -63,6 +63,13 @@ public class GeneratorTest  extends TestCase
     	props.setProperty("jsp.file.location",pathPrefix + "/target/clay/test/jsp"  + "src");
     	props.setProperty("test.file.location",pathPrefix + "/target/clay/test/javatest"  + "src");
     	
+    	props.setProperty("deobfuscate.tld.file.location", pathPrefix+"/target/clay/test/resources/META-INF/");
+    	props.setProperty("deobfuscate.column.names", "true");
+    	props.setProperty("dictionary.table.name", "MST_DICT");
+    	props.setProperty("dictionary.table.columnname", "DICT_TABLE_NAME");
+    	props.setProperty("dictionary.column.columnname", "DICT_COL_NAME");
+    	props.setProperty("dictionary.deobfuscated.columnname", "DICT_COL_DESC");
+    	
     	Generator gen = new Generator();
     	int result = gen.runGenerator(props);
         assertEquals("Error during domain code generation",0,result);

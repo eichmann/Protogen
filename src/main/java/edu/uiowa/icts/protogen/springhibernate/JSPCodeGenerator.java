@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,13 +30,15 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 	 * @param pathBase
 	 * @param packageRoot
 	 */
-	public JSPCodeGenerator(SpringHibernateModel model, String pathBase, String packageRoot) {
+	public JSPCodeGenerator(SpringHibernateModel model, String pathBase, String packageRoot,Properties properties) {
 		super(model, pathBase, packageRoot);
+		this.properties = properties;
 		jspRoot = pathBase;
 	}
 
 	private static final Log log = LogFactory.getLog(JSPCodeGenerator.class);
 	public String jspRoot;
+	private Properties properties;
 
 	public void generate() throws IOException {
 		generateAllJSP(model.getDomainClassList());
@@ -208,21 +211,23 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += spaces(indent) + "var cols = [];";
 		output += lines(1);
 		
+		boolean deOb = Boolean.parseBoolean(properties.getProperty("deobfuscate.column.names", "false"));
+		
 		ClassVariable cv;
 		Iterator<ClassVariable> cvIter = ec.listAllIter();
 		while(cvIter.hasNext()) {
 			cv = cvIter.next();
 			if ( cv.isPrimary() && ec.isUsesCompositeKey() ) {
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
-					output += spaces(indent) + "cols.push({ \"sName\": \"" + a.getLowerLabel() + "\", \"sTitle\":\"" + a.getLabel() + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
+					output += spaces(indent) + "cols.push({ \"sName\": \"" + a.getLowerLabel() + "\", \"sTitle\":\"" +  ( deOb ? " ${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+a.getSqlLabel()+"') } " : a.getLabel() ) + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
 					output += lines(1);
 				}
 			} else {
 				if( RelationshipType.NONE == cv.getRelationshipType() ){
-					output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
+					output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" +  ( deOb ? " ${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel() +"') } " : cv.getUpperIdentifier() ) +  "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
 					output += lines(1);
 				} else {
-					output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
+					output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" +  ( deOb ? " ${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel() +"') } " : cv.getUpperIdentifier() ) + "\",	\"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
 					output += lines(1);
 				}
 			}

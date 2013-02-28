@@ -13,10 +13,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiowa.icts.util.IctsStringUtils;
 import edu.uiowa.webapp.Schema;
 
 public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
@@ -25,8 +27,11 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 	
 	private String interfaceSuffix="Service";
 	private String impleSuffix="Home";
-	public DAOCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {
+	private Properties properties;
+	
+	public DAOCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot,Properties properties) {
 		super(model, pathBase, packageRoot);
+		this.properties = properties;
 		(new File(packageRootPath)).mkdirs();
 	}
 
@@ -105,6 +110,14 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			ClassVariable p_key = dc.getPrimaryKey();
 			if(p_key != null) {
 				out.write("public "+dc.getIdentifier()+"  findById("+p_key.getType()+" id);\n");
+			}
+		}
+		
+		if (Boolean.parseBoolean(properties.getProperty("deobfuscate.column.names", "false"))) {
+			String table = properties.getProperty("dictionary.table.name");
+			if( table != null && dc.getEntity().getSqlLabel().equals(table) ){
+				spaces(out, 4);
+				out.write("public String getAlternateColumnName(String tableName, String columnName);\n");
 			}
 		}
 		
@@ -217,6 +230,39 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		out.write("return ("+dc.getIdentifier()+")this.sessionFactory.getCurrentSession().get(getDomainName(), id);\n");
 		spaces(out, 4);
 		out.write("}\n\n");
+		
+		if (Boolean.parseBoolean(properties.getProperty("deobfuscate.column.names", "false"))) {
+			IctsStringUtils stringUtils = new IctsStringUtils();
+			String table = properties.getProperty("dictionary.table.name");
+			
+			log.debug(dc.getEntity().getSqlLabel());
+			log.debug(table);
+			
+			if( table != null && dc.getEntity().getSqlLabel().equals(table) ){
+				spaces(out, 4);
+				out.write("public String getAlternateColumnName(String tableName, String columnName){\n");
+				spaces(out, 8);
+				out.write("Criteria c = this.sessionFactory.getCurrentSession().createCriteria("+dc.getIdentifier()+".class);\n");
+				spaces(out, 8);
+				out.write("c.add(Restrictions.eq(\""+stringUtils.relabel((String) properties.get("dictionary.table.columnname"), false)+"\", tableName));\n");
+				spaces(out, 8);
+				out.write("c.add(Restrictions.eq(\""+stringUtils.relabel((String) properties.get("dictionary.column.columnname"), false)+"\", columnName));\n");
+				spaces(out, 8);
+				out.write("c.setMaxResults(1);\n");
+				spaces(out, 8);
+				out.write(dc.getIdentifier()+" dict = ("+dc.getIdentifier()+") c.uniqueResult();\n");
+				spaces(out, 8);
+				out.write("if( dict != null ){\n");
+				spaces(out, 12);
+				out.write("return dict.get"+stringUtils.relabel((String) properties.get("dictionary.deobfuscated.columnname"), true)+"();\n");
+				spaces(out, 8);
+				out.write("}\n");
+				spaces(out, 8);
+				out.write("return null;\n");
+				spaces(out, 4);
+				out.write("}\n\n");
+			}
+		}
 		
 		if( "SystemSetting".equals(dc.getIdentifier()) ){
 			spaces(out, 4);
