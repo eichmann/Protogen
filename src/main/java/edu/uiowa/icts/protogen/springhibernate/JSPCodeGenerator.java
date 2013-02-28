@@ -218,13 +218,18 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 					output += lines(1);
 				}
 			} else {
-				output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
-				output += lines(1);
+				if( RelationshipType.NONE == cv.getRelationshipType() ){
+					output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":true, \"bSearchable\": true });";
+					output += lines(1);
+				} else {
+					output += spaces(indent) + "cols.push({ \"sName\": \"" + cv.getLowerIdentifier() + "\", \"sTitle\":\"" + cv.getUpperIdentifier() + "\",	\"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
+					output += lines(1);
+				}
 			}
 		}
 		output += spaces(indent) + "cols.push({ \"sName\": \"urls\", \"sTitle\":\"\", \"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
 		output += lines(1);
-		output += spaces(indent) + "setDataTable('"+ec.getIdentifier().toLowerCase()+"Table',10,0,'${datatableUrl}',cols);";
+		output += spaces(indent) + "setDataTable('"+ec.getIdentifier().toLowerCase()+"Table',10,0,'${datatableUrl}',cols,undefined,true);";
 		indent -= 4;
 		output += lines(1);
 		output += spaces(indent) + "</script>";

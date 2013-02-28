@@ -165,6 +165,44 @@
 </foreign-key-list>
 <index-list/>
 </table>
+<table alias="" name="two_key_table" remarks="" uid="75978078:13d2217f23a:-7fef">
+<table-description/>
+<table-figure-bounds height="123" width="171" x="527" y="469"/>
+<column-list>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="key_one" remarks="" uid="75978078:13d2217f23a:-7feb">
+<column-description/>
+<data-type jdbc-type="4" name="INTEGER" selected-variant-pattern="INTEGER">
+<variant type-name-pattern="INTEGER"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="key_two" remarks="" uid="75978078:13d2217f23a:-7fea">
+<column-description/>
+<data-type jdbc-type="4" name="INTEGER" selected-variant-pattern="INTEGER">
+<variant type-name-pattern="INTEGER"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="name" remarks="" uid="75978078:13d2217f23a:-7fe9">
+<column-description/>
+<data-type jdbc-type="-1" literal-prefix="'" literal-suffix="'" name="TEXT" selected-variant-pattern="TEXT">
+<variant type-name-pattern="TEXT"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="value" remarks="" uid="75978078:13d2217f23a:-7fe8">
+<column-description/>
+<data-type jdbc-type="-1" literal-prefix="'" literal-suffix="'" name="TEXT" selected-variant-pattern="TEXT">
+<variant type-name-pattern="TEXT"/>
+</data-type>
+</column>
+</column-list>
+<primary-key alias="" name="PK_TWO_KEY_TABLE" remarks="" uid="75978078:13d2217f23a:-7fee">
+<primary-key-description/>
+<primary-key-column name="key_one"/>
+<primary-key-column name="key_two"/>
+</primary-key>
+<unique-key-list/>
+<foreign-key-list/>
+<index-list/>
+</table>
 </table-list>
 </schema>
 </schema-list>

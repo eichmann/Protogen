@@ -18,6 +18,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
@@ -283,6 +284,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent*2)+"@RequestParam(value=\"iSortingCols\") Integer sortingColsCount, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"sColumns\") String columns, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"sEcho\") String echo, \n");
+		output.append(indent(indent*2)+"@RequestParam(value=\"bFilter\") String bFilter, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"sSearch\", required=false) String search, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"display\", required=false, defaultValue=\"list\") String display ) {\n\n");
 		output.append(indent(indent*2)+"ArrayList<SortColumn> sorts = new ArrayList<SortColumn>();\n");
@@ -337,7 +339,11 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent)+"}\n\n");
 		
 		output.append(indent(indent)+"Boolean searchable;\n");
+		output.append(indent(indent)+"Boolean filtered = Boolean.valueOf(bFilter);\n");
 		output.append(indent(indent)+"ArrayList<String> searchColumns = new ArrayList<String>();\n");
+		output.append(indent(indent)+"HashMap<String,Object> likes = new HashMap<String, Object>();\n");
+		output.append(indent(indent)+"if( filtered ){\n");
+		indent += 4;
 		output.append(indent(indent)+"for( int i = 0; i < numberColumns; i++ ){\n");
 		
 		indent += 4;
@@ -349,10 +355,42 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         indent -= 4;
         output.append(indent(indent)+"}\n");
         indent -= 4;
+        output.append(indent(indent)+"}\n");
+        indent -= 4;
+        output.append(indent(indent)+"} else {\n");
+        indent += 4;
+        
+        int count = 0;
+		ClassVariable cv;
+		Iterator<ClassVariable> iter = dc.listAllIter();
+		while( iter.hasNext() ){
+			cv = iter.next();
+			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
+				for(Attribute a : dc.getEntity().getPrimaryKeyAttributes()) {
+					output.append(indent(indent) + "String "+a.getLowerLabel()+"Value = request.getParameter(\""+a.getLowerLabel()+"\");\n");
+					output.append(indent(indent) + "if( "+a.getLowerLabel()+"Value != null ){\n");
+            		indent += 4;	
+	            	output.append(indent(indent) + "likes.put(\""+a.getLowerLabel()+"\", "+a.getLowerLabel()+"Value);\n");
+	            	indent -= 4;
+	            	output.append(indent(indent) + "}\n");
+				}
+			} else {
+				if( cv.getRelationshipType() == RelationshipType.NONE ){
+					output.append(indent(indent) + "String "+cv.getLowerIdentifier()+"Value = request.getParameter(\""+cv.getLowerIdentifier()+"\");\n");
+					output.append(indent(indent) + "if( "+cv.getLowerIdentifier()+"Value != null ){\n");
+					indent += 4;	
+					output.append(indent(indent) + "likes.put(\""+cv.getLowerIdentifier()+"\", "+cv.getLowerIdentifier()+"Value);\n");
+					indent -= 4;
+					output.append(indent(indent) + "}\n");
+				}
+			}
+		}
+        
+        indent -= 4;
         output.append(indent(indent)+"}\n\n");
 
-		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( start, limit, search, searchColumns, sorts );\n");
-		output.append(indent(indent)+"Integer count = "+accessor+".count( search, searchColumns );\n\n");
+		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( start, limit, search, searchColumns, sorts, likes );\n");
+		output.append(indent(indent)+"Integer count = "+accessor+".count( search, searchColumns, likes );\n\n");
 		output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
 		output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
 		output.append(indent(indent)+"ob.put(\"iTotalDisplayRecords\", count);\n");
@@ -369,9 +407,8 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         			
 		indent += 4;
 		
-		int count = 0;
-		ClassVariable cv;
-		Iterator<ClassVariable> iter = dc.listAllIter();
+		count = 0;
+		iter = dc.listAllIter();
 		while( iter.hasNext() ){
 			cv = iter.next();
 			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
