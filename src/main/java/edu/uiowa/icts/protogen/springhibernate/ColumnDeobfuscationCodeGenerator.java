@@ -28,8 +28,12 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 
 	private void generateFunctionsClass() throws IOException {
 		for( Schema key : model.getSchemaMap().keySet() ){
-			generateFunctionsClass("Functions", key);
-			generateTldFile( key );
+			if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.class") ) ){
+				generateFunctionsClass("DeobfuscationFunctions", key);
+			}
+			if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.tld") ) ){
+				generateTldFile("DeobfuscationFunctions", key );
+			}
 		}
 	}
 
@@ -37,7 +41,7 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 	 * @param schema
 	 * @throws IOException 
 	 */
-	private void generateTldFile(Schema schema) throws IOException {
+	private void generateTldFile(String className, Schema schema) throws IOException {
 		
 		if( properties == null ){
 			log.error("properties file is null, not generating tld file");
@@ -63,7 +67,6 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 		}
 		
 		String packageName = model.getPackageRoot() +"." + schema.getLowerLabel() +".util";
-		String packagePath = pathBase + "/"	+ packageName.replaceAll("\\.", "/") ;
 		
 		FileWriter fstream = new FileWriter(tld);
 		BufferedWriter out = new BufferedWriter(fstream);
@@ -87,7 +90,7 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 		spaces(out, 8);
 		out.write("<name>deobfuscateColumn</name>\n");
 		spaces(out, 8);
-		out.write("<function-class>"+packagePath+".Functions</function-class>\n");
+		out.write("<function-class>"+model.getPackageRoot() +"." + schema.getLowerLabel()+".util."+className+"</function-class>\n");
 		spaces(out, 8);
 		out.write("<function-signature>java.lang.String deobfuscateColumn( java.lang.String, java.lang.String )</function-signature>\n");
 		spaces(out, 4);
@@ -101,7 +104,7 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 	private void generateFunctionsClass(String className, Schema schema ) throws IOException {
 		
 		if( properties == null ){
-			log.error("properties file is null, not generating Functions class");
+			log.error("properties file is null, not generating DeobfuscationFunctions class");
 			return;
 		}
 		
@@ -152,14 +155,14 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 		out.write("public class "+className+" {\n\n");
 
 		spaces(out, 4);
-		out.write("protected static "+schema.getLabel()+"DaoService "+schema.getLowerLabel()+"DaoService;\n\n");
+		out.write("protected static "+schema.getUpperLabel()+"DaoService "+schema.getLowerLabel()+"DaoService;\n\n");
 
 		spaces(out, 4);
 		out.write("@Autowired\n");
 		spaces(out, 4);
-		out.write("public void set"+schema.getLabel()+"DaoService("+schema.getLabel()+"DaoService "+schema.getLowerLabel()+"DaoService) {\n");
+		out.write("public void set"+schema.getUpperLabel()+"DaoService("+schema.getUpperLabel()+"DaoService "+schema.getLowerLabel()+"DaoService) {\n");
 		spaces(out, 8);
-		out.write("Functions."+schema.getLowerLabel()+"DaoService = "+schema.getLowerLabel()+"DaoService;\n");
+		out.write("DeobfuscationFunctions."+schema.getLowerLabel()+"DaoService = "+schema.getLowerLabel()+"DaoService;\n");
 		spaces(out, 4);
 		out.write("}\n\n");
 		
