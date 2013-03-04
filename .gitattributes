@@ -46,4 +46,5 @@ src/test/resources/demographics-base.clay -text svneol=unset#text/xml
 src/test/resources/pilot-base.clay -text svneol=unset#text/xml
 src/test/resources/ryanlorentzen.clay -text
 src/test/resources/ryanlorentzen.sql -text
+src/test/resources/scilink.clay -text
 subversion/config -text
