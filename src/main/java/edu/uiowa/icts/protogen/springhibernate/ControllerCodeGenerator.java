@@ -281,10 +281,10 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent*2)+"@RequestParam(value=\"iDisplayStart\") Integer start, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"iColumns\") Integer numberColumns, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"iColumns\") Integer columnCount, \n");
-		output.append(indent(indent*2)+"@RequestParam(value=\"iSortingCols\") Integer sortingColsCount, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"sColumns\") String columns, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"sEcho\") String echo, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"bFilter\") String bFilter, \n");
+		output.append(indent(indent*2)+"@RequestParam(value=\"iSortingCols\", required=false) Integer sortingColsCount, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"sSearch\", required=false) String search, \n");
 		output.append(indent(indent*2)+"@RequestParam(value=\"display\", required=false, defaultValue=\"list\") String display ) {\n\n");
 		output.append(indent(indent*2)+"ArrayList<SortColumn> sorts = new ArrayList<SortColumn>();\n");
@@ -297,6 +297,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		output.append(indent(indent)+"response.setContentType(\"application/json\");\n\n");
 		
 		output.append(indent(indent)+"String[] colArr = columns.split(\",\");\n\n");
+		
+		output.append(indent(indent)+"if( sortingColsCount != null ){\n");
+		indent += 4;
 		output.append(indent(indent)+"for( int i = 0; i < sortingColsCount; i++){\n");
 		
 		indent += 4;
@@ -325,6 +328,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		
 		indent += 4;
 		output.append(indent(indent)+"sorts.add(new SortColumn(colArr[colnum], request.getParameter(\"sSortDir_\"+i)));\n");
+		
+		indent -= 4;
+		output.append(indent(indent)+"}\n");
 		
 		indent -= 4;
 		output.append(indent(indent)+"}\n");
