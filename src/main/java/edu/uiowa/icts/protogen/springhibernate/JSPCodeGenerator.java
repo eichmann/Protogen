@@ -65,6 +65,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		String output= spaces(indent) + "<%@ include file=\"/WEB-INF/include.jsp\"  %>";
 		output += lines(2);
 	
+		boolean deOb = Boolean.parseBoolean(properties.getProperty("deobfuscate.column.names", "false"));
 		
 		Iterator<ClassVariable> cvIter = ec.getPrimaryKeys().iterator();
 		output += "<h2>"+ec.getIdentifier()+"</h2>";
@@ -75,7 +76,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			if(ec.isUsesCompositeKey() && cv.isPrimary()) {
 				output += "<h2>";
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
-					output += " ${"+cv.getLowerIdentifier()+"."+a.getLowerLabel()+"} ";
+					output += "${"+cv.getLowerIdentifier()+"."+a.getLowerLabel()+"}";
 				}
 				output += "</h2>";
 			}else{
@@ -90,16 +91,33 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		cvIter = ec.listAllIter();
 		output += lines(1);
 		
+		output += spaces(indent) + "<table class=\"table table-bordered table-hover\">";
+		indent += 4;
+		
 		while(cvIter.hasNext()) {
-			output += spaces(indent) + "";
-			output += lines(1);
+			
 			ClassVariable cv = cvIter.next();
+
+			output += lines(1);
+			output += spaces(indent) + "<tr>";
+			indent += 4;
+			
+			
+			String th_label = cv.getUpperIdentifier();
+			if( deOb && cv.getAttribute() != null ){
+				th_label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel()+"') }";
+			}
+			
 			log.debug("-ClassVariable:"+cv.getIdentifier());
-			output += spaces(indent) +"" +cv.getUpperIdentifier() + ": ";
+			output += spaces(indent) + "<th>" + th_label + "</th>";
 			output += lines(1);
 			
-			String pkString="";
+			String pkString = "";
 		
+			output += spaces(indent) + "<td>";
+			output += lines(1);
+			indent += 4;
+			
 			if(cv.getAttribType() == AttributeType.CHILD && cv.getAttribute().getEntity().getDomainClass() != null) {
 				log.debug("isChild");
 				Iterator<ClassVariable> pkIter = cv.getAttribute().getEntity().getDomainClass().getPrimaryKeys().iterator();
@@ -114,36 +132,53 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 				if(cv.getAttribute().getEntity().getDomainClass().isUsesCompositeKey()) {
 					output += spaces(indent) +"not implemented<br/><br/>";
 				}else{
-					output += spaces(indent) +"<ul><c:forEach items=\"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}\" var=\"item\" varStatus=\"itemStatus\" >";
+					output += spaces(indent) + "<ul>";
+					output += lines(1);
+					indent += 4;
+					
+					output += spaces(indent) + "<c:forEach items=\"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}\" var=\"item\" varStatus=\"itemStatus\" >";
+					output += lines(1);
+					indent += 4;
+					
 					output += spaces(indent) +"<li><a href=\"../"+ cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier().toLowerCase() +  "/edit.html?"+pkString+"\" > ${item."+cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
-					output += spaces(indent) +"</c:forEach></ul><br/><br/>";
+					output += lines(1);
+					indent -= 4;
+					
+					output += spaces(indent) +"</c:forEach>";
+					output += lines(1);
+					indent -= 4;
+					
+					output += spaces(indent) +"</ul>";
 				}
 			} else if( cv.isPrimary() && cv.getDomainClass().isUsesCompositeKey()) {
-				
-				List<String[]> compositeKeys = new ArrayList<String[]>();
-				
+				String params = "";
+				String label = "";
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
-					compositeKeys.add(new String[] {a.getLowerLabel(), ec.getLowerIdentifier()+".id."+a.getLowerLabel() });
+					String pk_label = a.getLowerLabel();
+					if( deOb ){
+						pk_label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+a.getSqlLabel()+"') }";
+					}
+					label += "("+pk_label+", ${ "+ec.getLowerIdentifier()+".id."+a.getLowerLabel()+" })";
+					params += a.getLowerLabel() + "=${ " + ec.getLowerIdentifier()+".id."+a.getLowerLabel() + " }&";
 				}
-			
-				String params="";
-				String label="";
-				for(String[] starray :compositeKeys) {
-					params += starray[0]+"=${"+starray[1] + "}&";
-					label += "("+starray[0]+",${"+starray[1]+"})";
-				}
-				
 				params = params.substring(0, params.length()-1);
-				output += ""+label+" ";
-					
+				output += spaces(indent) + label;
 			} else {
-				output += spaces(indent) +"${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}<br/><br/>";
+				output += spaces(indent) + "${"+ec.getLowerIdentifier() +"."+ cv.getIdentifier()+"}";
 			}
+
+			indent -= 4;
+			output += lines(1);
+			output += spaces(indent) + "<td>";
 			
+			indent -= 4;
 			output += lines(1);
-			output += spaces(indent) + "";
-			output += lines(1);
+			output += spaces(indent) + "</tr>";
 		}
+		
+		output += lines(1);
+		indent -= 4;
+		output += spaces(indent) + "</table>";
 		
 		File file = new File(jspFile);
 		FileWriter fstream = new FileWriter(file);
@@ -366,6 +401,8 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 	
 	private void generateListAltJSP(DomainClass ec) throws IOException {
 		
+		boolean deOb = Boolean.parseBoolean(properties.getProperty("deobfuscate.column.names", "false"));
+		
 		log.debug("GeneratingListJSP:"+ec.getIdentifier());
 		log.debug("...."+ ec.getIdentifier());
 		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
@@ -405,10 +442,13 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += spaces(indent) + "<tr>";
 		output += lines(1);
 		indent += 4;
-
 		while(cvIter.hasNext()) {
-			ClassVariable cv = cvIter.next();	
-			output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
+			ClassVariable cv = cvIter.next();
+			if( deOb && cv.getAttribute() != null ){
+				output += spaces(indent) + "<th>${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel()+"') }</th>";
+			}else{
+				output += spaces(indent) +"<th>" +cv.getUpperIdentifier() + "</th>";
+			}
 			output += lines(1);
 		}
 		output += spaces(indent) + "<th></th>";
@@ -445,22 +485,38 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			if (cv.isPrimary()) {
 				if(ec.isUsesCompositeKey() && cv.isPrimary()) {
 
-					List<String[]> compositeKeys = new ArrayList<String[]>();
-					for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
-						compositeKeys.add(new String[] {a.getLowerLabel(), ec.getLowerIdentifier()+".id."+a.getLowerLabel() });
-					}
-				
 					String params = "";
 					String label = "";
-					for(String[] starray :compositeKeys) {
-						params += starray[0]+"=${"+starray[1] + "}&";
-						label += "("+starray[0]+",${"+starray[1]+"})";
+					for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
+						String pk_label = a.getLowerLabel();
+						if( deOb ){
+							pk_label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+a.getSqlLabel()+"') }";
+						}
+						label += "("+pk_label+", ${ "+ec.getLowerIdentifier()+".id."+a.getLowerLabel()+" })";
+						params += a.getLowerLabel() + "=${ " + ec.getLowerIdentifier()+".id."+a.getLowerLabel() + " }&";
 					}
+					
 					params = params.substring(0, params.length()-1);
-					links += "<td><a href=\"edit.html?"+params+"\">[edit]</a> ";
-					links += "<a href=\"show.html?"+params+"\">[view]</a>";
-					links += " <a href=\"delete.html?"+params+"\">[delete]</a></td>";
-					output += "<td><a href=\"edit.html?"+params+"\">"+label+"</a></td> ";
+					
+					output += spaces(indent) + "<td>";
+					output += lines(1);
+					indent += 4;
+					output += spaces(indent) + "<a href=\"edit.html?"+params+"\">"+label+"</a>";
+					indent -= 4;
+					output += lines(1);
+					output += spaces(indent) + "</td>";
+					
+					links += spaces(indent) + "<td>";
+					indent += 4;
+					links += lines(1);
+					links += spaces(indent) + "<a href=\"edit.html?"+params+"\">edit</a> ";
+					links += lines(1);
+					links += spaces(indent) + "<a href=\"show.html?"+params+"\">view</a>";
+					links += lines(1);
+					links += spaces(indent) + "<a href=\"delete.html?"+params+"\">delete</a>";
+					links += lines(1);
+					indent -= 4;
+					links += spaces(indent) + "</td>";
 				} else {
 					links += spaces(indent) + "<td>";
 					indent += 4;
@@ -552,6 +608,9 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		
 		output += spaces(indent) + "<legend>"+ec.getIdentifier()+"</legend>";
 		
+		boolean deOb = Boolean.parseBoolean(properties.getProperty("deobfuscate.column.names", "false"));
+		
+		
 		cvIter = ec.listAllIter();;
 		while(cvIter.hasNext()) {
 			
@@ -560,7 +619,15 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			if(ec.isUsesCompositeKey() && cv.isPrimary()) {
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
 					if(!a.isForeign()){
-						output += "<label for=\"id."+a.getLowerLabel()+"\">"+a.getLowerLabel()+"</label><form:input path=\"id."+a.getLowerLabel()+"\" /><br/>\n ";
+						String label = a.getLowerLabel();
+						if( deOb ){
+							label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+a.getSqlLabel()+"') }";
+						}
+						output += lines(1);
+						output += spaces(indent) + "<label for=\"id."+a.getLowerLabel()+"\">"+label+"</label>";
+						output += lines(1);
+						output += spaces(indent) + "<form:input path=\"id."+a.getLowerLabel()+"\" /><br/>";
+						output += lines(1);
 					}
 				}
 			} else if( cv.getAttribType() == AttributeType.CHILD ) {
@@ -570,16 +637,28 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			} else if(cv.getAttribType() == AttributeType.FOREIGNATTRIBUTE) {
 				if(cv.isPrimary() && cv.getDomainClass().isUsesCompositeKey() ) {
 					for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
+						
+						String label = cv.getUpperIdentifier();
+						if( deOb ){
+							label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel()+"') }";
+						}
+						
 						String elementId = "id."+a.getLowerLabel();
-						output += spaces(indent) +"<label for=\""+elementId+"\">" +cv.getUpperIdentifier() + "</label>";
+						output += spaces(indent) +"<label for=\""+elementId+"\">" + label + "</label>";
 						output += lines(1);
 						output += "<form:select path=\""+elementId+"\" items=\"${"+cv.getDomainClass().getLowerIdentifier()+"List}\" itemValue=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier()+"\" itemLabel=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier() +"\"/>";
 						output += lines(1);
 						output += "<br/>";
 					}
 				} else {
+					
+					String label = cv.getUpperIdentifier();
+					if( deOb ){
+						label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel()+"') }";
+					}
+					
 					String elementId = cv.getIdentifier()+"."+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier();
-					output += spaces(indent) +"<label for=\""+elementId+"\">" +cv.getUpperIdentifier() + "</label>";
+					output += spaces(indent) +"<label for=\""+elementId+"\">" + label + "</label>";
 					output += lines(1);
 				//	output += spaces(indent) + "<td><select id=\""+cv.getIdentifier()+"\" name=\""+cv.getAttribute().getReferencedEntity().getDomainClass().getEntity().getLowerLabel()+"Id\" >";
 					output += " <form:select path=\""+elementId+"\" items=\"${"+cv.getDomainClass().getLowerIdentifier()+"List}\" itemValue=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier()+"\" itemLabel=\""+cv.getDomainClass().getPrimaryKeys().iterator().next().getLowerIdentifier() +"\"/>";
@@ -606,11 +685,17 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 					output += lines(1);
 					output += spaces(indent) +"<form:hidden path=\""+ cv.getIdentifier()+"\" />";
 				} else {
-					String cssClass=null;
+					
+					String label = cv.getUpperIdentifier();
+					if( deOb ){
+						label = "${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+cv.getAttribute().getSqlLabel()+"') }";
+					}
+					
+					String cssClass = null;
 					if(cv.getType().equalsIgnoreCase("date")){
 						cssClass="cssClass=\"dateInput\"";
 					}
-					output += spaces(indent) + "<label for=\""+cv.getIdentifier()+"\">" +cv.getUpperIdentifier() + "</label>";
+					output += spaces(indent) + "<label for=\""+cv.getIdentifier()+"\">" + label + "</label>";
 					output += lines(1);
 					output += spaces(indent) + "<form:input path=\""+ cv.getIdentifier()+"\" "+(cssClass!=null ? cssClass : "")+" />";
 					output += lines(1);
@@ -622,7 +707,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		}
 		
 		output += lines(1);
-		output += spaces(indent) + "<input type=\"submit\" value=\"Save\" class=\"btn\" />";
+		output += spaces(indent) + "<input type=\"submit\" value=\"Save\" class=\"btn btn-primary\" />";
 		output += lines(1);
 		output += spaces(indent) + "<button type=\"button\" class=\"btn\" id=\"cancel_button\">Cancel</button>";
 		output += lines(1);
