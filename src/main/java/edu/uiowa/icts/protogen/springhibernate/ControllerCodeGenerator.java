@@ -64,6 +64,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		importList.add("import java.util.ArrayList;");
 		importList.add("import java.util.List;");
 		importList.add("import java.util.Date;");
+		importList.add("import java.util.HashMap;");
 		
 		importList.add("import org.json.JSONArray;");
 		importList.add("import org.json.JSONException;");

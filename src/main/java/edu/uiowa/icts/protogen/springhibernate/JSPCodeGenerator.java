@@ -109,6 +109,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			}
 			
 			log.debug("-ClassVariable:"+cv.getIdentifier());
+			output += lines(1);
 			output += spaces(indent) + "<th>" + th_label + "</th>";
 			output += lines(1);
 			

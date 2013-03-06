@@ -28,11 +28,13 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 
 	private void generateFunctionsClass() throws IOException {
 		for( Schema key : model.getSchemaMap().keySet() ){
-			if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.class") ) ){
-				generateFunctionsClass("DeobfuscationFunctions", key);
-			}
-			if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.tld") ) ){
-				generateTldFile("DeobfuscationFunctions", key );
+			if( key.getLowerLabel().equalsIgnoreCase( properties.getProperty("schema.name") ) ){
+				if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.class") ) ){
+					generateFunctionsClass("DeobfuscationFunctions", key);
+				}
+				if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.tld") ) ){
+					generateTldFile("DeobfuscationFunctions", key );
+				}
 			}
 		}
 	}
