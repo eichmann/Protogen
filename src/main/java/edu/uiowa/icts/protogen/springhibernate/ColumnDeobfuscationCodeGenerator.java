@@ -28,7 +28,7 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 
 	private void generateFunctionsClass() throws IOException {
 		for( Schema key : model.getSchemaMap().keySet() ){
-			if( key.getLowerLabel().equalsIgnoreCase( properties.getProperty("schema.name") ) ){
+			if( key.getLowerLabel().equalsIgnoreCase( properties.getProperty("db.schema") ) ){
 				if( Boolean.valueOf( properties.getProperty("generate.deobfuscation.class") ) ){
 					generateFunctionsClass("DeobfuscationFunctions", key);
 				}

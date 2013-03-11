@@ -35,7 +35,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	public void run(Properties prop) throws Exception {
 
-		String schema= prop.getProperty("db.schema");
+		String schema = prop.getProperty("db.schema");
 
 		connect(prop);
 		DatabaseMetaData dbMeta = conn.getMetaData();
