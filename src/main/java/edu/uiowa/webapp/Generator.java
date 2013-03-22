@@ -77,11 +77,16 @@ public class Generator {
 				theLoader.run(props);
 			} catch (Exception e) {
 				log.error("Could load JDBC", e);
-				error=1;
+				error = 1;
 			}
 			
-			theLoader.getDatabase().setLabel(projectName);
-			theLoader.getDatabase().relabel();
+			if( theLoader.getDatabase() != null ){
+				theLoader.getDatabase().setLabel(projectName);
+				theLoader.getDatabase().relabel();
+			} else {
+				log.error("the database is null, exiting");
+				return 0;
+			}
 		}
 
 		theDatabase = theLoader.getDatabase();
