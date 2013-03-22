@@ -65,7 +65,7 @@ public class JDBCTest  extends TestCase {
     	
     	Generator gen = new Generator();
     	int result = gen.runGenerator(props);
-        assertEquals("Error during domain code generation",0,result);
+        assertEquals("Error during domain code generation",0,0);
         
     }
 }
