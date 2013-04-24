@@ -10,7 +10,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -710,19 +709,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		output += lines(1);
 		output += spaces(indent) + "<input type=\"submit\" value=\"Save\" class=\"btn btn-primary\" />";
 		output += lines(1);
-		output += spaces(indent) + "<button type=\"button\" class=\"btn\" id=\"cancel_button\">Cancel</button>";
-		output += lines(1);
-		output += spaces(indent) + "<script type=\"text/javascript\">";
-		output += lines(1);
-		indent += 4;
-		output += spaces(indent) + "$('#cancel_button').click(function( e ){ e.preventDefault(); window.location.href = 'list.html'; });";
-		output += lines(1);
-		indent -= 4;
-		output += spaces(indent) + "</script>";
-		output += lines(1);
-		indent -= 4;
-		
-		output += spaces(indent) + "";
+		output += spaces(indent) + "<a class=\"btn\" href=\"list.html\">Cancel</>";
 		output += lines(1);
 		output += spaces(indent) + "</fieldset>";
 		indent -= 4;
