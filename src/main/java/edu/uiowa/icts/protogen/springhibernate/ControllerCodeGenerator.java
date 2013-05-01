@@ -18,7 +18,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
@@ -54,6 +53,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		importList.add("import "+daoPackageName+".*;");
 		importList.add("import edu.uiowa.icts.spring.*;");
 		importList.add("import edu.uiowa.icts.util.SortColumn;");
+		importList.add("import edu.uiowa.icts.spring.GenericDaoListOptions;");
 		
 		importList.add("import java.io.IOException;");
 		importList.add("import java.io.StringReader;");
@@ -367,37 +367,60 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"} else {\n");
         indent += 4;
         
-        int count = 0;
-		ClassVariable cv;
-		Iterator<ClassVariable> iter = dc.listAllIter();
-		while( iter.hasNext() ){
-			cv = iter.next();
-			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
-				for(Attribute a : dc.getEntity().getPrimaryKeyAttributes()) {
-					output.append(indent(indent) + "String "+a.getLowerLabel()+"Value = request.getParameter(\""+a.getLowerLabel()+"\");\n");
-					output.append(indent(indent) + "if( "+a.getLowerLabel()+"Value != null ){\n");
-            		indent += 4;	
-	            	output.append(indent(indent) + "likes.put(\""+a.getLowerLabel()+"\", "+a.getLowerLabel()+"Value);\n");
-	            	indent -= 4;
-	            	output.append(indent(indent) + "}\n");
-				}
-			} else {
-				if( cv.getRelationshipType() == RelationshipType.NONE ){
-					output.append(indent(indent) + "String "+cv.getLowerIdentifier()+"Value = request.getParameter(\""+cv.getLowerIdentifier()+"\");\n");
-					output.append(indent(indent) + "if( "+cv.getLowerIdentifier()+"Value != null ){\n");
-					indent += 4;	
-					output.append(indent(indent) + "likes.put(\""+cv.getLowerIdentifier()+"\", "+cv.getLowerIdentifier()+"Value);\n");
-					indent -= 4;
-					output.append(indent(indent) + "}\n");
-				}
-			}
-		}
+        output.append(indent(indent)+"for(String column : colArr){\n");
+        indent += 4;
+        output.append(indent(indent)+"String columnValue = request.getParameter( column );\n");
+        output.append(indent(indent)+"if( columnValue != null ){\n");
+        indent += 4;
+        output.append(indent(indent)+"likes.put(column, columnValue);\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
+        
+//        int count = 0;
+//		ClassVariable cv;
+//		Iterator<ClassVariable> iter = dc.listAllIter();
+//		while( iter.hasNext() ){
+//			cv = iter.next();
+//			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
+//				for(Attribute a : dc.getEntity().getPrimaryKeyAttributes()) {
+//					output.append(indent(indent) + "String "+a.getLowerLabel()+"Value = request.getParameter(\""+a.getLowerLabel()+"\");\n");
+//					output.append(indent(indent) + "if( "+a.getLowerLabel()+"Value != null ){\n");
+//            		indent += 4;	
+//	            	output.append(indent(indent) + "likes.put(\""+a.getLowerLabel()+"\", "+a.getLowerLabel()+"Value);\n");
+//	            	indent -= 4;
+//	            	output.append(indent(indent) + "}\n");
+//				}
+//			} else {
+//				if( cv.getRelationshipType() == RelationshipType.NONE ){
+//					output.append(indent(indent) + "String "+cv.getLowerIdentifier()+"Value = request.getParameter(\""+cv.getLowerIdentifier()+"\");\n");
+//					output.append(indent(indent) + "if( "+cv.getLowerIdentifier()+"Value != null ){\n");
+//					indent += 4;	
+//					output.append(indent(indent) + "likes.put(\""+cv.getLowerIdentifier()+"\", "+cv.getLowerIdentifier()+"Value);\n");
+//					indent -= 4;
+//					output.append(indent(indent) + "}\n");
+//				}
+//			}
+//		}
         
         indent -= 4;
         output.append(indent(indent)+"}\n\n");
 
-		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( start, limit, search, searchColumns, sorts, likes );\n");
-		output.append(indent(indent)+"Integer count = "+accessor+".count( search, searchColumns, likes );\n\n");
+        output.append(indent(indent)+"GenericDaoListOptions options = new GenericDaoListOptions();\n");
+        output.append(indent(indent)+"options.setIndividualLikes(likes);\n");
+        output.append(indent(indent)+"options.setSearch(search);\n");
+        output.append(indent(indent)+"options.setSearchColumns(searchColumns);\n\n");
+        
+        output.append(indent(indent)+"Integer count = "+accessor+".count( options );\n\n");
+        
+        output.append(indent(indent)+"options.setLimit(limit);\n");
+        output.append(indent(indent)+"options.setStart(start);\n");
+        output.append(indent(indent)+"options.setSorts(sorts);\n\n");
+        
+		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( options );\n\n");
+		
+		
 		output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
 		output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
 		output.append(indent(indent)+"ob.put(\"iTotalDisplayRecords\", count);\n");
@@ -414,8 +437,9 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         			
 		indent += 4;
 		
-		count = 0;
-		iter = dc.listAllIter();
+		int count = 0;
+		Iterator<ClassVariable> iter = dc.listAllIter();
+		ClassVariable cv;
 		while( iter.hasNext() ){
 			cv = iter.next();
 			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
