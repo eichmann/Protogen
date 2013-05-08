@@ -169,7 +169,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 
 			indent -= 4;
 			output += lines(1);
-			output += spaces(indent) + "<td>";
+			output += spaces(indent) + "</td>";
 			
 			indent -= 4;
 			output += lines(1);
