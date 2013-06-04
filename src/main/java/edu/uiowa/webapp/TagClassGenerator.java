@@ -1258,8 +1258,10 @@ public class TagClassGenerator {
             for (int i = 0; i < theEntity.getParents().size(); i++){
                 Entity parent = theEntity.getParents().elementAt(i).getSourceEntity();
                 for (int j = 0; j < parent.getPrimaryKeyAttributes().size(); j++) {
-                    out.write("       if (use" + parent.getUpperLabel() + ")\n");
-                    out.write("          theBuffer.append(\" and " + parent.getSqlLabel() + "." + parent.getPrimaryKeyAttributes().elementAt(j) + " = " + theEntity.getSqlLabel() + "." + parent.getPrimaryKeyAttributes().elementAt(j).foreignAttribute + "\");\n");
+                    Attribute for_el = parent.getPrimaryKeyAttributes().elementAt(j);
+                    Attribute this_el = parent.getPrimaryKeyAttributes().elementAt(j).getForeignAttribute();
+                	out.write("       if (use" + parent.getUpperLabel() + ")\n");
+                    out.write("          theBuffer.append(\" and " + parent.getSqlLabel() + "." + ( for_el == null ? "" : for_el.getSqlLabel() ) + " = " + theEntity.getSqlLabel() + "." + ( this_el == null ? "" : this_el.getSqlLabel() ) + "\");\n");
                 }
             }
             out.write("\n");
@@ -1578,7 +1580,7 @@ public class TagClassGenerator {
                 Attribute theAttribute = primaryKeys.elementAt(j);
                 if (theAttribute == theKey) {
                 	orderBy = theKey.getSqlLabel();
-                	keyBuf.append("\t\t\t\t"+theKey.type +" _keyVal = rs."+theKey.getSQLMethod(true)+"(1);\n");
+                	keyBuf.append("\t\t\t\t"+theKey.getType() +" _keyVal = rs."+theKey.getSQLMethod(true)+"(1);\n");
                 	
                 	out.write("\n\t\t\t\t\t+\" and " + theKey.getSqlLabel() + " > ? \"");
                 } else {

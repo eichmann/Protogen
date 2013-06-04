@@ -22,24 +22,24 @@ public class Attribute extends ClayElement {
 				+ ", childAttributes=" + childAttributes + "]";
 	}
 
-	Domain domain = null;
-    String sqlType = null;
-    String type = null;
-    String remarks = null;
-    String origLabel = null;
-    boolean mandatory = false;
-    boolean primary = false;
-    boolean autoIncrement = false;
-    private boolean foreign = false;
-    boolean sequence = false;
-    boolean counter = false;
-    String sequenceName = null;
-    Entity dominantEntity = null;
-    String referencedEntityName = null;
-    Entity referencedEntity = null;
-    Entity entity = null;
-    Attribute foreignAttribute = null;
-	Vector<Attribute> childAttributes = new Vector<Attribute>();
+	private Domain domain = null;
+	private String sqlType = null;
+	private String type = null;
+	private String remarks = null;
+	private String origLabel = null;
+	private boolean mandatory = false;
+	private boolean primary = false;
+	private boolean autoIncrement = false;
+	private boolean foreign = false;
+	private boolean sequence = false;
+	private boolean counter = false;
+	private String sequenceName = null;
+	private Entity dominantEntity = null;
+	private String referencedEntityName = null;
+	private Entity referencedEntity = null;
+	private Entity entity = null;
+	private Attribute foreignAttribute = null;
+	private Vector<Attribute> childAttributes = new Vector<Attribute>();
 	
 	private static final Log log = LogFactory.getLog(Attribute.class);
 
