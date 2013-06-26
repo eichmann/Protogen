@@ -254,7 +254,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			cv = cvIter.next();
 			if ( cv.isPrimary() && ec.isUsesCompositeKey() ) {
 				for(Attribute a : ec.getEntity().getPrimaryKeyAttributes()) {
-					output += spaces(indent) + "cols.push({ \"sName\": \"" + a.getLowerLabel() + "\", \"sTitle\":\"" +  ( deOb ? " ${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+a.getSqlLabel()+"') } " : a.getLabel() ) + "\",	\"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
+					output += spaces(indent) + "cols.push({ \"sName\": \"id." + a.getLowerLabel() + "\", \"sTitle\":\"" +  ( deOb ? " ${ "+ec.getSchema().getLowerLabel()+":deobfuscateColumn ( '"+ec.getTableName()+"', '"+a.getSqlLabel()+"') } " : a.getLabel() ) + "\",	\"sClass\":\"\", \"bSortable\":false, \"bSearchable\": false });";
 					output += lines(1);
 				}
 			} else {

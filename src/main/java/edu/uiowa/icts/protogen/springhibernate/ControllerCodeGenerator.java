@@ -444,7 +444,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 			cv = iter.next();
 			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
 				for(Attribute a : dc.getEntity().getPrimaryKeyAttributes()) {
-					output.append(indent(indent) + ( count > 0 ? "} else " : "" ) + "if( \""+a.getLowerLabel()+"\".equals(column) ){\n");
+					output.append(indent(indent) + ( count > 0 ? "} else " : "" ) + "if( \"id."+a.getLowerLabel()+"\".equals(column) ){\n");
 					indent += 4;
 					output.append(indent(indent) + "tmp.put("+dc.getLowerIdentifier()+".getId().get"+ a.getUpperLabel() +"());\n");
 					indent -= 4;
