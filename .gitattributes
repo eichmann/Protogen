@@ -5,6 +5,7 @@
 .settings/org.eclipse.m2e.core.prefs -text svneol=unset#text/plain
 .settings/org.eclipse.wst.common.component -text
 .settings/org.eclipse.wst.common.project.facet.core.xml svneol=native#text/xml
+.settings/org.eclipse.wst.validation.prefs -text svneol=unset#text/plain
 .settings/org.hibernate.eclipse.console.prefs -text svneol=unset#text/plain
 .settings/org.maven.ide.eclipse.prefs -text
 /pom.xml -text
