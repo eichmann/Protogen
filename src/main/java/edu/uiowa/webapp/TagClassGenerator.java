@@ -317,7 +317,7 @@ public class TagClassGenerator {
                 + theEntity.getLabel() + " and to generate a new " + keyAttribute.getLabel() + "\n");
         out.write("\t\t\t\t" + keyAttribute.getLabel() + " = " + keyAttribute.getDefaultValue() + ";\n");
         // out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()+ ");\n");
-        out.write("\t\t\t\tinsertEntity();\n");
+        out.write("\t\t\t\tnewRecord = true; // insertEntity();\n");
         
         //TODO need case for null iterator and all active parents
 //        out.write("\t\t\t} else if (the" + theEntity.getLabel() + "Iterator == null");
@@ -403,7 +403,7 @@ public class TagClassGenerator {
 	            out.write("\t\t\t\tstmt.close();\n");
 	            out.write("\n");
 	            out.write("\t\t\t\tif (!found) {\n");
-	            out.write("\t\t\t\t\tinsertEntity();\n");
+	            out.write("\t\t\t\t\tnewRecord = true; // insertEntity();\n");
 	            out.write("\t\t\t\t}\n");
 	        }
         }
@@ -457,7 +457,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\tstmt.close();\n");
         out.write("\n");
         out.write("\t\t\t\tif (!found) {\n");
-        out.write("\t\t\t\t\tinsertEntity();\n");
+        out.write("\t\t\t\t\tnewRecord = true; // insertEntity();\n");
         out.write("\t\t\t\t}\n");
         out.write("\t\t\t}\n");
         
@@ -552,9 +552,11 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorException\");\n");
         out.write("\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
         out.write("\t\t\t\t}\n");
-        out.write("\t\t\t}\n");
+        out.write("\t\t\t}\n\n");
         
-        out.write("\t\t\tif (commitNeeded) {\n");
+        out.write("\t\t\tif ( newRecord ) {\n");
+        out.write("\t\t\t\tinsertEntity();\n");
+        out.write("\t\t\t} else if (commitNeeded) {\n");
         out.write("\t\t\t\tPreparedStatement stmt = getConnection().prepareStatement(\"update " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " set");
         paramBuffer = new StringBuffer();
         queryBuffer = new StringBuffer();
@@ -2480,7 +2482,7 @@ public class TagClassGenerator {
 //        out.write("\t\t\t\t" + keyAttribute.getLabel() + " = " + keyAttribute.getDefaultValue() + ";\n");
 //        out.write("\t\t\t\tlog.debug(\"generating new " + theEntity.getLabel() + " \" + " + keyAttribute.getLabel()
 //                + ");\n");
-//        out.write("\t\t\t\tinsertEntity();\n");
+//        out.write("\t\t\t\tnewRecord = true; // insertEntity();\n");
         out.write("\t\t\t\tHttpServletRequest theRequest = (HttpServletRequest) pageContext.getRequest();\n");
         out.write("\t\t\t\tboolean isMultipart = ServletFileUpload.isMultipartContent(theRequest);\n");
         out.write("\t\t\t\t// Create a factory for disk-based file items\n");
@@ -2589,7 +2591,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\t}\n");
 
         out.write("\t\t\t\t\tif (count == 0 && commitNeeded)\n");
-        out.write("\t\t\t\t\t\tinsertEntity();\n");
+        out.write("\t\t\t\t\t\tnewRecord = true; // insertEntity();\n");
         out.write("\t\t\t\t} catch (FileUploadException e) {\n\n");
         
         out.write("\t\t\t\t\tlog.error(\"Upload Exception\", e);\n\n");
@@ -2690,7 +2692,7 @@ public class TagClassGenerator {
                 out.write("\t\t\t\tstmt.close();\n");
                 out.write("\n");
                 out.write("\t\t\t\tif (!found) {\n");
-                out.write("\t\t\t\t\tinsertEntity();\n");
+                out.write("\t\t\t\t\tnewRecord = true; // insertEntity();\n");
                 out.write("\t\t\t\t}\n");
             }
         }
@@ -2744,7 +2746,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\tstmt.close();\n");
         out.write("\n");
         out.write("\t\t\t\tif (!found) {\n");
-        out.write("\t\t\t\t\tinsertEntity();\n");
+        out.write("\t\t\t\t\tnewRecord = true; // insertEntity();\n");
         out.write("\t\t\t\t}\n");
         out.write("\t\t\t}\n");
         
