@@ -518,10 +518,16 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"}\n");
         output.append(indent(indent)+"ob.put(\"aaData\", jsonArray);\n\n");
         	
-        output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n");
-        output.append(indent(indent)+"IOUtils.copy(reader, response.getOutputStream());\n");
+        output.append(indent(indent)+"StringReader reader = new StringReader( ob.toString() );\n");
+        output.append(indent(indent)+"try {\n");
+        indent += 4;
+        output.append(indent(indent)+"IOUtils.copy( reader, response.getOutputStream() );\n");
+        indent -= 4;
+        output.append(indent(indent)+"} finally {\n");
+        indent += 4;
         output.append(indent(indent)+"reader.close();\n");
-        
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
         indent -= 4;
         	
         output.append(indent(indent)+"} catch (Exception e) {\n");
@@ -545,9 +551,17 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"ob.put(\"iTotalRecords\", 0);\n");
         output.append(indent(indent)+"ob.put(\"error\", e.getMessage());\n");
         output.append(indent(indent)+"ob.put(\"stackTrace\", stackTrace);\n");
-        output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n"); 
-        output.append(indent(indent)+"IOUtils.copy(reader, response.getOutputStream());\n");
+        output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n");
+        output.append(indent(indent)+"try {\n");
+        indent += 4;
+        output.append(indent(indent)+"IOUtils.copy( reader, response.getOutputStream() );\n");
+        indent -= 4;
+        output.append(indent(indent)+"} finally {\n");
+        indent += 4;
         output.append(indent(indent)+"reader.close();\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
+        indent -= 4;
         output.append(indent(indent)+"return;\n");
         indent -= 4;
         output.append(indent(indent)+"} catch (JSONException je) {\n");
