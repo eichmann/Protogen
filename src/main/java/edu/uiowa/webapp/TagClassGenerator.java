@@ -3125,43 +3125,46 @@ public class TagClassGenerator {
         out.close();
     }
     
-    public void generateDBTestClass() throws IOException {
-        File baseClassFile = new File(packagePrefixDirectory, "/DBTest.java");
-        FileWriter fstream = new FileWriter(baseClassFile);
-        BufferedWriter out = new BufferedWriter(fstream);
-        
-        out.write("package " + packagePrefix + ";\n" + "\n" 
-        		+ "import javax.servlet.jsp.JspWriter;" + "\n"
-        		+ "import java.sql.Statement;"+ "\n"
-        		+ "import javax.servlet.jsp.JspException;"+ "\n"
-        		+ "import javax.servlet.jsp.JspTagException;" + "\n"
-                + "import org.apache.commons.logging.Log;\n"
-                + "import org.apache.commons.logging.LogFactory;\n"
-        		+ "\n"
-        		+ "\n"
-        		+ "@SuppressWarnings(\"serial\")" 
-        		+ "\n"
-        		+ "public class DBTest extends "+ this.projectName + "BodyTagSupport {" 
-        		+ "\n\n"
-        		+ "private static final Log log = LogFactory.getLog(DBTest.class);\n\n"
-        		+ "		public int doStartTag() throws JspException {" + "\n"
-        		+ "			try { \n" 
-        		+ "				JspWriter out = pageContext.getOut();" + "\n"
-        		+ "				Statement statement = getConnection().createStatement();" + "\n"
-        		+ "				boolean rs = statement.execute(\"Select now()\");" + "\n"
-        		+ "				if (rs) { out.print(\"SUCCESS\");  }" + "\n"
-        		+ "				else { out.print(\"FAILED\");}" + "\n"
-        		+ "			} catch (Exception e) {" + "\n"
-        		+ "				log.error(\"Connection Failed\", e);\n"
-        		+ "				throw new JspTagException(\"Connection Failed: \" + e); }" + "\n"
-        		+ "			finally { freeConnection();  }" + "\n"
-        		+ "			return SKIP_BODY;\n"
-        		+ "\n"
-        		+ "	}\n" 
-        		+ " }\n");
-
-        out.close();
-    }
+	public void generateDBTestClass() throws IOException {
+		File baseClassFile = new File( packagePrefixDirectory, "/DBTest.java" );
+		FileWriter fstream = new FileWriter( baseClassFile );
+		BufferedWriter out = new BufferedWriter( fstream );
+		out.write( "package " + packagePrefix + ";\n\n" );
+		out.write( "import javax.servlet.jsp.JspWriter;" + "\n" );
+		out.write( "import java.sql.Statement;" + "\n" );
+		out.write( "import javax.servlet.jsp.JspException;" + "\n" );
+		out.write( "import javax.servlet.jsp.JspTagException;" + "\n" );
+		out.write( "import org.apache.commons.logging.Log;\n" );
+		out.write( "import org.apache.commons.logging.LogFactory;\n\n\n" );
+		out.write( "@SuppressWarnings(\"serial\")" );
+		out.write( "\n" );
+		out.write( "public class DBTest extends " + this.projectName + "BodyTagSupport {\n\n" );
+		out.write( "\tprivate static final Log log = LogFactory.getLog( DBTest.class );\n\n" );
+		out.write( "\tpublic int doStartTag() throws JspException {\n" );
+		out.write( "\t\ttry { \n" );
+		out.write( "\t\t\tJspWriter out = pageContext.getOut();\n" );
+		out.write( "\t\t\tStatement statement = getConnection().createStatement();\n" );
+		if ( "sqlserver".equals( databaseType ) ) {
+			out.write( "\t\t\tboolean rs = statement.execute(\"select CURRENT_TIMESTAMP\");\n" );
+		} else {
+			out.write( "\t\t\tboolean rs = statement.execute(\"select now()\");\n" );
+		}
+		out.write( "\t\t\tif (rs) { \n" );
+		out.write( "\t\t\t\tout.print(\"SUCCESS\");\n" );
+		out.write( "\t\t\t} else {\n" );
+		out.write( "\t\t\t\tout.print(\"FAILED\");\n" );
+		out.write( "\t\t\t}\n" );
+		out.write( "\t\t} catch ( Exception e ) {" + "\n" );
+		out.write( "\t\t\tlog.error( \"Connection Failed\", e );\n" );
+		out.write( "\t\t\tthrow new JspTagException(\"Connection Failed: \" + e);\n" );
+		out.write( "\t\t} finally {\n" );
+		out.write( "\t\t\tfreeConnection();\n" );
+		out.write( "\t\t}\n" );
+		out.write( "\t\treturn SKIP_BODY;\n" );
+		out.write( "\t}\n" );
+		out.write( "}" );
+		out.close();
+	}
 
 	/**
 	 * @return the projectPath
