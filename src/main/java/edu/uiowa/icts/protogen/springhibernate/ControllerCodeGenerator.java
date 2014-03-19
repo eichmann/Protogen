@@ -10,10 +10,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,122 +36,124 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 	}
 
 
-	private void generateController(DomainClass dc) throws IOException {
+	private void generateController( DomainClass dc ) throws IOException {
 
-		String packageName = model.getPackageRoot() +"." + dc.getSchema().getLowerLabel() +".controller";
-		String daoPackageName = model.getPackageRoot() +"." + dc.getSchema().getLowerLabel() +".dao";
-	
+		String packageName = model.getPackageRoot() + "." + dc.getSchema().getLowerLabel() + ".controller";
+		String daoPackageName = model.getPackageRoot() + "." + dc.getSchema().getLowerLabel() + ".dao";
 
-		String packagePath = pathBase + "/"	+ packageName.replaceAll("\\.", "/") ;
-		
-		String className=""+dc.getIdentifier()+"Controller";
+		String packagePath = pathBase + "/" + packageName.replaceAll( "\\.", "/" );
+
+		String className = "" + dc.getIdentifier() + "Controller";
 		// String interfaceName = ""+dc.getIdentifier()+interfaceSuffix;
-		String accessor=""+dc.getSchema().getLowerLabel()+"DaoService.get"+dc.getIdentifier()+interfaceSuffix+"()";
-		String jspPath="/"+dc.getSchema().getLowerLabel()+"/"+dc.getLowerIdentifier();
+		String accessor = "" + dc.getSchema().getLowerLabel() + "DaoService.get" + dc.getIdentifier() + interfaceSuffix + "()";
+		String jspPath = "/" + dc.getSchema().getLowerLabel() + "/" + dc.getLowerIdentifier();
 		jspPath = jspPath.toLowerCase();
-		
-		List<String> importList = new ArrayList<String>();
-		
-		importList.add("import "+dc.getPackageName()+".*;");
-		importList.add("import "+daoPackageName+".*;");
-		importList.add("import edu.uiowa.icts.spring.*;");
-		importList.add("import edu.uiowa.icts.util.SortColumn;");
-		importList.add("import edu.uiowa.icts.spring.GenericDaoListOptions;");
-		
-		importList.add("import java.io.IOException;");
-		importList.add("import java.io.StringReader;");
-		
-		importList.add("import javax.servlet.http.HttpServletRequest;");
-		importList.add("import javax.servlet.http.HttpServletResponse;");
 
-		importList.add("import java.util.ArrayList;");
-		importList.add("import java.util.List;");
-		importList.add("import java.util.Date;");
-		importList.add("import java.util.HashMap;");
-		
-		importList.add("import org.json.JSONArray;");
-		importList.add("import org.json.JSONException;");
-		importList.add("import org.json.JSONObject;");
-		
-		importList.add("import org.apache.commons.io.IOUtils;");
-		importList.add("import org.apache.commons.logging.LogFactory;");
-		importList.add("import org.apache.commons.logging.Log;");
-		
-		importList.add("import org.springframework.stereotype.Controller;");
-		importList.add("import org.springframework.ui.ModelMap;");
-		importList.add("import org.springframework.web.bind.annotation.RequestMapping;");
-		importList.add("import org.springframework.web.bind.annotation.RequestMethod;");
-		importList.add("import org.springframework.web.bind.annotation.ModelAttribute;");
-		importList.add("import org.springframework.web.bind.annotation.RequestParam;");
-		importList.add("import org.springframework.web.servlet.ModelAndView;");
-		
-		(new File(packagePath)).mkdirs();
-		
+		List<String> importList = new ArrayList<String>();
+
+		importList.add( "import " + dc.getPackageName() + ".*;" );
+		importList.add( "import " + daoPackageName + ".*;" );
+		importList.add( "import edu.uiowa.icts.spring.*;" );
+		importList.add( "import edu.uiowa.icts.util.SortColumn;" );
+		importList.add( "import edu.uiowa.icts.spring.GenericDaoListOptions;" );
+
+		importList.add( "import java.io.IOException;" );
+		importList.add( "import java.io.StringReader;" );
+
+		importList.add( "import javax.servlet.http.HttpServletRequest;" );
+		importList.add( "import javax.servlet.http.HttpServletResponse;" );
+
+		importList.add( "import java.util.ArrayList;" );
+		importList.add( "import java.util.List;" );
+		importList.add( "import java.util.Date;" );
+		importList.add( "import java.util.HashMap;" );
+
+		importList.add( "import org.json.JSONArray;" );
+		importList.add( "import org.json.JSONException;" );
+		importList.add( "import org.json.JSONObject;" );
+
+		importList.add( "import org.apache.commons.lang.StringUtils;" );
+		importList.add( "import org.apache.commons.io.IOUtils;" );
+		importList.add( "import org.apache.commons.logging.LogFactory;" );
+		importList.add( "import org.apache.commons.logging.Log;" );
+
+		importList.add( "import org.springframework.stereotype.Controller;" );
+		importList.add( "import org.springframework.ui.ModelMap;" );
+		importList.add( "import org.springframework.web.bind.annotation.RequestMapping;" );
+		importList.add( "import org.springframework.web.bind.annotation.RequestMethod;" );
+		importList.add( "import org.springframework.web.bind.annotation.ModelAttribute;" );
+		importList.add( "import org.springframework.web.bind.annotation.RequestParam;" );
+		importList.add( "import org.springframework.web.servlet.ModelAndView;" );
+
+		( new File( packagePath ) ).mkdirs();
+
 		/**
 		 * If exists, exit
 		 */
-		File file = new File(packagePath, className	+ ".java");
-		if( file.exists() && !overwrite ) {
-			log.debug("File Exists");
+		File file = new File( packagePath, className + ".java" );
+		if ( file.exists() && !overwrite ) {
+			log.debug( "File Exists" );
 			return;
 		}
-		
-		if(file.exists()){
-			log.debug("Overwriting file....");
+
+		if ( file.exists() ) {
+			log.debug( "Overwriting file...." );
 		}
-			
-		
-		
-		
-		FileWriter fstream = new FileWriter(file);
-		BufferedWriter out = new BufferedWriter(fstream);
-		
+
+		FileWriter fstream = new FileWriter( file );
+		BufferedWriter out = new BufferedWriter( fstream );
+
 		/*
 		 * Print Package
 		 */
-		out.write("package "+ packageName+";\n");
-		lines(out, 1);
-		
+		out.write( "package " + packageName + ";\n" );
+		lines( out, 1 );
+
 		/*
 		 * Print imports
 		 */
-		for(String importSt: importList){
-			out.write(importSt+"\n");
+		for ( String importSt : importList ) {
+			out.write( importSt + "\n" );
 		}
+
+		SimpleDateFormat sdf = new SimpleDateFormat( "MM/dd/yyyy HH:mm:ss z", Locale.US );
+		sdf.setTimeZone( TimeZone.getDefault() );
 		
-		lines(out, 1);
-		out.write("/**\n");
-		out.write(" * Generated by Protogen\n");
-		out.write(" * " + (new Date())+ "\n");
-		out.write(" */\n");
+		lines( out, 1 );
+		out.write( "/**\n" );
+		out.write( " * Generated by Protogen \n" );
+		out.write( " * @date " + sdf.format( new Date() ) + "\n" );
+		out.write( " */\n" );
 
 		/*
 		 * Print class header
 		 */
-		out.write("@Controller\n");
-		out.write("@RequestMapping(\"/"+dc.getSchema().getLowerLabel().toLowerCase()+"/"+dc.getLowerIdentifier().toLowerCase()+"/*\")\n");
-		out.write("public class "+className+" extends Abstract"+dc.getSchema().getUpperLabel()+"Controller {\n\n");
+		out.write( "@Controller\n" );
+		out.write( "@RequestMapping( \"/" + dc.getSchema().getLowerLabel().toLowerCase() + "/" + dc.getLowerIdentifier().toLowerCase() + "/*\" )\n" );
+		out.write( "public class " + className + " extends Abstract" + dc.getSchema().getUpperLabel() + "Controller {\n\n" );
 
-		spaces(out, 4);
-		out.write("private static final Log log = LogFactory.getLog("+className+".class);\n\n");
+		spaces( out, 4 );
+		out.write( "private static final Log log = LogFactory.getLog( " + className + ".class );\n\n" );
 
-		out.write(generateNoScriptListMethod(dc, accessor,jspPath, 4));
-		lines(out,2);
-		out.write(generateListMethod(dc, accessor,jspPath, 4));
-		lines(out,2);
-		out.write(generateDataTableMethod(dc, accessor,jspPath, 4));
-		lines(out,2);
-		out.write( generateAddMethod(dc , accessor,jspPath, 4));
-		lines(out,2);
-		out.write( generateEditMethod(dc , accessor,jspPath, 4));
-		lines(out,2);
-		out.write( generateShowMethod(dc , accessor,jspPath, 4));
-		lines(out,2);
-		out.write( generateSaveMethod(dc , accessor,jspPath, 4));
-		lines(out,2);
-		out.write( generateDeleteMethod(dc , accessor,jspPath, 4));
-		lines(out,1);
-		out.write("}");
+		out.write( generateNoScriptListMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateListMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateDataTableMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateAddMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateEditMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateShowMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateSaveMethod( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateDeleteMethodGET( dc, accessor, jspPath, 4 ) );
+		lines( out, 2 );
+		out.write( generateDeleteMethodPOST( dc, accessor, jspPath, 4 ) );
+		lines( out, 1 );
+		out.write( "}" );
 		out.close();
 	}
 	
@@ -794,78 +799,107 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		return output.toString();
 	}
 	
-	public String generateDeleteMethod(DomainClass dc , String accessor,String jspPath, int indent)
-	{
+	public String generateDeleteMethodPOST( DomainClass dc, String accessor, String jspPath, int indent ) {
+		
 		List<String[]> compositeKey = new ArrayList<String[]>();
-		String sig="";
-		if(dc.isUsesCompositeKey())
-		{
-			
-			for(Attribute a : dc.getEntity().getPrimaryKeyAttributes())
-			{
+		String requestParameters = "@RequestParam( value = \"submit\" ) String submitButtonValue";
+		if ( dc.isUsesCompositeKey() ) {
+			for ( Attribute a : dc.getEntity().getPrimaryKeyAttributes() ) {
 				String type = a.getType();
-				if(type.equalsIgnoreCase("date"))
-					type="String";
-				sig += "@RequestParam(\""+a.getLowerLabel()+"\") "+type+" "+a.getLowerLabel()+", ";
-				compositeKey.add(new String[]{a.getType(),a.getLowerLabel()});
+				if ( type.equalsIgnoreCase( "date" ) ) {
+					type = "String";
+				}
+				requestParameters += ", @RequestParam( \"" + a.getLowerLabel() + "\" ) " + type + " " + a.getLowerLabel();
+				compositeKey.add( new String[] { a.getType(), a.getLowerLabel() } );
 			}
-				
-			sig = sig.substring(0, sig.length()-2);
-			
-		}
-		else
-		{
-			for(ClassVariable cv :dc.getPrimaryKeys())
-			{
-				
-				sig += "@RequestParam(\""+cv.getLowerIdentifier()+"\") "+cv.getType()+" "+dc.getLowerIdentifier()+"Id, ";
-			}
-			if(!"".equals(sig)){
-				sig = sig.substring(0, sig.length()-2);
+		} else {
+			for ( ClassVariable cv : dc.getPrimaryKeys() ) {
+				requestParameters += ", @RequestParam( \"" + cv.getLowerIdentifier() + "\" ) " + cv.getType() + " " + dc.getLowerIdentifier() + "Id ";
 			}
 		}
-			
+
 		StringBuffer output = new StringBuffer();
-		output.append(indent(indent)+"@RequestMapping(value = \"delete.html\", method = RequestMethod.GET)\n");
-		output.append(indent(indent)+"public String delete("+sig+") {\n");
+		output.append( indent( indent ) + "@RequestMapping( value = \"delete.html\", method = RequestMethod.POST )\n" );
+		output.append( indent( indent ) + "public String doDelete( " + requestParameters + " ) {\n" );
+
+		output.append( indent( indent * 2 ) + "if ( StringUtils.equalsIgnoreCase( submitButtonValue, \"yes\" ) ) {\n" );
+		
+		/*
+		 * set composite key values
+		 */
+		if ( dc.isUsesCompositeKey() ) {
+			output.append( indent( indent * 3 ) + dc.getIdentifier() + "Id " + dc.getLowerIdentifier() + "Id = new " + dc.getIdentifier() + "Id();\n" );
+			for ( String[] starray : compositeKey ) {
+				String setter = "set" + starray[1].substring( 0, 1 ).toUpperCase() + starray[1].substring( 1, starray[1].length() );
+				output.append( indent( indent * 3 ) + dc.getLowerIdentifier() + "Id." + setter + "( " + starray[1] + " );\n" );
+			}
+		}
+
+		output.append( indent( indent * 3 ) + dc.getIdentifier() + " " + dc.getLowerIdentifier() + " = " + accessor + ".findById( " + dc.getLowerIdentifier() + "Id );\n" );
+		output.append( indent( indent * 3 ) + accessor + ".delete( " + dc.getLowerIdentifier() + " );\n" );
+		
+		output.append( indent( indent * 2 ) + "}\n" );
+		
+		output.append( indent( indent * 2 ) + "return \"redirect:" + jspPath + "/list.html\";\n" );
+		
+		output.append( indent( indent ) + "}" );
+		return output.toString();
+	}
+	
+	public String generateDeleteMethodGET( DomainClass dc, String accessor, String jspPath, int indent ) {
+		List<String[]> compositeKey = new ArrayList<String[]>();
+		String sig = "";
+		if ( dc.isUsesCompositeKey() ) {
+			for ( Attribute a : dc.getEntity().getPrimaryKeyAttributes() ) {
+				sig += "@RequestParam(\"" + a.getLowerLabel() + "\") " + a.getType() + " " + a.getLowerLabel() + ", ";
+				compositeKey.add( new String[] { a.getType(), a.getLowerLabel() } );
+			}
+			if ( !"".equals( sig ) ) {
+				sig = sig.substring( 0, sig.length() - 2 );
+			}
+		} else {
+			for ( ClassVariable cv : dc.getPrimaryKeys() ) {
+				sig += "@RequestParam(\"" + cv.getLowerIdentifier() + "\") " + cv.getType() + " " + dc.getLowerIdentifier() + "Id, ";
+			}
+			if ( !"".equals( sig ) ) {
+				sig = sig.substring( 0, sig.length() - 2 );
+			}
+		}
+
+		StringBuffer output = new StringBuffer();
+		output.append( indent( indent ) + "@RequestMapping( value = \"delete.html\", method = RequestMethod.GET )\n" );
+		output.append( indent( indent ) + "public ModelAndView confirmDelete( " + sig + " ) {\n" );
+		output.append( indent( indent * 2 ) + "ModelMap model = new ModelMap();\n" );
 
 		/*
 		 * set composite key values
 		 */
-		if(dc.isUsesCompositeKey())
-		{
-			output.append(indent(indent*2)+dc.getIdentifier()+"Id "+dc.getLowerIdentifier()+"Id = new "+dc.getIdentifier()+"Id();\n");
-			for(String[] starray : compositeKey)
-			{
-				String setter = "set"+starray[1].substring(0, 1).toUpperCase() + starray[1].substring(1, starray[1].length());
-				output.append(indent(indent*2)+dc.getLowerIdentifier()+"Id."+setter+"("+starray[1]+");\n");
+		if ( dc.isUsesCompositeKey() ) {
+			output.append( indent( indent * 2 ) + dc.getIdentifier() + "Id " + dc.getLowerIdentifier() + "Id = new " + dc.getIdentifier() + "Id();\n" );
+			for ( String[] starray : compositeKey ) {
+				String setter = "set" + starray[1].substring( 0, 1 ).toUpperCase() + starray[1].substring( 1, starray[1].length() );
+				output.append( indent( indent * 2 ) + dc.getLowerIdentifier() + "Id." + setter + "(" + starray[1] + ");\n" );
 			}
-	
+
 		}
 
+		output.append( indent( indent * 2 ) + dc.getIdentifier() + " " + dc.getLowerIdentifier() + " = " + accessor + ".findById(" + dc.getLowerIdentifier() + "Id);\n" );
+		output.append( indent( indent * 2 ) + "model.addAttribute( \"" + dc.getLowerIdentifier() + "\", " + dc.getLowerIdentifier() + " );\n" );
+		output.append( indent( indent * 2 ) + "return new ModelAndView( \"" + jspPath + "/delete\", model );\n" );
+		output.append( indent( indent ) + "}" );
 		
-		output.append(indent(indent*2)+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" = "+accessor+".findById("+dc.getLowerIdentifier()+"Id);\n");
-		output.append(indent(indent*2)+accessor+".delete("+dc.getLowerIdentifier()+");\n");
-		output.append(indent(indent*2)+"return \"redirect:"+jspPath+"/list.html\";\n");
-	
-		output.append(indent(indent)+"}");
 		return output.toString();
 	}
 
 
 	/*
 	 * Public Function to generate java domain code
-	 * 
 	 */
-	public void generate() throws IOException 
-	{
-		
-		for(DomainClass dc: model.getDomainClassList())
-			generateController(dc);
-	
+	public void generate() throws IOException {
+		for ( DomainClass dc : model.getDomainClassList() ) {
+			generateController( dc );
+		}
 		generateAbstractControllers();
-
-		
 	}
 
 }

@@ -52,9 +52,183 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 			generateListJSP(ec);
 			generateListAltJSP(ec);
 			generateEditJSP(ec);
+			generateDeleteJSP(ec);
 		}
 	}
 
+	private void generateDeleteJSP( DomainClass ec ) throws IOException {
+		String directory = jspRoot + "/" + ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
+		( new File( directory ) ).mkdirs();
+		String jspFile = directory + "/delete.jsp";
+		int indent = 0;
+
+		String output = spaces( indent ) + "<%@ include file=\"/WEB-INF/include.jsp\"  %>";
+		output += lines( 2 );
+
+		boolean deOb = Boolean.parseBoolean( properties.getProperty( "deobfuscate.column.names", "false" ) );
+
+		Iterator<ClassVariable> cvIter = ec.getPrimaryKeys().iterator();
+		output += "<h2>Delete " + ec.getIdentifier() + "</h2>";
+		output += lines( 1 );
+
+		output += spaces( indent ) + "";
+		lines( 1 );
+
+		cvIter = ec.listAllIter();
+		output += lines( 1 );
+
+		output += "<form method=\"post\" action=\"delete.html\">";
+		output += lines(1);
+		indent += 4;
+		
+		output += spaces(indent) + "<fieldset>";
+		output += lines(1);
+		indent += 4;
+		
+		output += spaces(indent) + "<legend>Are you sure you want to delete this "+ec.getIdentifier()+"?</legend>";
+		output += lines(1);
+		
+		output += spaces( indent ) + "<table class=\"table table-bordered table-hover\">";
+		output += lines(1);
+		indent += 4;
+
+		output += spaces(indent) + "<thead>";
+		output += lines( 1 );
+		indent += 4;
+		
+		output += spaces( indent ) + "<tr>";
+		indent += 4;
+		
+		while ( cvIter.hasNext() ) {
+			ClassVariable cv = cvIter.next();
+			String th_label = cv.getUpperIdentifier();
+			if ( deOb && cv.getAttribute() != null ) {
+				th_label = "${ " + ec.getSchema().getLowerLabel() + ":deobfuscateColumn ( '" + ec.getTableName() + "', '" + cv.getAttribute().getSqlLabel() + "') }";
+			}
+			output += lines( 1 );
+			output += spaces( indent ) + "<th>" + th_label + "</th>";
+		}
+		
+		output += lines( 1 );
+		indent -= 4;
+		output += spaces( indent ) + "</tr>";
+		
+		output += lines( 1 );
+		indent -= 4;
+		output += spaces(indent) + "</thead>";
+		
+		output += lines( 1 );
+		output += spaces(indent) + "<tbody>";
+		indent += 4;
+		
+		output += lines( 1 );
+		output += spaces( indent ) + "<tr>";
+		indent += 4;
+		
+		cvIter = ec.listAllIter();
+		while ( cvIter.hasNext() ) {
+
+			ClassVariable cv = cvIter.next();
+
+			output += lines( 1 );
+			output += spaces( indent ) + "<td>";
+			indent += 4;
+			output += lines( 1 );
+
+			if ( cv.getAttribType() == AttributeType.CHILD && cv.getAttribute().getEntity().getDomainClass() != null ) {
+				if ( cv.getAttribute().getEntity().getDomainClass().isUsesCompositeKey() ) {
+					output += spaces( indent ) + "<em>not implemented</em>";
+				} else {
+					output += spaces( indent ) + "<ul>";
+					output += lines( 1 );
+					indent += 4;
+
+					output += spaces( indent ) + "<c:forEach items=\"${ " + ec.getLowerIdentifier() + "." + cv.getIdentifier() + " }\" var=\"item\" varStatus=\"itemStatus\">";
+					output += lines( 1 );
+					indent += 4;
+
+					output += spaces( indent ) + "<li>${ item." + cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + " }</li>";
+					output += lines( 1 );
+					indent -= 4;
+
+					output += spaces( indent ) + "</c:forEach>";
+					output += lines( 1 );
+					indent -= 4;
+
+					output += spaces( indent ) + "</ul>";
+				}
+			} else if ( cv.isPrimary() && cv.getDomainClass().isUsesCompositeKey() ) {
+				String label = "";
+				for ( Attribute a : ec.getEntity().getPrimaryKeyAttributes() ) {
+					String pk_label = a.getLowerLabel();
+					if ( deOb ) {
+						pk_label = "${ " + ec.getSchema().getLowerLabel() + ":deobfuscateColumn ( '" + ec.getTableName() + "', '" + a.getSqlLabel() + "') }";
+					}
+					label += "( " + pk_label + ", ${ " + ec.getLowerIdentifier() + ".id." + a.getLowerLabel() + " } )";
+				}
+				output += spaces( indent ) + label;
+			} else {
+				output += spaces( indent ) + "${ " + ec.getLowerIdentifier() + "." + cv.getIdentifier() + " }";
+			}
+
+			output += lines( 1 );
+			indent -= 4;
+			output += spaces( indent ) + "</td>";
+			
+		}
+		
+		output += lines( 1 );
+		indent -= 4;
+		output += spaces( indent ) + "</tr>";
+
+		output += lines( 1 );
+		indent -= 4;
+		output += spaces(indent) + "</tbody>";
+
+		output += lines( 1 );
+		indent -= 4;
+		output += spaces( indent ) + "</table>";
+		
+		output += lines( 2 );
+		output += spaces( indent ) + "<input type=\"submit\" name=\"submit\" value=\"Yes\" class=\"btn btn-danger\" />";
+		output += lines( 1 );
+		output += spaces( indent ) + "<input type=\"submit\" name=\"submit\" value=\"No\" class=\"btn\" />";
+		
+		output += lines( 1 );
+		
+		cvIter = ec.listAllIter();
+		while ( cvIter.hasNext() ) {
+			ClassVariable cv = cvIter.next();
+			if ( ec.isUsesCompositeKey() && cv.isPrimary() ) {
+				for ( Attribute a : ec.getEntity().getPrimaryKeyAttributes() ) {
+					if ( !a.isForeign() ) {
+						output += lines( 1 );
+						output += spaces( indent ) + "<input type=\"hidden\" name=\"" + a.getLowerLabel() + "\" value=\"${ " + ec.getLowerIdentifier() + ".id." + a.getLowerLabel() + " }\" />";
+					}
+				}
+			} else if ( cv.isPrimary() ) {
+				output += lines( 1 );
+				output += spaces( indent ) + "<input type=\"hidden\" name=\"" + cv.getIdentifier() + "\" value=\"${ " + ec.getLowerIdentifier() + "." + cv.getIdentifier() + " }\" />";
+			}
+		}
+		
+		output += lines( 2 );
+		indent -= 4;
+		output += spaces( indent ) + "</fieldset>";
+		
+		output += lines( 1 );
+		indent -= 4;
+		output += spaces( indent ) + "</form>";
+
+		File file = new File( jspFile );
+		FileWriter fstream = new FileWriter( file );
+		BufferedWriter out = new BufferedWriter( fstream );
+		out.write( output );
+		out.close();
+		log.debug( "done creating delete" );
+
+	}
+	
 	private void generateShowJSP(DomainClass ec) throws IOException {
 		String directory =  jspRoot + "/"+ ec.getSchema().getUnqualifiedLabel() + "/" + ec.getIdentifier().toLowerCase();
 		(new File(directory )).mkdirs();
