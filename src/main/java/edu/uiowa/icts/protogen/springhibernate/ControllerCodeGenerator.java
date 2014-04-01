@@ -300,7 +300,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		
 		indent += 4;
 		
-		output.append(indent(indent)+"response.setContentType(\"application/json\");\n\n");
+		output.append(indent(indent)+"response.setContentType( \"application/json\" );\n\n");
 		
 		output.append(indent(indent)+"String[] colArr = columns.split(\",\");\n\n");
 		
@@ -313,27 +313,27 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		
 		indent += 4;
 		output.append(indent(indent)+"Integer colnum = null;\n");
-		output.append(indent(indent)+"String col = request.getParameter(\"iSortCol_\"+i);\n");
-		output.append(indent(indent)+"if(col != null){\n");
+		output.append(indent(indent)+"String col = request.getParameter( \"iSortCol_\" + i );\n");
+		output.append(indent(indent)+"if ( col != null ) {\n");
 		
 		indent += 4;
 		output.append(indent(indent)+"try {\n");
 		
 		indent += 4;
-		output.append(indent(indent)+"colnum = Integer.parseInt(col);\n");
+		output.append(indent(indent)+"colnum = Integer.parseInt( col );\n");
 		
 		indent -= 4;
-		output.append(indent(indent)+"} catch (NumberFormatException e) {\n");
+		output.append(indent(indent)+"} catch ( NumberFormatException e ) {\n");
 		
 		indent += 4;
 		output.append(indent(indent)+"continue;\n");
 		
 		indent -= 4;
 		output.append(indent(indent)+"}\n");
-		output.append(indent(indent)+"if(colnum != null){\n");
+		output.append(indent(indent)+"if( colnum != null ){\n");
 		
 		indent += 4;
-		output.append(indent(indent)+"sorts.add(new SortColumn(colArr[colnum], request.getParameter(\"sSortDir_\"+i)));\n");
+		output.append(indent(indent)+"sorts.add( new SortColumn( colArr[ colnum ], request.getParameter( \"sSortDir_\" + i ) ) );\n");
 		
 		indent -= 4;
 		output.append(indent(indent)+"}\n");
@@ -350,73 +350,46 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		indent -= 4;
 		output.append(indent(indent)+"}\n\n");
 		
-		output.append(indent(indent)+"Boolean searchable;\n");
-		output.append(indent(indent)+"Boolean filtered = Boolean.valueOf(bFilter);\n");
-		output.append(indent(indent)+"ArrayList<String> searchColumns = new ArrayList<String>();\n");
-		output.append(indent(indent)+"HashMap<String,Object> likes = new HashMap<String, Object>();\n");
-		output.append(indent(indent)+"if( filtered ){\n");
+		output.append(indent(indent)+"GenericDaoListOptions options = new GenericDaoListOptions();\n\n");
+		
+		output.append(indent(indent)+"if( Boolean.valueOf( bFilter ) ){\n");
 		indent += 4;
+		output.append(indent(indent)+"ArrayList<String> searchColumns = new ArrayList<String>();\n");
 		output.append(indent(indent)+"for( int i = 0; i < numberColumns; i++ ){\n");
 		
 		indent += 4;
-		output.append(indent(indent)+"searchable = Boolean.valueOf(request.getParameter(\"bSearchable_\"+i));\n");
-		output.append(indent(indent)+"if( searchable ){\n");
+		output.append(indent(indent)+"if( Boolean.valueOf( request.getParameter( \"bSearchable_\"+i ) ) ){\n");
 		
 		indent += 4;
-		output.append(indent(indent)+"searchColumns.add(colArr[i]);\n");
+		output.append(indent(indent)+"searchColumns.add( colArr[i] );\n");
         indent -= 4;
         output.append(indent(indent)+"}\n");
         indent -= 4;
         output.append(indent(indent)+"}\n");
+        
+        output.append(indent(indent)+"options.setSearch( search );\n");
+        output.append(indent(indent)+"options.setSearchColumns( searchColumns );\n");
+        
         indent -= 4;
         output.append(indent(indent)+"} else {\n");
         indent += 4;
         
-        output.append(indent(indent)+"for(String column : colArr){\n");
+        output.append(indent(indent)+"HashMap<String,Object> likes = new HashMap<String, Object>();\n");
+        output.append(indent(indent)+"for( String column : colArr ){\n");
         indent += 4;
         output.append(indent(indent)+"String columnValue = request.getParameter( column );\n");
         output.append(indent(indent)+"if( columnValue != null ){\n");
         indent += 4;
-        output.append(indent(indent)+"likes.put(column, columnValue);\n");
+        output.append(indent(indent)+"likes.put( column, columnValue );\n");
         indent -= 4;
         output.append(indent(indent)+"}\n");
         indent -= 4;
         output.append(indent(indent)+"}\n");
-        
-//        int count = 0;
-//		ClassVariable cv;
-//		Iterator<ClassVariable> iter = dc.listAllIter();
-//		while( iter.hasNext() ){
-//			cv = iter.next();
-//			if( cv.isPrimary() && dc.isUsesCompositeKey()) {
-//				for(Attribute a : dc.getEntity().getPrimaryKeyAttributes()) {
-//					output.append(indent(indent) + "String "+a.getLowerLabel()+"Value = request.getParameter(\""+a.getLowerLabel()+"\");\n");
-//					output.append(indent(indent) + "if( "+a.getLowerLabel()+"Value != null ){\n");
-//            		indent += 4;	
-//	            	output.append(indent(indent) + "likes.put(\""+a.getLowerLabel()+"\", "+a.getLowerLabel()+"Value);\n");
-//	            	indent -= 4;
-//	            	output.append(indent(indent) + "}\n");
-//				}
-//			} else {
-//				if( cv.getRelationshipType() == RelationshipType.NONE ){
-//					output.append(indent(indent) + "String "+cv.getLowerIdentifier()+"Value = request.getParameter(\""+cv.getLowerIdentifier()+"\");\n");
-//					output.append(indent(indent) + "if( "+cv.getLowerIdentifier()+"Value != null ){\n");
-//					indent += 4;	
-//					output.append(indent(indent) + "likes.put(\""+cv.getLowerIdentifier()+"\", "+cv.getLowerIdentifier()+"Value);\n");
-//					indent -= 4;
-//					output.append(indent(indent) + "}\n");
-//				}
-//			}
-//		}
+        output.append(indent(indent)+"options.setIndividualLikes(likes);\n");
         
         indent -= 4;
         output.append(indent(indent)+"}\n\n");
 
-        output.append(indent(indent)+"GenericDaoListOptions options = new GenericDaoListOptions();\n");
-        output.append(indent(indent)+"options.setIndividualLikes(likes);\n");
-        output.append(indent(indent)+"options.setSearch(search);\n");
-        output.append(indent(indent)+"options.setSearchColumns(searchColumns);\n\n");
-        
         output.append(indent(indent)+"Integer count = "+accessor+".count( options );\n\n");
         
         output.append(indent(indent)+"options.setLimit(limit);\n");
@@ -425,20 +398,17 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         
 		output.append(indent(indent)+"List<"+dc.getIdentifier()+"> "+dc.getLowerIdentifier()+"List = "+accessor+".list( options );\n\n");
 		
-		
 		output.append(indent(indent)+"JSONObject ob = new JSONObject();\n");
-		output.append(indent(indent)+"ob.put(\"sEcho\", echo);\n");
-		output.append(indent(indent)+"ob.put(\"iTotalDisplayRecords\", count);\n");
-		output.append(indent(indent)+"ob.put(\"iTotalRecords\", count);\n");
-		output.append(indent(indent)+"String urls;\n");
+		output.append(indent(indent)+"ob.put( \"sEcho\", echo );\n");
+		output.append(indent(indent)+"ob.put( \"iTotalDisplayRecords\", count );\n");
+		output.append(indent(indent)+"ob.put( \"iTotalRecords\", count );\n");
 		output.append(indent(indent)+"JSONArray jsonArray = new JSONArray();\n");
-		output.append(indent(indent)+"JSONArray tmp;\n");
 		output.append(indent(indent)+"for( "+dc.getIdentifier()+" "+dc.getLowerIdentifier()+" : "+dc.getLowerIdentifier()+"List ){\n");
         		
         indent += 4;
         		
-        output.append(indent(indent)+"tmp = new JSONArray();\n");
-        output.append(indent(indent)+"for(String column : colArr){\n");
+        output.append(indent(indent)+"JSONArray tmp = new JSONArray();\n");
+        output.append(indent(indent)+"for( String column : colArr ){\n");
         			
 		indent += 4;
 		
@@ -467,8 +437,8 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent) + ( count > 0 ? "} else " : "" ) + "if( \"urls\".equals(column)) {\n");
 		indent += 4;
         
-        output.append(indent(indent)+"urls = \"\";\n");
-        output.append(indent(indent)+"if(\"list\".equals(display)){\n");
+        output.append(indent(indent)+"String urls = \"\";\n");
+        output.append(indent(indent)+"if( \"list\".equals( display ) ){\n");
         					
         indent += 4;
         
@@ -499,7 +469,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         
         output.append(indent(indent)+"} else {\n\n");
         output.append(indent(indent)+"}\n");
-        output.append(indent(indent)+"tmp.put(urls);\n");
+        output.append(indent(indent)+"tmp.put( urls );\n");
         
         indent -= 4;
         
@@ -507,7 +477,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         
         indent += 4;
         
-        output.append(indent(indent)+"tmp.put(\"[error column \"+column+\" not supported]\");\n");
+        output.append(indent(indent)+"tmp.put( \"[error column \"+column+\" not supported]\" );\n");
         
         indent -= 4;
         
@@ -516,12 +486,12 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         indent -= 4;
 
         output.append(indent(indent)+"}\n");
-        output.append(indent(indent)+"jsonArray.put(tmp);\n");
+        output.append(indent(indent)+"jsonArray.put( tmp );\n");
         
         indent -= 4;
         
         output.append(indent(indent)+"}\n");
-        output.append(indent(indent)+"ob.put(\"aaData\", jsonArray);\n\n");
+        output.append(indent(indent)+"ob.put( \"aaData\", jsonArray );\n\n");
         	
         output.append(indent(indent)+"StringReader reader = new StringReader( ob.toString() );\n");
         output.append(indent(indent)+"try {\n");
@@ -569,10 +539,10 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         indent -= 4;
         output.append(indent(indent)+"return;\n");
         indent -= 4;
-        output.append(indent(indent)+"} catch (JSONException je) {\n");
+        output.append(indent(indent)+"} catch ( JSONException je ) {\n");
         
         indent += 4;
-        output.append(indent(indent)+"log.error(\"error writing json error to page\", je);\n");
+        output.append(indent(indent)+"log.error( \"error writing json error to page\", je );\n");
         
         indent -= 4;
         output.append(indent(indent)+"} catch (IOException ioe) {\n");
