@@ -380,7 +380,11 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"String columnValue = request.getParameter( column );\n");
         output.append(indent(indent)+"if( columnValue != null ){\n");
         indent += 4;
-        output.append(indent(indent)+"likes.put( column, columnValue );\n");
+        output.append(indent(indent)+"for ( String splitColumnValue : StringUtils.split( columnValue, ' ' ) ) {\n");
+        indent += 4;
+        output.append(indent(indent)+"likes.put( column, splitColumnValue );\n");
+        indent -= 4;
+        output.append(indent(indent)+"}\n");
         indent -= 4;
         output.append(indent(indent)+"}\n");
         indent -= 4;
@@ -496,7 +500,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"StringReader reader = new StringReader( ob.toString() );\n");
         output.append(indent(indent)+"try {\n");
         indent += 4;
-        output.append(indent(indent)+"IOUtils.copy( reader, response.getOutputStream() );\n");
+        output.append(indent(indent)+"IOUtils.copy( reader, response.getWriter() );\n");
         indent -= 4;
         output.append(indent(indent)+"} finally {\n");
         indent += 4;
@@ -529,7 +533,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"StringReader reader = new StringReader(ob.toString());\n");
         output.append(indent(indent)+"try {\n");
         indent += 4;
-        output.append(indent(indent)+"IOUtils.copy( reader, response.getOutputStream() );\n");
+        output.append(indent(indent)+"IOUtils.copy( reader, response.getWriter() );\n");
         indent -= 4;
         output.append(indent(indent)+"} finally {\n");
         indent += 4;
