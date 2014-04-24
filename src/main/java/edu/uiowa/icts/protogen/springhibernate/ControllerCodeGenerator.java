@@ -509,15 +509,15 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"}\n");
         indent -= 4;
         	
-        output.append(indent(indent)+"} catch (Exception e) {\n");
+        output.append(indent(indent)+"} catch ( Exception e ) {\n");
         
         indent += 4;
         output.append(indent(indent)+"try {\n");
         
         indent += 4;
-        output.append(indent(indent)+"log.error(\"error builing datatable json object\",e);\n");
+        output.append(indent(indent)+"log.error( \"error builing datatable json object\", e );\n");
         
-        output.append(indent(indent)+"String stackTrace = \"\";\n");
+        output.append(indent(indent)+"String stackTrace = e.getMessage() + \"<br/>\";\n");
         output.append(indent(indent)+"for( StackTraceElement ste : e.getStackTrace() ){\n");
         indent += 4;
         output.append(indent(indent)+"stackTrace += ste.toString()+\"<br/>\";\n");
@@ -540,8 +540,6 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
         output.append(indent(indent)+"reader.close();\n");
         indent -= 4;
         output.append(indent(indent)+"}\n");
-        indent -= 4;
-        output.append(indent(indent)+"return;\n");
         indent -= 4;
         output.append(indent(indent)+"} catch ( JSONException je ) {\n");
         
