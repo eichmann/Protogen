@@ -559,25 +559,48 @@ public class TagClassGenerator {
         paramBuffer = new StringBuffer();
         queryBuffer = new StringBuffer();
         attrSeq = 0;
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.isPrimary()) {
-                paramBuffer.append((keySeq == 0 ? " " : " and ") + theAttribute.getSqlLabel() + " = ?");
-                keySeq++;
-            } else {
-                out.write((attrSeq == 0 ? " " : ", ") + theAttribute.getSqlLabel() + " = ?");
-                queryBuffer.append("\t\t\t\tstmt."
-                        + theAttribute.getSQLMethod(false)
-                        + "("
-                        + (attrSeq + 1)
-                        + ","
-                        + theAttribute.getLabel()
-                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
-                                : "") + ");\n");
-                attrSeq++;
-            }
-        }
+		for ( int i = 0; i < theEntity.getAttributes().size(); i++ ) {
+			Attribute theAttribute = theEntity.getAttributes().elementAt( i );
+			if ( theAttribute.isPrimary() ) {
+				paramBuffer.append( ( keySeq == 0 ? " " : " and " ) + theAttribute.getSqlLabel() + " = ? " );
+				keySeq++;
+			
+				
+			} else if ( !theAttribute.isPrimary() && theAttribute.isForeign() ) {
+
+				out.write( ( attrSeq == 0 ? " " : ", " ) + theAttribute.getSqlLabel() + " = ?" );
+
+				queryBuffer.append( "\t\t\t\tif ( " + theAttribute.getLabel() + " == " + theAttribute.getInitializer() + " ) {\n" );
+				
+				if( theAttribute.isInt() ){
+					queryBuffer.append( "\t\t\t\t\tstmt.setNull( " + ( attrSeq + 1 ) + ", java.sql.Types.INTEGER );\n" );
+				} else if( theAttribute.isText() ){
+					queryBuffer.append( "\t\t\t\t\tstmt.setNull( " + ( attrSeq + 1 ) + ", java.sql.Types.VARCHAR );\n" );
+				} else {
+					queryBuffer.append( "\t\t\t\t\tstmt.setNull( " + ( attrSeq + 1 ) + ", java.sql.Types.OTHER );\n" );
+				}
+				
+				queryBuffer.append( "\t\t\t\t} else {\n" );
+				queryBuffer.append( "\t\t\t\t\t" + "stmt." + theAttribute.getSQLMethod( false ) + "( " + ( attrSeq + 1 ) + ", " + theAttribute.getLabel() );
+				if ( theAttribute.isDateTime() ) {
+					queryBuffer.append( " == null ? null : new java.sql." + ( theAttribute.isTime() ? "Timestamp" : "Date" ) + "( " + theAttribute.getLabel() + ".getTime() )" );
+				}
+				queryBuffer.append( " );\n" );
+				
+				queryBuffer.append( "\t\t\t\t}\n" );
+
+				attrSeq++;
+
+			} else {
+				out.write( ( attrSeq == 0 ? " " : ", " ) + theAttribute.getSqlLabel() + " = ?" );
+				queryBuffer.append( "\t\t\t\t" + "stmt." + theAttribute.getSQLMethod( false ) + "( " + ( attrSeq + 1 ) + ", " + theAttribute.getLabel() );
+				if ( theAttribute.isDateTime() ) {
+					queryBuffer.append( " == null ? null : new java.sql." + ( theAttribute.isTime() ? "Timestamp" : "Date" ) + "( " + theAttribute.getLabel() + ".getTime() )" );
+				}
+				queryBuffer.append( " );\n" );
+				attrSeq++;
+			}
+		}
         out.write(" where" + paramBuffer.toString() + "\");\n");
         out.write(queryBuffer.toString());
         keySeq = 0;
@@ -623,7 +646,8 @@ public class TagClassGenerator {
         out.write("\t}\n");
     }
     
-    private void generateToJson(Entity theEntity, BufferedWriter out) throws IOException {
+    @SuppressWarnings( "unused" )
+	private void generateToJson(Entity theEntity, BufferedWriter out) throws IOException {
         out.write("\n\tpublic String toJson() {\n");
         out.write("\t\tJSONObject job = new JSONObject();\n");
         out.write("\t\ttry {\n");
