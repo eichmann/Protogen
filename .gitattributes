@@ -11,6 +11,7 @@
 /pom.xml -text
 src/main/java/META-INF/MANIFEST.MF svneol=native#text/plain
 src/main/java/dispatcher-servlet.tmplt -text
+src/main/java/edu/uiowa/icts/plugin/protogen/WebApp.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/AbstractSpringHibernateCodeGenerator.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/BaseTestCodeGenerator.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ClassVariable.java -text
