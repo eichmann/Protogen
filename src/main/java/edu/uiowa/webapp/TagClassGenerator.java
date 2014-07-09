@@ -1388,11 +1388,11 @@ public class TagClassGenerator {
         out.write("\t\t\t\t}\n");
         out.write("\t\t\t}\n\n");
         
-        out.write("            if( rs != null && !rs.isClosed() ){\n");
+        out.write("            if( rs != null ){\n");
         out.write("                rs.close();\n");
         out.write("            }\n\n");
         
-        out.write("            if( stat != null && !stat.isClosed() ){\n");
+        out.write("            if( stat != null ){\n");
         out.write("                stat.close();\n");
         out.write("            }\n\n");
         
