@@ -1234,7 +1234,7 @@ public class TagClassGenerator {
         out.write(queryBuffer.toString());
         out.write("            rs = stat.executeQuery();\n"
                 + "\n"
-                + "            if (rs.next()) {\n");
+                + "            if ( rs != null && rs.next() ) {\n");
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
@@ -1323,7 +1323,7 @@ public class TagClassGenerator {
                 
         out.write("    public int doAfterBody() throws JspException {\n"
                 + "        try {\n"
-                + "            if (rs.next()) {\n");
+                + "            if ( rs != null && rs.next() ) {\n");
         for (int i = 0; i < primaryKeys.size(); i++) {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
@@ -1359,9 +1359,9 @@ public class TagClassGenerator {
         out.write("    public int doEndTag() throws JspTagException, JspException {\n");
         out.write("        try {\n");
         
-        out.write("\t\t\tif(pageContext != null){\n");
+        out.write("\t\t\tif( pageContext != null ){\n");
         out.write("\t\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
-        out.write("\t\t\t\tif(error != null && error){\n\n");
+        out.write("\t\t\t\tif( error != null && error ){\n\n");
         
         out.write("\t\t\t\t\tfreeConnection();\n");
         out.write("\t\t\t\t\tclearServiceState();\n\n");
@@ -1386,11 +1386,17 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\t\tpageContext.removeAttribute(\"tagErrorMessage\");\n");
         out.write("\t\t\t\t\t}\n");
         out.write("\t\t\t\t}\n");
-        out.write("\t\t\t}\n");
+        out.write("\t\t\t}\n\n");
         
-        out.write("            rs.close();\n");
-        out.write("            stat.close();\n");
-        out.write("        } catch (SQLException e) {\n");
+        out.write("            if( rs != null && !rs.isClosed() ){\n");
+        out.write("                rs.close();\n");
+        out.write("            }\n\n");
+        
+        out.write("            if( stat != null && !stat.isClosed() ){\n");
+        out.write("                stat.close();\n");
+        out.write("            }\n\n");
+        
+        out.write("        } catch ( SQLException e ) {\n");
         
         out.write("            log.error(\"JDBC error ending " + theEntity.getLabel() + " iterator\",e);\n");
         
