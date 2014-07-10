@@ -45,21 +45,7 @@ public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator{
 		importList.add("import org.springframework.beans.factory.annotation.Autowired;");
 		importList.add("import "+dc.getPackageName()+".*;");
 		
-		(new File(packagePath)).mkdirs();
-		
-	
-		File file = new File(packagePath, className	+ ".java");
-		if( file.exists() && !overwrite ) {
-			log.debug("File Exists");
-			return;
-		}
-		
-		if(file.exists()){
-			log.debug("Overwriting file....");
-		}
-			
-		FileWriter fstream = new FileWriter(file);
-		BufferedWriter out = new BufferedWriter(fstream);
+		BufferedWriter out = createFileInSrcElseTarget(packagePath, className + ".java");
 		
 		/*
 		 * Print Package

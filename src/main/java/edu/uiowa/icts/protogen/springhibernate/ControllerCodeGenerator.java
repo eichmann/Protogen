@@ -85,24 +85,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		importList.add( "import org.springframework.web.bind.annotation.RequestParam;" );
 		importList.add( "import org.springframework.web.servlet.ModelAndView;" );
 
-		( new File( packagePath ) ).mkdirs();
-
-		/**
-		 * If exists, exit
-		 */
-		File file = new File( packagePath, className + ".java" );
-		if ( file.exists() && !overwrite ) {
-			log.debug( "File Exists in "+packagePath +", writing to 'target' directory" );
-			packagePath = packagePath.replaceFirst("src/", "target/src/");
-			// recreate file with "target" prepended...
-			( new File( packagePath ) ).mkdirs();
-			file = new File( packagePath, className + ".java" );
-		} else if ( file.exists() ) {
-			log.debug( "Overwriting file...." );
-		}
-
-		FileWriter fstream = new FileWriter( file );
-		BufferedWriter out = new BufferedWriter( fstream );
+		BufferedWriter out =  createFileInSrcElseTarget(packagePath, className + ".java");
 
 		/*
 		 * Print Package
@@ -196,21 +179,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		importList.add("import org.springframework.security.core.context.SecurityContextHolder;");
 		importList.add("import "+daoPackageName+".*;");
 		
-		(new File(packagePath)).mkdirs();
-		
-	
-		File file = new File(packagePath, className	+ ".java");
-		if( file.exists() && !overwrite ) {
-			log.debug("File Exists");
-			return;
-		}
-		
-		if( file.exists() ){
-			log.debug("Overwriting file....");
-		}
-			
-		FileWriter fstream = new FileWriter(file);
-		BufferedWriter out = new BufferedWriter(fstream);
+		BufferedWriter out = createFileInSrcElseTarget(packagePath, className + ".java");
 		
 		/*
 		 * Print Package

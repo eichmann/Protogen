@@ -63,21 +63,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		importList.add( "import java.util.List;" );
 		importList.add( "import edu.uiowa.icts.util.SortColumn;" );
 
-		( new File( packagePath ) ).mkdirs();
-
-		File file = new File( packagePath, className + ".java" );
-		if ( file.exists() && !overwrite ) {
-			log.debug( "File Exists" );
-			return;
-		}
-
-		if ( file.exists() ) {
-			log.debug( "Overwriting file...." );
-		}
-
-		FileWriter fstream = new FileWriter( file );
-		BufferedWriter out = new BufferedWriter( fstream );
-
+		BufferedWriter out =  createFileInSrcElseTarget(packagePath, className + ".java");
 		/*
 		 * Print Package
 		 */
@@ -157,24 +143,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		importList.add( "import org.springframework.transaction.annotation.Transactional;" );
 		importList.add( "import org.hibernate.criterion.Restrictions;" );
 
-		( new File( packagePath ) ).mkdirs();
-
-		/*
-		 * If exists, exit
-		 * 
-		 */
-		File file = new File( packagePath, className + ".java" );
-		if ( file.exists() && !overwrite ) {
-			log.debug( "File Exists" );
-			return;
-		}
-
-		if ( file.exists() ) {
-			log.debug( "Overwriting file...." );
-		}
-
-		FileWriter fstream = new FileWriter( file );
-		BufferedWriter out = new BufferedWriter( fstream );
+		BufferedWriter out =  createFileInSrcElseTarget(packagePath, className + ".java");
 
 		/*
 		 * Print Package
@@ -386,22 +355,8 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		importList.add( "import org.springframework.beans.factory.annotation.Autowired;" );
 		importList.add( "import org.springframework.stereotype.Component;" );
 		importList.add( "import " + daoPackageName + ".*;" );
-
-		( new File( packagePath ) ).mkdirs();
-
-		File file = new File( packagePath, className + ".java" );
-		if ( file.exists() && overwrite == false )
-		{
-			log.debug( "File Exists" );
-			return;
-		}
-
-		if ( file.exists() ) {
-			log.debug( "Overwriting file...." );
-		}
-
-		FileWriter fstream = new FileWriter( file );
-		BufferedWriter out = new BufferedWriter( fstream );
+		
+		BufferedWriter out =  createFileInSrcElseTarget(packagePath, className + ".java");
 
 		/*
 		 * Print Package

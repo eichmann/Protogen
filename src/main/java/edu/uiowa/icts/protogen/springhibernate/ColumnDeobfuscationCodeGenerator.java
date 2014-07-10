@@ -61,7 +61,7 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 		
 		File tld = new File(location+( location.endsWith("/") ? "" : "/" )+"deobfuscate.tld");
 		
-		if( tld.exists() && !overwrite ) {
+		if( tld.exists()) {
 			log.debug("File Exists");
 			return;
 		} else if( tld.exists() ){
@@ -123,7 +123,7 @@ public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCod
 		(new File(packagePath)).mkdirs();
 	
 		File file = new File(packagePath, className	+ ".java");
-		if( file.exists() && !overwrite ) {
+		if( file.exists()) {
 			log.debug("File Exists");
 			return;
 		} else if( file.exists() ){

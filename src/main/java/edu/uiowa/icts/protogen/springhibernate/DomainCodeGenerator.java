@@ -54,15 +54,7 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 
 		Entity entity = dc.getEntity();
 
-		File file = new File( packagePath, entity.getUnqualifiedLabel() + "Id.java" );
-
-		if ( file.exists() ) {
-			log.debug( "" + file.getCanonicalPath() + " Exists. Not Overwriting" );
-			return;
-		}
-
-		FileWriter fstream = new FileWriter( file );
-		BufferedWriter out = new BufferedWriter( fstream );
+		BufferedWriter out = createFileInSrcElseTarget(packagePath, entity.getUnqualifiedLabel() + "Id.java" );
 
 		out.write( "package " + dc.getPackageName() + ";\n" );
 		List<String> importList = new ArrayList<String>();
@@ -211,16 +203,11 @@ public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 			generateDomainCompositeKeyClass( domainClass, packagePath );
 		}
 
-		File file = new File( packagePath, domainClass.getIdentifier() + ".java" );
-		if ( !file.exists() ) {
-			FileWriter fstream = new FileWriter( file );
-			BufferedWriter out = new BufferedWriter( fstream );
-			out.write( domainClass.toString() );
-			out.close();
-		} else {
-			log.debug( "" + file.getCanonicalPath() + " Exists. Not Overwriting" );
-		}
+		BufferedWriter out = createFileInSrcElseTarget(packagePath, domainClass.getIdentifier() + ".java");
+		out.write( domainClass.toString() );
+		out.close();
 	}
+
 
 	/*
 	 * Public Function to generate java domain code

@@ -7,6 +7,8 @@
 package edu.uiowa.icts.protogen.springhibernate;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -18,8 +20,6 @@ public abstract class AbstractSpringHibernateCodeGenerator {
 	protected String packageRoot = null; 
 	protected String packageRootPath = null; 
 	protected SpringHibernateModel model=null;
-	protected boolean overwrite=false;
-
 
 	protected static final Log log = LogFactory.getLog(AbstractSpringHibernateCodeGenerator.class);
 
@@ -59,14 +59,6 @@ public abstract class AbstractSpringHibernateCodeGenerator {
 	protected void spaces(BufferedWriter out, int num) throws IOException {
 		for (int i = 0; i < num; i++)
 			out.write(" ");
-	}
-
-	public boolean isOverwrite() {
-		return overwrite;
-	}
-
-	public void setOverwrite(boolean overwrite) {
-		this.overwrite = overwrite;
 	}
 	
 	public String createGetter(String type,String variableName,int indent)
@@ -110,8 +102,23 @@ public abstract class AbstractSpringHibernateCodeGenerator {
 		}
 		return output;
 	}
+    /*
+     * Write file to src/ by default, if exists there, write to target/src/
+     */
+	protected BufferedWriter createFileInSrcElseTarget(String packagePath, String fileName) throws IOException {
+		// make sure all directories have been created
+		( new File( packagePath ) ).mkdirs();
 
-	
-
-
+		File file = new File( packagePath, fileName);
+		if (file.exists()){ 
+			// create file with "target" prepended...
+			log.debug( fileName + " exists in "+ packagePath +", creating it in 'target' directory" );
+			packagePath = packagePath.replaceFirst("src/", "target/src/");
+			( new File( packagePath ) ).mkdirs();
+			file = new File( packagePath, fileName);
+		}
+		FileWriter fstream = new FileWriter( file );
+		BufferedWriter out = new BufferedWriter( fstream );
+		return out;
+	}
 }
