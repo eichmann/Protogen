@@ -39,7 +39,7 @@ public class WebApp  extends AbstractMojo {
     
     
     /**
-     * @parameter expression="${project}"
+     * @parameter property="project"
      */
     private MavenProject project;
 		
@@ -52,7 +52,7 @@ public class WebApp  extends AbstractMojo {
 
     /**
      * Location of the file.
-     * @parameter expression="${basedir}"
+     * @parameter property="basedir"
      * @required
      */
     private String buildDirectory;
