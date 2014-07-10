@@ -43,6 +43,10 @@ public class GeneratorTest  extends TestCase
      */
     public void testHibernateCodeGeneration()
     {
+    	String packagePath = "asdfasdf/src/asdfasdf";
+    	packagePath = packagePath.replaceFirst("src/", "target/src/");
+    	assertEquals(packagePath,"asdfasdf/target/src/asdfasdf");
+    	
     	String projectName = "Protogen";
     	String pathPrefix = System.getProperty("user.dir");
     	log.debug("PathPrefix:"+pathPrefix);

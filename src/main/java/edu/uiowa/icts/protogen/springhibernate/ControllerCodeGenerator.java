@@ -92,11 +92,12 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		 */
 		File file = new File( packagePath, className + ".java" );
 		if ( file.exists() && !overwrite ) {
-			log.debug( "File Exists" );
-			return;
-		}
-
-		if ( file.exists() ) {
+			log.debug( "File Exists in "+packagePath +", writing to 'target' directory" );
+			packagePath = packagePath.replaceFirst("src/", "target/src/");
+			// recreate file with "target" prepended...
+			( new File( packagePath ) ).mkdirs();
+			file = new File( packagePath, className + ".java" );
+		} else if ( file.exists() ) {
 			log.debug( "Overwriting file...." );
 		}
 
