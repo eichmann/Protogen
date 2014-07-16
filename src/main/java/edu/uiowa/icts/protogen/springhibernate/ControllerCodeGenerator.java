@@ -21,6 +21,7 @@ import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.uiowa.icts.protogen.springhibernate.velocity.AbstractControllerMVCTestsGenerator;
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
@@ -170,7 +171,13 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 	 * generates an abstract controller
 	 */
 	private void generateAbstractController(Schema schema, String className, String packageName, String packagePath) throws IOException {
+		// generate abstract controller test file first!
+		AbstractControllerMVCTestsGenerator generator = new AbstractControllerMVCTestsGenerator(packageName);
+		BufferedWriter testWriter = createFileInSrcElseTarget(packagePath.replaceFirst("src/main", "src/test"), "AbstractControllerMVCTests.java");
+		testWriter.write(generator.javaSourceCode());
+		testWriter.close();
 		
+		// then do real abstract controller
 		String daoPackageName = model.getPackageRoot() +"." + schema.getLowerLabel() +".dao";
 		List<String> importList = new ArrayList<String>();
 		importList.add("import edu.uiowa.icts.spring.*;");

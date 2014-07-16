@@ -23,6 +23,8 @@ src/main/java/edu/uiowa/icts/protogen/springhibernate/DomainClass.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/DomainCodeGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/JSPCodeGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/SpringHibernateModel.java svneol=native#text/x-java-source
+src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractControllerMVCTestsGenerator.java -text
+src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractVelocityGenerator.java -text
 src/main/java/edu/uiowa/loaders/DBConnect.java -text
 src/main/java/edu/uiowa/loaders/JDBCReader.java -text
 src/main/java/edu/uiowa/loaders/PrivateReader.java -text
@@ -42,8 +44,10 @@ src/main/java/edu/uiowa/webapp/Relationship.java -text
 src/main/java/edu/uiowa/webapp/Schema.java -text
 src/main/java/edu/uiowa/webapp/TLDGenerator.java -text
 src/main/java/edu/uiowa/webapp/TagClassGenerator.java -text
+src/main/resources/velocity-templates/AbstractControllerMVCTests.java -text
 src/test/java/edu/uiowa/icts/protogen/GeneratorTest.java svneol=native#text/x-java-source
 src/test/java/edu/uiowa/icts/protogen/JDBCTest.java -text svneol=unset#text/plain
+src/test/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractControllerMVCTestsGeneratorTest.java -text
 src/test/resources/Model.clay -text svneol=unset#text/xml
 src/test/resources/demographics-base.clay -text svneol=unset#text/xml
 src/test/resources/pilot-base.clay -text svneol=unset#text/xml

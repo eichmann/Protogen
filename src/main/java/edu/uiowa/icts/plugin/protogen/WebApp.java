@@ -39,7 +39,7 @@ public class WebApp  extends AbstractMojo {
     
     
     /**
-     * @parameter property="project"
+     * @parameter expression="${project}"
      */
     private MavenProject project;
 		
@@ -52,7 +52,7 @@ public class WebApp  extends AbstractMojo {
 
     /**
      * Location of the file.
-     * @parameter property="basedir"
+     * @parameter expression="${basedir}"
      * @required
      */
     private String buildDirectory;
@@ -125,7 +125,7 @@ public class WebApp  extends AbstractMojo {
 			 String key = keys.nextElement().toString();
 			 String value =propFile.getProperty(key);
 			 
-			 String strreplace = "${basedir}";
+			 String strreplace = "basedir";
 			 if (value.contains(strreplace)){
 				 propFile.setProperty(key, value.replace(strreplace,buildDirectory));
 			 }
