@@ -7,18 +7,17 @@ import java.io.StringWriter;
 import java.util.Date;
 
 public class AbstractControllerMVCTestsGenerator extends AbstractVelocityGenerator {
-	private String packageName;
+	
 	
 	public AbstractControllerMVCTestsGenerator(String packageName) {
 		// initialize Velocity
-		super();
-		this.packageName = packageName;
+		super(packageName);
 	}
 
 	public String javaSourceCode() {
         /* lets make a Context and put data into it */
         VelocityContext context = new VelocityContext();
-        context.put("packageName", packageName);
+        context.put("packageName", this.packageName);
         context.put("date", new Date().toString()); // can be done with Velocity tools but let's keep it simple to start
 
         /* lets render a template loaded from the classpath */

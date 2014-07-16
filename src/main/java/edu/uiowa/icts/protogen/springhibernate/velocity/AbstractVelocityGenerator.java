@@ -1,11 +1,14 @@
 package edu.uiowa.icts.protogen.springhibernate.velocity;
 
 import java.util.Properties;
+
 import org.apache.velocity.app.Velocity;
 
-public class AbstractVelocityGenerator {
-
-	public AbstractVelocityGenerator() {
+public abstract class AbstractVelocityGenerator {
+	protected String packageName;
+	
+	public AbstractVelocityGenerator(String packageName) {
+		this.packageName = packageName;
 		/* 
 		 * init the runtime engine, which only takes affect with first call to .init(p) 
 		 * subsequent calls to init are ignored.
