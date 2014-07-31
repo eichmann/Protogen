@@ -8,7 +8,7 @@ import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * @author rrlorent
- * @date Jul 3, 2014
+ * @since Jul 3, 2014
  * @goal clean
  * @requiresDependencyResolution test
  */
