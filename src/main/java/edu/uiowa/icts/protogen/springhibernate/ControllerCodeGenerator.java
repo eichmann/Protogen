@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.uiowa.icts.protogen.springhibernate.velocity.AbstractControllerMVCTestsGenerator;
+import edu.uiowa.icts.protogen.springhibernate.velocity.ControllerMvcTestGenerator;
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
@@ -49,7 +50,14 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		String accessor = "" + dc.getSchema().getLowerLabel() + "DaoService.get" + dc.getIdentifier() + interfaceSuffix + "()";
 		String jspPath = "/" + dc.getSchema().getLowerLabel() + "/" + dc.getLowerIdentifier();
 		jspPath = jspPath.toLowerCase();
-
+		
+		// Generate corresponding Spring MVC test file
+		ControllerMvcTestGenerator generator = new ControllerMvcTestGenerator(packageName,dc.getIdentifier(),jspPath);
+		BufferedWriter testWriter = createFileInSrcElseTarget(packagePath.replaceFirst("src/main", "src/test"), className + "MvcTest.java");
+		testWriter.write(generator.javaSourceCode());
+		testWriter.close();
+        
+		// resume normal controller generation...
 		List<String> importList = new ArrayList<String>();
 
 		importList.add( "import " + dc.getPackageName() + ".*;" );
