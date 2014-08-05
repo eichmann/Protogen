@@ -76,7 +76,7 @@
 </table>
 <table alias="" name="foo" remarks="" uid="1bfcee4f:13cd4a94b36:-7fce">
 <table-description/>
-<table-figure-bounds height="83" width="133" x="814" y="154"/>
+<table-figure-bounds height="52" width="82" x="581" y="93"/>
 <column-list>
 <column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="foo_id" remarks="" uid="1bfcee4f:13cd4a94b36:-7fc8">
 <column-description/>
@@ -101,9 +101,9 @@
 </table>
 <table alias="" name="bar" remarks="" uid="1bfcee4f:13cd4a94b36:-7fc2">
 <table-description/>
-<table-figure-bounds height="69" width="176" x="769" y="427"/>
+<table-figure-bounds height="69" width="176" x="727" y="410"/>
 <column-list>
-<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="bar" remarks="" uid="1bfcee4f:13cd4a94b36:-7fbe">
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="bar_id" remarks="" uid="1bfcee4f:13cd4a94b36:-7fbe">
 <column-description/>
 <data-type jdbc-type="4" name="INT" selected-variant-pattern="INT">
 <variant type-name-pattern="INT"/>
@@ -115,18 +115,32 @@
 <variant type-name-pattern="TEXT"/>
 </data-type>
 </column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="bar_type_id" remarks="" uid="7ad6bae9:147a6c641ce:-73a9">
+<column-description/>
+<data-type jdbc-type="4" name="INT" selected-variant-pattern="INT">
+<variant type-name-pattern="INT"/>
+</data-type>
+</column>
 </column-list>
 <primary-key alias="" name="PK_BAR" remarks="" uid="1bfcee4f:13cd4a94b36:-7fc1">
 <primary-key-description/>
-<primary-key-column name="bar"/>
+<primary-key-column name="bar_id"/>
 </primary-key>
 <unique-key-list/>
-<foreign-key-list/>
+<foreign-key-list>
+<foreign-key alias="" name="FK_bar_1" on-delete="" on-update="" referenced-key="PK_BAR_TYPE" referenced-table="bar_type" referenced-table-schema="ryanlorentzen" remarks="" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="" uid="7ad6bae9:147a6c641ce:-73aa">
+<foreign-key-description/>
+<foreign-key-figure>
+<fk-fig-bendpoint-list/>
+</foreign-key-figure>
+<foreign-key-column column-name="bar_type_id" referenced-key-column-name="bar_type_id"/>
+</foreign-key>
+</foreign-key-list>
 <index-list/>
 </table>
 <table alias="" name="foobar" remarks="" uid="1bfcee4f:13cd4a94b36:-7fbc">
 <table-description/>
-<table-figure-bounds height="49" width="111" x="818" y="297"/>
+<table-figure-bounds height="64" width="140" x="670" y="242"/>
 <column-list>
 <column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="foo_id" remarks="" uid="1bfcee4f:13cd4a94b36:-7fb4">
 <column-description/>
@@ -134,17 +148,27 @@
 <variant type-name-pattern="INT"/>
 </data-type>
 </column>
-<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="bar" remarks="" uid="1bfcee4f:13cd4a94b36:-7fae">
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="bar_id" remarks="" uid="7ad6bae9:147a6c641ce:-73dc">
 <column-description/>
 <data-type jdbc-type="4" name="INT" selected-variant-pattern="INT">
 <variant type-name-pattern="INT"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="date_added" remarks="" uid="7ad6bae9:147a6c641ce:-739c">
+<column-description/>
+<data-type jdbc-type="93" name="TIMESTAMP" selected-variant-pattern="TIMESTAMP">
+<variant type-name-pattern="TIMESTAMP"/>
+<variant precision-max="9" precision-min="1" precision-variable="%p" type-name-pattern="TIMESTAMP(%p)"/>
+<variant type-name-pattern="TIMESTAMP WITH TIME ZONE"/>
+<variant precision-max="9" precision-min="1" precision-variable="%p" type-name-pattern="TIMESTAMP(%p) WITH TIME ZONE"/>
+<variant precision-max="9" precision-min="1" precision-variable="%p" type-name-pattern="TIMESTAMP(%p) WITHOUT TIME ZONE"/>
 </data-type>
 </column>
 </column-list>
 <primary-key alias="" name="PK_FOOBAR" remarks="" uid="1bfcee4f:13cd4a94b36:-7fbb">
 <primary-key-description/>
 <primary-key-column name="foo_id"/>
-<primary-key-column name="bar"/>
+<primary-key-column name="bar_id"/>
 </primary-key>
 <unique-key-list/>
 <foreign-key-list>
@@ -155,19 +179,19 @@
 </foreign-key-figure>
 <foreign-key-column column-name="foo_id" referenced-key-column-name="foo_id"/>
 </foreign-key>
-<foreign-key alias="" name="FK_TABLE_5_2" on-delete="" on-update="" referenced-key="PK_BAR" referenced-table="bar" referenced-table-schema="ryanlorentzen" remarks="" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="" uid="1bfcee4f:13cd4a94b36:-7faf">
+<foreign-key alias="" name="FK_foobar_2" on-delete="" on-update="" referenced-key="PK_BAR" referenced-table="bar" referenced-table-schema="ryanlorentzen" remarks="" source-entity-role="" source-multiplicity="0..*" source-relationship-type="" target-entity-role="" target-multiplicity="1" target-relationship-type="" uid="7ad6bae9:147a6c641ce:-73dd">
 <foreign-key-description/>
 <foreign-key-figure>
 <fk-fig-bendpoint-list/>
 </foreign-key-figure>
-<foreign-key-column column-name="bar" referenced-key-column-name="bar"/>
+<foreign-key-column column-name="bar_id" referenced-key-column-name="bar_id"/>
 </foreign-key>
 </foreign-key-list>
 <index-list/>
 </table>
 <table alias="" name="two_key_table" remarks="" uid="75978078:13d2217f23a:-7fef">
 <table-description/>
-<table-figure-bounds height="123" width="171" x="527" y="469"/>
+<table-figure-bounds height="78" width="130" x="462" y="342"/>
 <column-list>
 <column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="key_one" remarks="" uid="75978078:13d2217f23a:-7feb">
 <column-description/>
@@ -235,6 +259,31 @@
 <primary-key alias="" name="PK_MST_DICT" remarks="" uid="75978078:13d2217f23a:-7fca">
 <primary-key-description/>
 <primary-key-column name="DICT_ID"/>
+</primary-key>
+<unique-key-list/>
+<foreign-key-list/>
+<index-list/>
+</table>
+<table alias="" name="bar_type" remarks="" uid="7ad6bae9:147a6c641ce:-73ba">
+<table-description/>
+<table-figure-bounds height="57" width="111" x="614" y="580"/>
+<column-list>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="true" name="bar_type_id" remarks="" uid="7ad6bae9:147a6c641ce:-73b6">
+<column-description/>
+<data-type jdbc-type="4" name="INT" selected-variant-pattern="INT">
+<variant type-name-pattern="INT"/>
+</data-type>
+</column>
+<column alias="" auto-increment="false" column-size="0" decimal-digits="0" default-value="" mandatory="false" name="name" remarks="" uid="7ad6bae9:147a6c641ce:-73b5">
+<column-description/>
+<data-type jdbc-type="-1" literal-prefix="'" literal-suffix="'" name="TEXT" selected-variant-pattern="TEXT">
+<variant type-name-pattern="TEXT"/>
+</data-type>
+</column>
+</column-list>
+<primary-key alias="" name="PK_BAR_TYPE" remarks="" uid="7ad6bae9:147a6c641ce:-73b9">
+<primary-key-description/>
+<primary-key-column name="bar_type_id"/>
 </primary-key>
 <unique-key-list/>
 <foreign-key-list/>

@@ -183,17 +183,17 @@ public class Generator {
 			/*
 			 * generate.controller = true 
 			 */
-			if (Boolean.parseBoolean(props.getProperty("generate.controller", "true"))) {
-				String controllerPath = props.getProperty("controller.file.location",	pathPrefix +projectName+ "/"  + "src");
-				ControllerCodeGenerator codeGen = new ControllerCodeGenerator(model,controllerPath,packageName);
+			if ( Boolean.parseBoolean( props.getProperty( "generate.controller", "true" ) ) ) {
+				String controllerPath = props.getProperty( "controller.file.location", pathPrefix + projectName + "/" + "src" );
+				ControllerCodeGenerator codeGen = new ControllerCodeGenerator( model, controllerPath, packageName, props );
 				try {
 					codeGen.generate();
-				} catch (Exception e3) {
-					log.error("Could not generate Controller Classes: " +controllerPath, e3);
-					error=1;
+				} catch ( Exception e3 ) {
+					log.error( "Could not generate Controller Classes: " + controllerPath, e3 );
+					error = 1;
 				}
 			} else {
-				log.debug("Not generating controller code");
+				log.debug( "Not generating controller code" );
 			}
 			
 			

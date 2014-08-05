@@ -26,6 +26,7 @@ src/main/java/edu/uiowa/icts/protogen/springhibernate/SpringHibernateModel.java 
 src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractControllerMVCTestsGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractVelocityGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/ControllerMvcTestGenerator.java -text
+src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/VelocityControllerGenerator.java -text svneol=unset#text/plain
 src/main/java/edu/uiowa/loaders/DBConnect.java -text
 src/main/java/edu/uiowa/loaders/JDBCReader.java -text
 src/main/java/edu/uiowa/loaders/PrivateReader.java -text
@@ -46,7 +47,10 @@ src/main/java/edu/uiowa/webapp/Schema.java -text
 src/main/java/edu/uiowa/webapp/TLDGenerator.java -text
 src/main/java/edu/uiowa/webapp/TagClassGenerator.java -text
 src/main/resources/velocity-templates/AbstractControllerMVCTests.java -text
+src/main/resources/velocity-templates/Controller.java -text svneol=unset#text/plain
 src/main/resources/velocity-templates/ControllerMvcTest.java -text
+src/main/resources/velocity-templates/DatatableMethodGeneration1.java -text svneol=unset#text/plain
+src/main/resources/velocity-templates/DatatableMethodGeneration2.java -text svneol=unset#text/plain
 src/test/java/edu/uiowa/icts/protogen/GeneratorTest.java svneol=native#text/x-java-source
 src/test/java/edu/uiowa/icts/protogen/JDBCTest.java -text svneol=unset#text/plain
 src/test/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractControllerMVCTestsGeneratorTest.java -text
