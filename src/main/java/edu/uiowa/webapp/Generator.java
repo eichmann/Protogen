@@ -142,21 +142,21 @@ public class Generator {
 			}
 		} else {
 
-			SpringHibernateModel model = new SpringHibernateModel(theDatabase, packageName);
+			SpringHibernateModel model = new SpringHibernateModel( theDatabase, packageName, props );
 
 			/*
 			 * generate.domain = true 
 			 */
-			if (Boolean.parseBoolean(props.getProperty("generate.domain", "true"))) {
-				String domainPath = props.getProperty("domain.file.location",pathPrefix + projectName+ "/"  + "src");
-				DomainCodeGenerator codeGen = new DomainCodeGenerator(model,domainPath,packageName);
+			if ( Boolean.parseBoolean( props.getProperty( "generate.domain", "true" ) ) ) {
+				String domainPath = props.getProperty( "domain.file.location", pathPrefix + projectName + "/" + "src" );
+				DomainCodeGenerator codeGen = new DomainCodeGenerator( model, domainPath, packageName );
 				try {
-					log.debug("***********Writing domain code*****************");
+					log.debug( "***********Writing domain code*****************" );
 					codeGen.generate();
-				} catch (IOException e) {
-					log.debug("Error writing domain code");
-					log.error("Error writing domain code", e);
-					error=1;
+				} catch ( IOException e ) {
+					log.debug( "Error writing domain code" );
+					log.error( "Error writing domain code", e );
+					error = 1;
 				}
 			} else {
 				log.debug("Not generating domain code");
@@ -216,17 +216,17 @@ public class Generator {
 			/*
 			 * generate.test = true 
 			 */
-			if (Boolean.parseBoolean(props.getProperty("generate.test", "true"))) {
-				String testPath = props.getProperty("test.file.location",	pathPrefix +projectName+ "/"  + "src");
-				BaseTestCodeGenerator codeGen = new BaseTestCodeGenerator(model,testPath,packageName);
+			if ( Boolean.parseBoolean( props.getProperty( "generate.test", "true" ) ) ) {
+				String testPath = props.getProperty( "test.file.location", pathPrefix + projectName + "/" + "src" );
+				BaseTestCodeGenerator codeGen = new BaseTestCodeGenerator( model, testPath, packageName, props );
 				try {
 					codeGen.generate();
-				} catch (Exception e3) {
-					log.error("Could not generate Test Classes: " + testPath, e3);
-					error=1;
+				} catch ( Exception e3 ) {
+					log.error( "Could not generate Test Classes: " + testPath, e3 );
+					error = 1;
 				}
 			} else {
-				log.debug("Not generating test code");
+				log.debug( "Not generating test code" );
 			}
 			
 			/*

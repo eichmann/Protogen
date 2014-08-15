@@ -3,6 +3,7 @@ package edu.uiowa.icts.protogen.springhibernate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.webapp.Entity;
@@ -27,6 +28,12 @@ public class DomainClass {
 	private boolean usesCompositeKey;
 	private boolean nullablePrimitives = true;
 	private boolean defaultToLong;//not implemented
+	
+	private Properties properties;
+	
+	public DomainClass( Properties properties ){
+		this.properties = properties;
+	}
 
 	public boolean isDefaultToLong() {
 		return defaultToLong;
@@ -195,20 +202,16 @@ public class DomainClass {
 		return output;
 	}
 
-	public String genConstructor( String indent )
-	{
+	public String genConstructor( String indent ) {
 		Iterator<ClassVariable> cvIter = listAllIter();
-		String output = indent + "public " + identifier + "()";
 
-		output += indent + "{\n";
+		String output = indent + "public " + identifier + "() {\n";
 
-		while ( cvIter.hasNext() )
-		{
+		while ( cvIter.hasNext() ) {
 			ClassVariable cv = cvIter.next();
 			String init = "";
 
-			if ( cv.getInitializer().isEmpty() )
-			{
+			if ( cv.getInitializer().isEmpty() ) {
 				if ( cv.getType().equals( "String" ) )
 					init = " = \"\"";
 				else if ( cv.getType().equals( "int" ) )
@@ -219,18 +222,18 @@ public class DomainClass {
 					init = " = 0f";
 				else if ( cv.getType().equals( "double" ) )
 					init = " = 0d";
-
 				else if ( cv.getType().equals( "boolean" ) )
 					init = " = false";
-
 				else
 					init = " = null";
-			}
-			else
+			} else {
 				init = cv.getInitializer();
+			}
 
-			if ( !init.isEmpty() )
+			if ( !init.isEmpty() ) {
 				output += indent + indent + "this." + cv.getIdentifier() + init + ";";
+			}
+
 			output += "\n";
 
 		}
@@ -238,23 +241,21 @@ public class DomainClass {
 		return output;
 	}
 
-	public String genConstructorWithId( String indent )
-	{
+	public String genConstructorWithId( String indent ) {
 		Iterator<ClassVariable> cvIter = getPrimaryKeys().iterator();
 		String output = indent + "public " + identifier + "(";
-		while ( cvIter.hasNext() )
-		{
+		while ( cvIter.hasNext() ) {
 			ClassVariable cv = cvIter.next();
 			output += cv.getType() + " " + cv.getIdentifier();
-			if ( cvIter.hasNext() )
+			if ( cvIter.hasNext() ) {
 				output += ", ";
+			}
 		}
 
-		output += ")\n" + indent + "{\n";
+		output += "){\n";
 
 		cvIter = getPrimaryKeys().iterator();
-		while ( cvIter.hasNext() )
-		{
+		while ( cvIter.hasNext() ) {
 			ClassVariable cv = cvIter.next();
 			output += indent + indent + "this." + cv.getIdentifier() + " = " + cv.getIdentifier() + ";";
 			output += "\n";
@@ -264,53 +265,46 @@ public class DomainClass {
 		return output;
 	}
 
-	public String genConstructorWithArgs( String indent )
-	{
+	public String genConstructorWithArgs( String indent ) {
 		Iterator<ClassVariable> cvIter = listAllIter();
 		String output = indent + "public " + identifier + "(";
-		while ( cvIter.hasNext() )
-		{
+		while ( cvIter.hasNext() ) {
 			ClassVariable cv = cvIter.next();
 			output += cv.getType() + " " + cv.getIdentifier();
-			if ( cvIter.hasNext() )
+			if ( cvIter.hasNext() ) {
 				output += ", ";
+			}
 		}
 
-		output += ")\n" + indent + "{\n";
+		output += "){\n";
 
 		cvIter = listAllIter();
-		while ( cvIter.hasNext() )
-		{
+		while ( cvIter.hasNext() ) {
 			ClassVariable cv = cvIter.next();
-			output += indent + indent + "this." + cv.getIdentifier() + " = " + cv.getIdentifier() + ";";
-			output += "\n";
-
+			output += indent + indent + "this." + cv.getIdentifier() + " = " + cv.getIdentifier() + ";\n";
 		}
 		output += indent + "}\n";
 		return output;
 	}
 
-	public String genImportList( String indent )
-	{
+	public String genImportList( String indent ) {
 		String output = "";
 		Iterator<String> ilI = importList.iterator();
-		while ( ilI.hasNext() )
+		while ( ilI.hasNext() ) {
 			output += indent + "import " + ilI.next() + ";\n";
+		}
 		return output;
 
 	}
 
-	public void populateClassVariableDomainClass()
-	{
-
+	public void populateClassVariableDomainClass() {
 		Iterator<ClassVariable> cvIter = symTable.iterator();
-		while ( cvIter.hasNext() )
+		while ( cvIter.hasNext() ) {
 			cvIter.next().setDomainClass( this );
-
+		}
 	}
 
-	public String toString()
-	{
+	public String toString() {
 		String indent = "";
 		String output = "";
 		output += "package " + packageName + ";";
@@ -351,23 +345,29 @@ public class DomainClass {
 	}
 
 	private String genAnnotations( String indent ) {
-		if ( classType == ClassType.ENTITY && entity != null )
-			return "@Entity(name=\"" + getPackageName().replaceAll( "\\.", "_" ) + "_" + getLowerIdentifier() + "\")\n@Table(name = \"" + entity.getSqlLabel() + "\", schema=\"" + schema.getSqlLabel() + "\")";
-		else
-			return "";
+		String schemaLabel = schema.getSqlLabel();
+		if( properties != null ){
+			
+		}
+		
+		if ( classType == ClassType.ENTITY && entity != null ) {
+			String anno = "";
+			anno += "@Entity( name = \"" + getPackageName().replaceAll( "\\.", "_" ) + "_" + getLowerIdentifier() + "\" )\n";
+			anno += "@Table( name = \"" + entity.getSqlLabel() + "\", schema = \"" + schemaLabel + "\" )";
+			return anno;
+		}
+		return "";
 	}
 
 	public List<ClassVariable> getPrimaryKeys() {
 		List<ClassVariable> cvList = new ArrayList<ClassVariable>();
 		Iterator<ClassVariable> symIter = symTable.iterator();
-		while ( symIter.hasNext() )
-		{
+		while ( symIter.hasNext() ) {
 			ClassVariable cv = symIter.next();
-			if ( cv.isPrimary() )//&& cv.getAttribType() != AttributeType.FOREIGNPRIMARYKEY)
+			if ( cv.isPrimary() ) {//&& cv.getAttribType() != AttributeType.FOREIGNPRIMARYKEY)
 				cvList.add( cv );
-
+			}
 		}
-
 		return cvList;
 	}
 

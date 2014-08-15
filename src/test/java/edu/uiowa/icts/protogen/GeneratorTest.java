@@ -65,7 +65,11 @@ public class GeneratorTest extends TestCase {
 		props.setProperty( "test.file.location", pathPrefix + "/target/clay/test/javatest" + "src" );
 
 		props.setProperty( "datatables.generation", "1" );
-
+		
+		props.setProperty( "include.schema.in.package.name", "false" );
+		props.setProperty( "ryanlorentzen.master.dao.service.name", "FooBarDaoService" );
+		props.setProperty( "ryanlorentzen.abstract.controller.name", "SomeOtherAbstractControllerName" );
+		
 		props.setProperty( "deobfuscate.tld.file.location", pathPrefix + "/target/clay/test/resources/META-INF/" );
 		props.setProperty( "deobfuscate.column.names", "true" );
 		props.setProperty( "dictionary.table.name", "MST_DICT" );
@@ -99,7 +103,7 @@ public class GeneratorTest extends TestCase {
 		props.setProperty( "generate.controller", "true" );
 		props.setProperty( "generate.jsp", "true" );
 		props.setProperty( "generate.tests", "true" );
-
+		
 		props.setProperty( "generate.domain", "false" );
 		props.setProperty( "generate.dao", "false" );
 

@@ -10,9 +10,9 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
-import org.codehaus.plexus.util.StringUtils;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
@@ -32,7 +32,7 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 	private Properties properties;
 
 	public VelocityControllerGenerator( String packageRoot, DomainClass domainClass, Properties properties ) {
-		super( packageRoot + "." + domainClass.getSchema().getLowerLabel() + ".controller" );
+		super( packageRoot + ( Boolean.valueOf( properties.getProperty( "include.schema.in.package.name", "true" ) ) ? "." + domainClass.getSchema().getLowerLabel() : "" ) + ".controller" );
 		this.packageRoot = packageRoot;
 		this.domainClass = domainClass;
 		this.properties = properties;
@@ -48,13 +48,32 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 		context.put( "date", sdf.format( new Date() ) ); // can be done with Velocity tools but let's keep it simple to start
 		context.put( "packageName", this.packageName );
 		context.put( "className", domainClass.getIdentifier() + "Controller" );
-		context.put( "pathPrefix", ( "/" + domainClass.getSchema().getLowerLabel() + "/" + domainClass.getLowerIdentifier() ).toLowerCase() );
+		
+		if ( Boolean.valueOf( properties.getProperty( "include.schema.in.request.mapping", "true" ) ) ) {
+			context.put( "pathPrefix", ( "/" + domainClass.getSchema().getLowerLabel() + "/" + domainClass.getLowerIdentifier() ).toLowerCase() );
+		} else {
+			context.put( "pathPrefix", "/" + domainClass.getLowerIdentifier().toLowerCase() );
+		}
+		
 		context.put( "domainName", domainClass.getIdentifier() );
 		context.put( "lowerDomainName", domainClass.getLowerIdentifier() );
-		context.put( "abstractControllerClassName", "Abstract" + domainClass.getSchema().getUpperLabel() + "Controller" );
-		context.put( "daoServiceName", domainClass.getSchema().getLowerLabel() + "DaoService" );
-		context.put( "domainPackageName", this.packageRoot + "." + domainClass.getSchema().getLowerLabel() + ".domain" );
 		
+		String abstractControllerClassName = properties.getProperty( domainClass.getSchema().getLabel().toLowerCase() + ".abstract.controller.name" );
+		if( abstractControllerClassName == null ){
+			abstractControllerClassName = "Abstract" + domainClass.getSchema().getUpperLabel() + "Controller";
+		}
+		context.put( "abstractControllerClassName", abstractControllerClassName );
+		
+		String daoServiceName = properties.getProperty( domainClass.getSchema().getUpperLabel().toLowerCase() + ".master.dao.service.name" );
+		if( daoServiceName == null || "".equals( daoServiceName.trim() ) ){
+			daoServiceName = domainClass.getSchema().getLowerLabel() + "DaoService";
+		} else {
+			daoServiceName = StringUtils.substring( daoServiceName, 0, 1 ).toLowerCase() + StringUtils.substring( daoServiceName, 1, daoServiceName.length() );
+		}
+		context.put( "daoServiceName", daoServiceName );
+		
+		context.put( "domainPackageName", this.packageRoot + "." + domainClass.getSchema().getLowerLabel() + ".domain" );
+
 		String dtMethod = datatableMethod( context );
 		context.put( "datatableMethod", dtMethod );
 
@@ -97,7 +116,7 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 
 	private String foreignClassParameters() {
 		StringBuilder output = new StringBuilder( " " );
-		if( domainClass.getForeignClassVariables() != null && !domainClass.getForeignClassVariables().isEmpty() ){
+		if ( domainClass.getForeignClassVariables() != null && !domainClass.getForeignClassVariables().isEmpty() ) {
 			for ( ClassVariable cv : domainClass.getForeignClassVariables() ) {
 				output.append( "@RequestParam( value = \"" + cv.getDomainClass().getLowerIdentifier() + "." + cv.getDomainClass().getPrimaryKey().getIdentifier() + "\" ) " + cv.getDomainClass().getPrimaryKey().getType() + " " + cv.getDomainClass().getLowerIdentifier() + "_" + cv.getDomainClass().getPrimaryKey().getIdentifier() + ", " );
 			}
