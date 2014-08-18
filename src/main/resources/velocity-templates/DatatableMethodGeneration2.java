@@ -38,7 +38,7 @@
 						continue;
 					}
 					if ( columnIndex != null ) {
-						sorts.add( new SortColumn( headers.get( i ).getName(), request.getParameter( "order[" + i + "][dir]" ) ) );
+						sorts.add( new SortColumn( headers.get( columnIndex ).getName(), request.getParameter( "order[" + i + "][dir]" ) ) );
 					}
 				}
 			}
