@@ -200,7 +200,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		}
 
 		spaces( out, 8 );
-		out.write( "return (" + dc.getIdentifier() + ") this.sessionFactory.getCurrentSession().get( getDomainName(), id );\n" );
+		out.write( "return (" + dc.getIdentifier() + ") this.sessionFactory.getCurrentSession().get( " + className + ".class, id );\n" );
 		spaces( out, 4 );
 		out.write( "}\n\n" );
 
@@ -213,15 +213,15 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 
 			if ( table != null && dc.getEntity().getSqlLabel().equals( table ) ) {
 				spaces( out, 4 );
-				out.write( "public String getAlternateColumnName(String tableName, String columnName){\n" );
+				out.write( "public String getAlternateColumnName( String tableName, String columnName ){\n" );
 				spaces( out, 8 );
-				out.write( "Criteria c = this.sessionFactory.getCurrentSession().createCriteria(" + dc.getIdentifier() + ".class);\n" );
+				out.write( "Criteria c = this.sessionFactory.getCurrentSession().createCriteria( " + dc.getIdentifier() + ".class );\n" );
 				spaces( out, 8 );
-				out.write( "c.add(Restrictions.eq(\"" + stringUtils.relabel( (String) properties.get( "dictionary.table.columnname" ), false ) + "\", tableName));\n" );
+				out.write( "c.add( Restrictions.eq( \"" + stringUtils.relabel( (String) properties.get( "dictionary.table.columnname" ), false ) + "\", tableName ) );\n" );
 				spaces( out, 8 );
-				out.write( "c.add(Restrictions.eq(\"" + stringUtils.relabel( (String) properties.get( "dictionary.column.columnname" ), false ) + "\", columnName));\n" );
+				out.write( "c.add( Restrictions.eq( \"" + stringUtils.relabel( (String) properties.get( "dictionary.column.columnname" ), false ) + "\", columnName ) );\n" );
 				spaces( out, 8 );
-				out.write( "c.setMaxResults(1);\n" );
+				out.write( "c.setMaxResults( 1 );\n" );
 				spaces( out, 8 );
 				out.write( dc.getIdentifier() + " dict = (" + dc.getIdentifier() + ") c.uniqueResult();\n" );
 				spaces( out, 8 );
