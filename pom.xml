@@ -8,18 +8,18 @@
 
 	<name>Protogen</name>
 	<description>Code generation project.</description>
+	
 	<scm>
 		<connection>scm:svn:https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/trunk</connection>
 		<developerConnection>scm:svn:https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/trunk</developerConnection>
 		<url>https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/trunk</url>
-
 	</scm>
 
 	<distributionManagement>
 		<repository>
 			<id>www-test.icts.uiowa.edu</id>
 			<name>www-test.icts.uiowa.edu-releases</name>
-			<url>https://www-test.icts.uiowa.edu/artifactory/libs-release-local</url>
+			<url>https://www-test.icts.uiowa.edu/artifactory/plugins-release-local</url>
 		</repository>
 	</distributionManagement>
 
