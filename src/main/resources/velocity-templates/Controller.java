@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,14 +46,14 @@ public class ${className} extends ${abstractControllerClassName} {
     private static final Log log = LogFactory.getLog( ${className}.class );
 
     @RequestMapping( value = "list_alt.html", method = RequestMethod.GET )
-    public ModelAndView listNoScript( ModelMap model ) {
+    public String listNoScript(Model model) {
         model.addAttribute( "${lowerDomainName}List", ${daoServiceName}.get${domainName}Service().list() );
-        return new ModelAndView( "${pathPrefix}/list_alt", model );
+        return "${pathPrefix}/list_alt";
     }
 
     @RequestMapping(value = "list.html", method = RequestMethod.GET)
-    public ModelAndView list() {
-        return new ModelAndView( "${pathPrefix}/list" );
+    public String list() {
+        return "${pathPrefix}/list";
     }
 
 ${datatableMethod}

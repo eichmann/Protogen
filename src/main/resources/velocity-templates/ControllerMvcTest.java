@@ -3,7 +3,6 @@ package ${packageName};
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -27,11 +26,24 @@ public class ${className}ControllerMvcTest extends AbstractControllerMVCTests {
 
     @Test
     public void addShouldDisplayNew${className}Form() throws Exception {
-       mockMvc.perform(get("${jspPath}/add.html"))
+       mockMvc.perform(get("${pathPrefix}/add.html"))
        .andExpect(status().isOk())
        .andExpect(model().attributeExists("${className.substring(0, 1).toLowerCase()}${className.substring(1)}")) 
-       .andExpect(view().name("${jspPath}/edit"));
+       .andExpect(view().name("${pathPrefix}/edit"));
     }
     
-
+    @Test
+    public void listShouldSimplyLoadPage() throws Exception {
+       mockMvc.perform(get("${pathPrefix}/list.html"))
+       .andExpect(status().isOk())
+       .andExpect(view().name("${pathPrefix}/list"));
+    }
+    
+    @Test
+    public void listAltShouldLoadListOf${className}s() throws Exception {
+       mockMvc.perform(get("${pathPrefix}/list_alt.html"))
+       .andExpect(status().isOk())
+       .andExpect(model().attributeExists("${className.substring(0, 1).toLowerCase()}${className.substring(1)}List")) 
+       .andExpect(view().name("${pathPrefix}/list_alt"));
+    }
 }

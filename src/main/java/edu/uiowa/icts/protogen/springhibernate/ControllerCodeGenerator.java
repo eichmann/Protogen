@@ -48,7 +48,7 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		String jspPath = ( "/" + domainClass.getSchema().getLowerLabel() + "/" + domainClass.getLowerIdentifier() ).toLowerCase();
 
 		// Generate corresponding Spring MVC test file
-		ControllerMvcTestGenerator generator = new ControllerMvcTestGenerator( packageName, domainClass.getIdentifier(), jspPath );
+		ControllerMvcTestGenerator generator = new ControllerMvcTestGenerator( model.getPackageRoot(), domainClass, properties );
 		BufferedWriter testWriter = createFileInSrcElseTarget( packagePath.replaceFirst( "src/main", "src/test" ), className + "MvcTest.java" );
 		try {
 			testWriter.write( generator.javaSourceCode() );
@@ -184,13 +184,12 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 	 * generates an abstract controller
 	 */
 	private void generateAbstractController( Schema schema, String className, String packageName, String packagePath ) throws IOException {
-		
 		// generate abstract controller test file first!
 		AbstractControllerMVCTestsGenerator generator = new AbstractControllerMVCTestsGenerator( packageName );
 		BufferedWriter testWriter = createFileInSrcElseTarget( packagePath.replaceFirst( "src/main", "src/test" ), "AbstractControllerMVCTests.java" );
 		testWriter.write( generator.javaSourceCode() );
 		testWriter.close();
-
+		
 		// then do real abstract controller
 		String daoPackageName = model.getPackageRoot() + ( Boolean.valueOf( properties.getProperty( "include.schema.in.package.name", "true" ) ) ? "." + schema.getLowerLabel() : "" ) + ".dao";
 		

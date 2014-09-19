@@ -55,6 +55,7 @@ src/test/java/edu/uiowa/icts/protogen/GeneratorTest.java svneol=native#text/x-ja
 src/test/java/edu/uiowa/icts/protogen/JDBCTest.java -text svneol=unset#text/plain
 src/test/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractControllerMVCTestsGeneratorTest.java -text
 src/test/java/edu/uiowa/icts/protogen/springhibernate/velocity/ControllerMvcTestGeneratorTest.java -text
+src/test/java/edu/uiowa/icts/protogen/springhibernate/velocity/VelocityControllerGeneratorTest.java -text
 src/test/resources/Model.clay -text svneol=unset#text/xml
 src/test/resources/demographics-base.clay -text svneol=unset#text/xml
 src/test/resources/pilot-base.clay -text svneol=unset#text/xml

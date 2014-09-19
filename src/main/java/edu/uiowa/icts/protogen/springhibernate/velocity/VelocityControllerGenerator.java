@@ -27,17 +27,10 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 
 	private static final String INTERFACE_SUFFIX = "Service";
 
-	private DomainClass domainClass;
-	private String packageRoot;
-	private Properties properties;
-
 	public VelocityControllerGenerator( String packageRoot, DomainClass domainClass, Properties properties ) {
-		super( packageRoot + ( Boolean.valueOf( properties.getProperty( "include.schema.in.package.name", "true" ) ) ? "." + domainClass.getSchema().getLowerLabel() : "" ) + ".controller" );
-		this.packageRoot = packageRoot;
-		this.domainClass = domainClass;
-		this.properties = properties;
+		super( packageRoot, domainClass, properties );
 	}
-
+    
 	public String javaSourceCode() {
 
 		SimpleDateFormat sdf = new SimpleDateFormat( "MM/dd/yyyy HH:mm:ss z", Locale.US );
@@ -46,15 +39,9 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 		/* lets make a Context and put data into it */
 		VelocityContext context = new VelocityContext();
 		context.put( "date", sdf.format( new Date() ) ); // can be done with Velocity tools but let's keep it simple to start
-		context.put( "packageName", this.packageName );
+		context.put( "packageName", this.getPackageName() );
 		context.put( "className", domainClass.getIdentifier() + "Controller" );
-		
-		if ( Boolean.valueOf( properties.getProperty( "include.schema.in.request.mapping", "true" ) ) ) {
-			context.put( "pathPrefix", ( "/" + domainClass.getSchema().getLowerLabel() + "/" + domainClass.getLowerIdentifier() ).toLowerCase() );
-		} else {
-			context.put( "pathPrefix", "/" + domainClass.getLowerIdentifier().toLowerCase() );
-		}
-		
+		context.put( "pathPrefix", this.getPathPrefix() );
 		context.put( "domainName", domainClass.getIdentifier() );
 		context.put( "lowerDomainName", domainClass.getLowerIdentifier() );
 		
