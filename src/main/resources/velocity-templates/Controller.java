@@ -45,8 +45,7 @@ public class ${className} extends ${abstractControllerClassName} {
     private static final Log log = LogFactory.getLog( ${className}.class );
 
     @RequestMapping( value = "list_alt.html", method = RequestMethod.GET )
-    public ModelAndView listNoScript() {
-        ModelMap model = new ModelMap();
+    public ModelAndView listNoScript( ModelMap model ) {
         model.addAttribute( "${lowerDomainName}List", ${daoServiceName}.get${domainName}Service().list() );
         return new ModelAndView( "${pathPrefix}/list_alt", model );
     }
@@ -59,16 +58,14 @@ public class ${className} extends ${abstractControllerClassName} {
 ${datatableMethod}
 
     @RequestMapping( value = "add.html", method = RequestMethod.GET )
-    public ModelAndView add() {
-        ModelMap model = new ModelMap();
+    public ModelAndView add( ModelMap model ) {
         model.addAttribute( "${lowerDomainName}", new ${domainName}() );
 ${addEditListDependencies}
         return new ModelAndView( "${pathPrefix}/edit", model );
     }
 
     @RequestMapping( value = "edit.html", method = RequestMethod.GET )
-    public ModelAndView edit( ${requestParameterIdentifier} ) {
-        ModelMap model = new ModelMap();
+    public ModelAndView edit( ModelMap model, ${requestParameterIdentifier} ) {
 ${addEditListDependencies}
 ${compositeKey}
         model.addAttribute( "${lowerDomainName}", ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
@@ -76,8 +73,7 @@ ${compositeKey}
     }
 
     @RequestMapping( value = "show.html", method = RequestMethod.GET )
-    public ModelAndView show( ${requestParameterIdentifier} ) {
-        ModelMap model = new ModelMap();
+    public ModelAndView show( ModelMap model, ${requestParameterIdentifier} ) {
 ${compositeKey}
         model.addAttribute( "${lowerDomainName}", ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
         return new ModelAndView( "${pathPrefix}/show", model );
@@ -93,8 +89,7 @@ ${foreignClassSetters}
     }
 
     @RequestMapping( value = "delete.html", method = RequestMethod.GET )
-    public ModelAndView confirmDelete( ${requestParameterIdentifier} ) {
-        ModelMap model = new ModelMap();
+    public ModelAndView confirmDelete( ModelMap model, ${requestParameterIdentifier} ) {
 ${compositeKey}
         model.addAttribute( "${lowerDomainName}", ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
         return new ModelAndView( "${pathPrefix}/delete", model );

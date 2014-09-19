@@ -226,11 +226,9 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 		indent += 1;
 
 		String params = "";
-		List<String[]> compositeKey = new ArrayList<String[]>();
 		if ( domainClass.isUsesCompositeKey() ) {
 			for ( Attribute a : domainClass.getEntity().getPrimaryKeyAttributes() ) {
 				params += "\"" + a.getLowerLabel() + "=\"+" + domainClass.getLowerIdentifier() + ".getId().get" + a.getUpperLabel() + "()+\"&\"+";
-				compositeKey.add( new String[] { a.getType(), a.getLowerLabel() } );
 			}
 			if ( !"".equals( params ) ) {
 				params = params.substring( 0, params.length() - 4 );
