@@ -84,6 +84,7 @@ public class VelocityControllerGeneratorTest {
 	//	properties.setProperty( "include.schema.in.request.mapping", "false" );			
 		VelocityControllerGenerator generator = new VelocityControllerGenerator(packageRoot,domainClass,properties);
 		assertEquals("/ictssysadmin/clinicaldocument", generator.getPathPrefix());
+		assertEquals("/ictssysadmin/clinicaldocument", generator.getJspPath());
 	}
 	
 	@Test
@@ -101,6 +102,7 @@ public class VelocityControllerGeneratorTest {
 		properties.setProperty( "include.schema.in.request.mapping", "false" );			
 		VelocityControllerGenerator generator = new VelocityControllerGenerator(packageRoot,domainClass,properties);
 		assertEquals("/clinicaldocument", generator.getPathPrefix());
+		assertEquals("/ictssysadmin/clinicaldocument", generator.getJspPath());
 	}
 	
 	@Test
@@ -208,10 +210,10 @@ public class VelocityControllerGeneratorTest {
 		// test list_alt
 		assertThat(sourceCode, containsString("public String listNoScript(Model model) {"));
 		assertThat(sourceCode, containsString("model.addAttribute( \"clinicalDocumentList\", ictssysadminDaoService.getClinicalDocumentService().list() );"));
-		assertThat(sourceCode, containsString("return \"/clinicaldocument/list_alt\";"));
+		assertThat(sourceCode, containsString("return \"/ictssysadmin/clinicaldocument/list_alt\";"));
 		// test list
 		assertThat(sourceCode, containsString("public String list() {"));
-		assertThat(sourceCode, containsString("return \"/clinicaldocument/list\";"));
+		assertThat(sourceCode, containsString("return \"/ictssysadmin/clinicaldocument/list\";"));
 	}
 	
 	@Test
@@ -240,7 +242,7 @@ public class VelocityControllerGeneratorTest {
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete\", method = RequestMethod.GET )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"save\", method = RequestMethod.POST )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete\", method = RequestMethod.POST )"));
-		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"list\", true, true, false ) );"));
+		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"/list\", true, true, false ) );"));
 		// test datatable links
 		assertThat(sourceCode, containsString("urls += \"<a href=\\\"show?\"+\"\\\">[view]</a>\";"));
 		assertThat(sourceCode, containsString("urls += \"<a href=\\\"edit?\"+\"\\\">[edit]</a>\";"));
@@ -273,7 +275,7 @@ public class VelocityControllerGeneratorTest {
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete.html\", method = RequestMethod.GET )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"save.html\", method = RequestMethod.POST )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete.html\", method = RequestMethod.POST )"));
-		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"list.html\", true, true, false ) );"));
+		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"/list.html\", true, true, false ) );"));
 		
 		// test datatable links
 		assertThat(sourceCode, containsString("urls += \"<a href=\\\"show.html?\"+\"\\\">[view]</a>\";"));

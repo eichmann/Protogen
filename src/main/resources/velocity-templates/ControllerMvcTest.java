@@ -31,21 +31,21 @@ public class ${className}ControllerMvcTest extends AbstractControllerMVCTests {
        mockMvc.perform(get("${pathPrefix}/add${pathExtension}"))
        .andExpect(status().isOk())
        .andExpect(model().attributeExists("${className.substring(0, 1).toLowerCase()}${className.substring(1)}")) 
-       .andExpect(view().name("${pathPrefix}/edit"));
+       .andExpect(view().name("${jspPath}/edit"));
     }
     
     @Test
     public void listShouldSimplyLoadPage() throws Exception {
        mockMvc.perform(get("${pathPrefix}/list${pathExtension}"))
        .andExpect(status().isOk())
-       .andExpect(view().name("${pathPrefix}/list"));
+       .andExpect(view().name("${jspPath}/list"));
     }
     
     @Test
     public void indexShouldDisplayListPage() throws Exception {
        mockMvc.perform(get("${pathPrefix}/"))
        .andExpect(status().isOk())
-       .andExpect(view().name("${pathPrefix}/list"));
+       .andExpect(view().name("${jspPath}/list"));
     }
     
     @Test
@@ -53,6 +53,6 @@ public class ${className}ControllerMvcTest extends AbstractControllerMVCTests {
        mockMvc.perform(get("${pathPrefix}/list_alt${pathExtension}"))
        .andExpect(status().isOk())
        .andExpect(model().attributeExists("${className.substring(0, 1).toLowerCase()}${className.substring(1)}List")) 
-       .andExpect(view().name("${pathPrefix}/list_alt"));
+       .andExpect(view().name("${jspPath}/list_alt"));
     }
 }

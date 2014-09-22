@@ -22,6 +22,7 @@ public class ControllerMvcTestGenerator extends AbstractVelocityGenerator {
 		context.put( "date", new Date().toString() ); // can be done with Velocity tools but let's keep it simple to start
 		context.put( "className", this.domainClass.getIdentifier() );
 		context.put( "pathPrefix", this.getPathPrefix() );
+		context.put( "jspPath", this.getJspPath() );
 		context.put( "pathExtension", this.getPathExtension());
 
 		/* lets render a template loaded from the classpath */

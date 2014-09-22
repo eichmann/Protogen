@@ -848,7 +848,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		while ( dcIter.hasNext() )
 		{
 			DomainClass dc = dcIter.next();
-			output += "<li><a href=\"<c:url value=\"/" + dc.getSchema().getUnqualifiedLabel() + "/" + dc.getLowerIdentifier().toLowerCase() + "/list"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" />\" >" + dc.getIdentifier() + " List</a></li>";
+			output += "<li><a href=\"<c:url value=\""+ (Boolean.valueOf( properties.getProperty( "include.schema.in.request.mapping", "true" )) ? "/" + dc.getSchema().getUnqualifiedLabel() : "") + "/" + dc.getLowerIdentifier().toLowerCase() + "/list"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" />\" >" + dc.getIdentifier() + " List</a></li>";
 			output += lines( 1 );
 
 		}

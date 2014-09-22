@@ -135,23 +135,23 @@ public class ControllerMvcTestGeneratorTest {
 		assertThat(sourceCode, containsString("public void listAltShouldLoadListOfClinicalDocuments() throws Exception {"));
 		assertThat(sourceCode, containsString("mockMvc.perform(get(\"/clinicaldocument/list_alt\"))"));
 		assertThat(sourceCode, containsString(".andExpect(model().attributeExists(\"clinicalDocumentList\"))"));
-		assertThat(sourceCode, containsString(".andExpect(view().name(\"/clinicaldocument/list_alt\"));"));
+		assertThat(sourceCode, containsString(".andExpect(view().name(\"/ictssysadmin/clinicaldocument/list_alt\"));"));
 		
 		// test list
 		assertThat(sourceCode, containsString("public void listShouldSimplyLoadPage() throws Exception {"));
 		assertThat(sourceCode, containsString("mockMvc.perform(get(\"/clinicaldocument/list\"))"));
-		assertThat(sourceCode, containsString(".andExpect(view().name(\"/clinicaldocument/list\"));"));
+		assertThat(sourceCode, containsString(".andExpect(view().name(\"/ictssysadmin/clinicaldocument/list\"));"));
 		
 		// test index
 		assertThat(sourceCode, containsString("public void indexShouldDisplayListPage() throws Exception {"));
 		assertThat(sourceCode, containsString("mockMvc.perform(get(\"/clinicaldocument/\"))"));
-		assertThat(sourceCode, containsString(".andExpect(view().name(\"/clinicaldocument/list\"));"));
+		assertThat(sourceCode, containsString(".andExpect(view().name(\"/ictssysadmin/clinicaldocument/list\"));"));
 		
 		// test add
 		assertThat(sourceCode, containsString("public void addShouldDisplayNewClinicalDocumentForm() throws Exception {"));
 		assertThat(sourceCode, containsString("mockMvc.perform(get(\"/clinicaldocument/add\"))"));
 		assertThat(sourceCode, containsString(".andExpect(model().attributeExists(\"clinicalDocument\"))"));
-		assertThat(sourceCode, containsString(".andExpect(view().name(\"/clinicaldocument/edit\"));"));
+		assertThat(sourceCode, containsString(".andExpect(view().name(\"/ictssysadmin/clinicaldocument/edit\"));"));
 	}
 	
 	@Test

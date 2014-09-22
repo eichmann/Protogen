@@ -48,12 +48,12 @@ public class ${className} extends ${abstractControllerClassName} {
     @RequestMapping( value = "list_alt${pathExtension}", method = RequestMethod.GET )
     public String listNoScript(Model model) {
         model.addAttribute( "${lowerDomainName}List", ${daoServiceName}.get${domainName}Service().list() );
-        return "${pathPrefix}/list_alt";
+        return "${jspPath}/list_alt";
     }
 
     @RequestMapping(value = {"list${pathExtension}", "", "/"}, method = RequestMethod.GET)
     public String list() {
-        return "${pathPrefix}/list";
+        return "${jspPath}/list";
     }
 
 ${datatableMethod}
@@ -62,7 +62,7 @@ ${datatableMethod}
     public ModelAndView add( ModelMap model ) {
         model.addAttribute( "${lowerDomainName}", new ${domainName}() );
 ${addEditListDependencies}
-        return new ModelAndView( "${pathPrefix}/edit", model );
+        return new ModelAndView( "${jspPath}/edit", model );
     }
 
     @RequestMapping( value = "edit${pathExtension}", method = RequestMethod.GET )
@@ -70,14 +70,14 @@ ${addEditListDependencies}
 ${addEditListDependencies}
 ${compositeKey}
         model.addAttribute( "${lowerDomainName}", ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
-        return new ModelAndView( "${pathPrefix}/edit", model );
+        return new ModelAndView( "${jspPath}/edit", model );
     }
 
     @RequestMapping( value = "show${pathExtension}", method = RequestMethod.GET )
     public ModelAndView show( ModelMap model, ${requestParameterIdentifier} ) {
 ${compositeKey}
         model.addAttribute( "${lowerDomainName}", ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
-        return new ModelAndView( "${pathPrefix}/show", model );
+        return new ModelAndView( "${jspPath}/show", model );
     }
 
     @RequestMapping( value = "save${pathExtension}", method = RequestMethod.POST )
@@ -86,14 +86,14 @@ ${compositeKey}
 ${compositeKeySetter}
 ${foreignClassSetters}
         ${daoServiceName}.get${domainName}Service().saveOrUpdate( ${lowerDomainName} );
-        return new ModelAndView( new RedirectView( "list${pathExtension}", true, true, false ) );
+        return new ModelAndView( new RedirectView( "/list${pathExtension}", true, true, false ) );
     }
 
     @RequestMapping( value = "delete${pathExtension}", method = RequestMethod.GET )
     public ModelAndView confirmDelete( ModelMap model, ${requestParameterIdentifier} ) {
 ${compositeKey}
         model.addAttribute( "${lowerDomainName}", ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
-        return new ModelAndView( "${pathPrefix}/delete", model );
+        return new ModelAndView( "${jspPath}/delete", model );
     }
 
     @RequestMapping( value = "delete${pathExtension}", method = RequestMethod.POST )
@@ -102,6 +102,6 @@ ${compositeKey}
         if ( StringUtils.equalsIgnoreCase( submitButtonValue, "yes" ) ) {
             ${daoServiceName}.get${domainName}Service().delete( ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
         }
-        return new ModelAndView( new RedirectView( "list${pathExtension}", true, true, false ) );
+        return new ModelAndView( new RedirectView( "/list${pathExtension}", true, true, false ) );
     }
 }

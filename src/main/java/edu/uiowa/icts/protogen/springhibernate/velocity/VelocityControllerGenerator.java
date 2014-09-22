@@ -42,6 +42,7 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 		context.put( "packageName", this.getPackageName() );
 		context.put( "className", domainClass.getIdentifier() + "Controller" );
 		context.put( "pathPrefix", this.getPathPrefix() );
+		context.put( "jspPath", this.getJspPath() );
 		context.put( "pathExtension", this.getPathExtension());
 		context.put( "domainName", domainClass.getIdentifier() );
 		context.put( "lowerDomainName", domainClass.getLowerIdentifier() );

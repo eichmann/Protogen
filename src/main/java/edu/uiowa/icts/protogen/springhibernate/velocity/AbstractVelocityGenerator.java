@@ -38,6 +38,9 @@ public abstract class AbstractVelocityGenerator {
 			return "/" + domainClass.getLowerIdentifier().toLowerCase();
 		}
     }
+	public String getJspPath(){
+		return "/" + domainClass.getSchema().getLowerLabel() + "/" + domainClass.getLowerIdentifier().toLowerCase();
+    }
 	
 	public String getPathExtension(){
 		return properties.getProperty( "controller.request.mapping.extension", "" );
