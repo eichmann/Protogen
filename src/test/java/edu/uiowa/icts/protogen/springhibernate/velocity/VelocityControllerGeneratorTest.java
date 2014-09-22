@@ -242,7 +242,7 @@ public class VelocityControllerGeneratorTest {
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete\", method = RequestMethod.GET )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"save\", method = RequestMethod.POST )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete\", method = RequestMethod.POST )"));
-		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"/list\", true, true, false ) );"));
+		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"list\", true, true, false ) );"));
 		// test datatable links
 		assertThat(sourceCode, containsString("urls += \"<a href=\\\"show?\"+\"\\\">[view]</a>\";"));
 		assertThat(sourceCode, containsString("urls += \"<a href=\\\"edit?\"+\"\\\">[edit]</a>\";"));
@@ -275,7 +275,7 @@ public class VelocityControllerGeneratorTest {
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete.html\", method = RequestMethod.GET )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"save.html\", method = RequestMethod.POST )"));
 		assertThat(sourceCode, containsString("@RequestMapping( value = \"delete.html\", method = RequestMethod.POST )"));
-		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"/list.html\", true, true, false ) );"));
+		assertThat(sourceCode, containsString("return new ModelAndView( new RedirectView( \"list.html\", true, true, false ) );"));
 		
 		// test datatable links
 		assertThat(sourceCode, containsString("urls += \"<a href=\\\"show.html?\"+\"\\\">[view]</a>\";"));

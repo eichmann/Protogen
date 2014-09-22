@@ -50,7 +50,8 @@ public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator 
 		importList.add( "import org.junit.Before;" );
 		importList.add( "import org.junit.Test;" );
 		importList.add( "import org.springframework.beans.factory.annotation.Autowired;" );
-		importList.add( "import " + dc.getPackageName() + ".*;" );
+		importList.add( "import org.springframework.test.context.web.WebAppConfiguration;" );
+	//	importList.add( "import " + dc.getPackageName() + ".*;" );
 
 		BufferedWriter out = createFileInSrcElseTarget( packagePath, className + ".java" );
 
@@ -88,6 +89,7 @@ public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator 
 		/*
 		 * Print interface header
 		 */
+		out.write( "@WebAppConfiguration\n" );
 		out.write( "public class " + className + " extends AbstractSpringTestCase {\n\n" );
 		
 		spaces( out, 4 );

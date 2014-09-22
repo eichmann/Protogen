@@ -86,7 +86,7 @@ ${compositeKey}
 ${compositeKeySetter}
 ${foreignClassSetters}
         ${daoServiceName}.get${domainName}Service().saveOrUpdate( ${lowerDomainName} );
-        return new ModelAndView( new RedirectView( "/list${pathExtension}", true, true, false ) );
+        return new ModelAndView( new RedirectView( "list${pathExtension}", true, true, false ) );
     }
 
     @RequestMapping( value = "delete${pathExtension}", method = RequestMethod.GET )
@@ -102,6 +102,6 @@ ${compositeKey}
         if ( StringUtils.equalsIgnoreCase( submitButtonValue, "yes" ) ) {
             ${daoServiceName}.get${domainName}Service().delete( ${daoServiceName}.get${domainName}Service().findById( ${lowerDomainName}Id ) );
         }
-        return new ModelAndView( new RedirectView( "/list${pathExtension}", true, true, false ) );
+        return new ModelAndView( new RedirectView( "list${pathExtension}", true, true, false ) );
     }
 }

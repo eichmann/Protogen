@@ -200,7 +200,7 @@ public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		}
 
 		spaces( out, 8 );
-		out.write( "return (" + dc.getIdentifier() + ") this.sessionFactory.getCurrentSession().get( " + className + ".class, id );\n" );
+		out.write( "return (" + dc.getIdentifier() + ") this.sessionFactory.getCurrentSession().get( " + dc.getIdentifier() + ".class, id );\n" );
 		spaces( out, 4 );
 		out.write( "}\n\n" );
 
