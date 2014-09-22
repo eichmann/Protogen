@@ -39,4 +39,8 @@ public abstract class AbstractVelocityGenerator {
 		}
     }
 	
+	public String getPathExtension(){
+		return properties.getProperty( "controller.request.mapping.extension", "" );
+	}
+	
 }

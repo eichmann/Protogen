@@ -77,7 +77,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		cvIter = ec.listAllIter();
 		output += lines( 1 );
 
-		output += "<form method=\"post\" action=\"delete.html\">";
+		output += "<form method=\"post\" action=\"delete"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\">";
 		output += lines( 1 );
 		indent += 4;
 
@@ -311,7 +311,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 					output += lines( 1 );
 					indent += 4;
 
-					output += spaces( indent ) + "<li><a href=\"../" + cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier().toLowerCase() + "/edit.html?" + pkString + "\" > ${item." + cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
+					output += spaces( indent ) + "<li><a href=\"../" + cv.getAttribute().getEntity().getDomainClass().getLowerIdentifier().toLowerCase() + "/edit"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + pkString + "\" > ${item." + cv.getAttribute().getEntity().getDomainClass().getPrimaryKey().getLowerIdentifier() + "}</a></li>";
 					output += lines( 1 );
 					indent -= 4;
 
@@ -368,7 +368,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		String sortableLabel = "bSortable";
 		String searchableLabel = "bSearchable";
 		String individualSearchingLabel = "includeSearches";
-		String datatableUrl = "datatable.html";
+		String datatableUrl = "datatable"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"";
 
 		if ( StringUtils.equals( properties.getProperty( "datatables.generation", "1" ), "2" ) ) {
 			nameLabel = "name";
@@ -396,7 +396,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		output += lines( 1 );
 
 		output += lines( 1 );
-		output += spaces( indent ) + "<a href=\"add.html\" class=\"btn btn-default\">Add</a>";
+		output += spaces( indent ) + "<a href=\"add"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" class=\"btn btn-default\">Add</a>";
 		output += lines( 2 );
 		output += spaces( indent ) + "<div id=\"error_div\" class=\"alert alert-error\" style=\"display: none;\">";
 		output += lines( 1 );
@@ -502,7 +502,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		output += lines( 1 );
 
 		output += lines( 1 );
-		output += spaces( indent ) + "<a href=\"add.html\" class=\"btn btn-default\">Add</a>";
+		output += spaces( indent ) + "<a href=\"add"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" class=\"btn btn-default\">Add</a>";
 		output += lines( 2 );
 		output += spaces( indent ) + "<div id=\"error_div\" class=\"alert alert-error\" style=\"display: none;\">";
 		output += lines( 1 );
@@ -584,7 +584,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 					output += spaces( indent ) + "<td>";
 					output += lines( 1 );
 					indent += 4;
-					output += spaces( indent ) + "<a href=\"edit.html?" + params + "\">" + label + "</a>";
+					output += spaces( indent ) + "<a href=\"edit"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + params + "\">" + label + "</a>";
 					indent -= 4;
 					output += lines( 1 );
 					output += spaces( indent ) + "</td>";
@@ -592,11 +592,11 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 					links += spaces( indent ) + "<td>";
 					indent += 4;
 					links += lines( 1 );
-					links += spaces( indent ) + "<a href=\"edit.html?" + params + "\">edit</a> ";
+					links += spaces( indent ) + "<a href=\"edit"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + params + "\">edit</a> ";
 					links += lines( 1 );
-					links += spaces( indent ) + "<a href=\"show.html?" + params + "\">view</a>";
+					links += spaces( indent ) + "<a href=\"show"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + params + "\">view</a>";
 					links += lines( 1 );
-					links += spaces( indent ) + "<a href=\"delete.html?" + params + "\">delete</a>";
+					links += spaces( indent ) + "<a href=\"delete"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + params + "\">delete</a>";
 					links += lines( 1 );
 					indent -= 4;
 					links += spaces( indent ) + "</td>";
@@ -604,16 +604,16 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 					links += spaces( indent ) + "<td>";
 					indent += 4;
 					links += lines( 1 );
-					links += spaces( indent ) + "<a href=\"edit.html?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">edit</a> ";
+					links += spaces( indent ) + "<a href=\"edit"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">edit</a> ";
 					links += lines( 1 );
-					links += spaces( indent ) + "<a href=\"show.html?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">view</a>";
+					links += spaces( indent ) + "<a href=\"show"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">view</a>";
 					links += lines( 1 );
-					links += spaces( indent ) + "<a href=\"delete.html?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">delete</a>";
+					links += spaces( indent ) + "<a href=\"delete"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">delete</a>";
 					links += lines( 1 );
 					indent -= 4;
 					links += spaces( indent ) + "</td>";
 
-					output += spaces( indent ) + "<td><a href=\"edit.html?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}</a></td>";
+					output += spaces( indent ) + "<td><a href=\"edit"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"?" + cv.getIdentifier() + "=${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}\">${" + ec.getLowerIdentifier() + "." + cv.getIdentifier() + "}</a></td>";
 				}
 			} else if ( cv.getRelationshipType() == RelationshipType.ONETOMANY ) {
 				output += spaces( indent ) + "<td>" + cv.getLowerIdentifier() + "</td>";
@@ -680,7 +680,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 			output += lines( 1 );
 		}
 
-		output += "<form:form method=\"post\" commandName=\"" + ec.getLowerIdentifier() + "\" action=\"save.html\" >";
+		output += "<form:form method=\"post\" commandName=\"" + ec.getLowerIdentifier() + "\" action=\"save"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" >";
 		output += lines( 1 );
 		indent += 4;
 
@@ -790,7 +790,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		output += lines( 1 );
 		output += spaces( indent ) + "<input type=\"submit\" value=\"Save\" class=\"btn btn-primary\" />";
 		output += lines( 1 );
-		output += spaces( indent ) + "<a class=\"btn btn-default\" href=\"list.html\">Cancel</a>";
+		output += spaces( indent ) + "<a class=\"btn btn-default\" href=\"list"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\">Cancel</a>";
 		output += lines( 1 );
 		indent -= 4;
 		output += spaces( indent ) + "</fieldset>";
@@ -820,7 +820,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		while ( dcIter.hasNext() )
 		{
 			DomainClass dc = dcIter.next();
-			output += "<a href=\"<c:url value=\"/" + dc.getSchema().getUnqualifiedLabel() + "/" + dc.getLowerIdentifier().toLowerCase() + "/list.html\" />\" >" + dc.getIdentifier() + " List</a><br/>";
+			output += "<a href=\"<c:url value=\"/" + dc.getSchema().getUnqualifiedLabel() + "/" + dc.getLowerIdentifier().toLowerCase() + "/list"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" />\" >" + dc.getIdentifier() + " List</a><br/>";
 			output += lines( 1 );
 
 		}
@@ -848,7 +848,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		while ( dcIter.hasNext() )
 		{
 			DomainClass dc = dcIter.next();
-			output += "<li><a href=\"<c:url value=\"/" + dc.getSchema().getUnqualifiedLabel() + "/" + dc.getLowerIdentifier().toLowerCase() + "/list.html\" />\" >" + dc.getIdentifier() + " List</a></li>";
+			output += "<li><a href=\"<c:url value=\"/" + dc.getSchema().getUnqualifiedLabel() + "/" + dc.getLowerIdentifier().toLowerCase() + "/list"+ properties.getProperty( "controller.request.mapping.extension", "" ) +"\" />\" >" + dc.getIdentifier() + " List</a></li>";
 			output += lines( 1 );
 
 		}

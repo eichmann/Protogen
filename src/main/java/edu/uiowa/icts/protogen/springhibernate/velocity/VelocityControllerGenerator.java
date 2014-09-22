@@ -42,6 +42,7 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 		context.put( "packageName", this.getPackageName() );
 		context.put( "className", domainClass.getIdentifier() + "Controller" );
 		context.put( "pathPrefix", this.getPathPrefix() );
+		context.put( "pathExtension", this.getPathExtension());
 		context.put( "domainName", domainClass.getIdentifier() );
 		context.put( "lowerDomainName", domainClass.getLowerIdentifier() );
 		
@@ -229,9 +230,9 @@ public class VelocityControllerGenerator extends AbstractVelocityGenerator {
 			}
 		}
 
-		output.append( tab( indent ) + "urls += \"<a href=\\\"show.html?\"+" + params + "\"\\\">[view]</a>\";\n" );
-		output.append( tab( indent ) + "urls += \"<a href=\\\"edit.html?\"+" + params + "\"\\\">[edit]</a>\";\n" );
-		output.append( tab( indent ) + "urls += \"<a href=\\\"delete.html?\"+" + params + "\"\\\">[delete]</a>\";\n" );
+		output.append( tab( indent ) + "urls += \"<a href=\\\"show"+this.getPathExtension()+"?\"+" + params + "\"\\\">[view]</a>\";\n" );
+		output.append( tab( indent ) + "urls += \"<a href=\\\"edit"+this.getPathExtension()+"?\"+" + params + "\"\\\">[edit]</a>\";\n" );
+		output.append( tab( indent ) + "urls += \"<a href=\\\"delete"+this.getPathExtension()+"?\"+" + params + "\"\\\">[delete]</a>\";\n" );
 
 		indent -= 1;
 
