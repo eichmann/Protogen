@@ -35,6 +35,7 @@ src/main/java/edu/uiowa/loaders/generic.java -text
 src/main/java/edu/uiowa/webapp/Attribute.java -text
 src/main/java/edu/uiowa/webapp/ClayElement.java -text
 src/main/java/edu/uiowa/webapp/ClayLoader.java -text
+src/main/java/edu/uiowa/webapp/DTDump.java -text
 src/main/java/edu/uiowa/webapp/Database.java -text
 src/main/java/edu/uiowa/webapp/DatabaseSchemaLoader.java -text
 src/main/java/edu/uiowa/webapp/Domain.java -text
