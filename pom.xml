@@ -17,32 +17,22 @@
 
 	<distributionManagement>
 		<repository>
-			<id>www-test.icts.uiowa.edu</id>
-			<name>www-test.icts.uiowa.edu-releases</name>
-			<url>https://www-test.icts.uiowa.edu/artifactory/plugins-release-local</url>
+			<id>cd2h-libs-snapshot</id>
+			<name>cd2h-libs-snapshot</name>
+			<url>https://wintermute.info-science.uiowa.edu:8082/artifactory/cd2h-libs-snapshot/</url>
 		</repository>
 	</distributionManagement>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
-
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.1</version>
-				<configuration>
-					<tagBase>https://srcvault.icts.uiowa.edu/repos/Admin/Protogen/tags/</tagBase>
-				</configuration>
-			</plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
 		</plugins>
 
 		<finalName>${project.artifactId}</finalName>
@@ -106,7 +96,7 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-plugin-api</artifactId>
-			<version>2.0</version>
+			<version>3.8.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
