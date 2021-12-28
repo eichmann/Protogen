@@ -12,8 +12,8 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.util.IctsStringUtils;
-import edu.uiowa.webapp.Schema;
 
 public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 	static Logger log = LogManager.getLogger(ColumnDeobfuscationCodeGenerator.class);

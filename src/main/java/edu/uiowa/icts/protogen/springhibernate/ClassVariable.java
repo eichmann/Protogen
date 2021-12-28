@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.uiowa.webapp.Attribute;
+import edu.uiowa.icts.protogen.model.Attribute;
 
 public class ClassVariable
 	{

@@ -19,11 +19,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.plexus.util.StringUtils;
 
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.velocity.AbstractControllerMVCTestsGenerator;
 import edu.uiowa.icts.protogen.springhibernate.velocity.ControllerMvcTestGenerator;
 import edu.uiowa.icts.protogen.springhibernate.velocity.VelocityControllerGenerator;
-import edu.uiowa.webapp.Attribute;
-import edu.uiowa.webapp.Schema;
 
 public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 	static Logger log = LogManager.getLogger(ControllerCodeGenerator.class);
@@ -44,7 +44,6 @@ public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerato
 		String packagePath = pathBase + "/" + packageName.replaceAll( "\\.", "/" );
 
 		String className = domainClass.getIdentifier() + "Controller";
-		String jspPath = ( "/" + domainClass.getSchema().getLowerLabel() + "/" + domainClass.getLowerIdentifier() ).toLowerCase();
 
 		// Generate corresponding Spring MVC test file
 		ControllerMvcTestGenerator generator = new ControllerMvcTestGenerator( model.getPackageRoot(), domainClass, properties );

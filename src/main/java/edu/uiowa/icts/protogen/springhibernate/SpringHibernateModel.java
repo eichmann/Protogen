@@ -16,14 +16,14 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.uiowa.icts.protogen.loaders.Entity;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Database;
+import edu.uiowa.icts.protogen.model.Relationship;
+import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass.ClassType;
-import edu.uiowa.webapp.Attribute;
-import edu.uiowa.webapp.Database;
-import edu.uiowa.webapp.Entity;
-import edu.uiowa.webapp.Relationship;
-import edu.uiowa.webapp.Schema;
 
 /**
  * Completes the database model created previously to support Spring and Hibernate code generation
