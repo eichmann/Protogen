@@ -13,6 +13,12 @@ src/main/java/META-INF/MANIFEST.MF svneol=native#text/plain
 src/main/java/dispatcher-servlet.tmplt -text
 src/main/java/edu/uiowa/icts/plugin/protogen/Clean.java -text svneol=unset#text/plain
 src/main/java/edu/uiowa/icts/plugin/protogen/WebApp.java svneol=native#text/x-java-source
+src/main/java/edu/uiowa/icts/protogen/model/Attribute.java -text
+src/main/java/edu/uiowa/icts/protogen/model/Database.java -text
+src/main/java/edu/uiowa/icts/protogen/model/Domain.java -text
+src/main/java/edu/uiowa/icts/protogen/model/Element.java -text
+src/main/java/edu/uiowa/icts/protogen/model/Relationship.java -text
+src/main/java/edu/uiowa/icts/protogen/model/Schema.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/AbstractSpringHibernateCodeGenerator.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/BaseTestCodeGenerator.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/springhibernate/ClassVariable.java -text
