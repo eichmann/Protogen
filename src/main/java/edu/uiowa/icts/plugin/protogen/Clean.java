@@ -15,7 +15,6 @@ import org.apache.maven.plugin.MojoFailureException;
 public class Clean extends AbstractMojo {
 	static Logger log = LogManager.getLogger(Clean.class);
 
-	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		log.debug( "cleaning" );
 	}

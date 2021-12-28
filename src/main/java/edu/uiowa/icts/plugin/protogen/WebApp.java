@@ -15,9 +15,9 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
-import edu.uiowa.webapp.Database;
-import edu.uiowa.webapp.DatabaseSchemaLoader;
-import edu.uiowa.webapp.Generator;
+import edu.uiowa.icts.protogen.loaders.DatabaseModelLoader;
+import edu.uiowa.icts.protogen.model.Database;
+import edu.uiowa.icts.protogen.webapp.Generator;
 
 /**
  * Build TagLib or Spring demo project
@@ -59,7 +59,7 @@ public class WebApp  extends AbstractMojo {
     private String buildDirectory;
     
     
-	DatabaseSchemaLoader theLoader = null;
+	DatabaseModelLoader theLoader = null;
 	static Database theDatabase = null;
 	
 	public void execute() throws MojoExecutionException, MojoFailureException {
