@@ -1,17 +1,21 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.loaders;
 
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Element;
+import edu.uiowa.icts.protogen.model.Relationship;
+import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
 
-public class Entity extends ClayElement {
+public class Entity extends Element {
 	
     Schema schema = null;
-	Vector<Attribute> attributes = new Vector<Attribute>();
-	Vector<Attribute> primaryKeyAttributes = new Vector<Attribute>();
+	public Vector<Attribute> attributes = new Vector<Attribute>();
+	public Vector<Attribute> primaryKeyAttributes = new Vector<Attribute>();
     Vector<Attribute> parentKeyAttributes = new Vector<Attribute>();
     Vector<Attribute> subKeyAttributes = new Vector<Attribute>();
 	
@@ -85,8 +89,6 @@ public class Entity extends ClayElement {
 	}
 	
 	public Attribute getAttributeByLabel(String label) {
-	    Attribute target = null;
-	    
 	    for (int i = 0; i < attributes.size(); i++)
 	        if (attributes.elementAt(i).getLabel().equals(label))
 	            return attributes.elementAt(i);
@@ -95,10 +97,7 @@ public class Entity extends ClayElement {
 	}
 
     public Attribute getAttributeBySQLLabel(String label) {
-        Attribute target = null;
-        
         for (int i = 0; i < attributes.size(); i++) {
-//            log.debug(attributes.elementAt(i).getLabel());
             if (attributes.elementAt(i).getSqlLabel().equals(label))
                 return attributes.elementAt(i);
         }
@@ -116,8 +115,6 @@ public class Entity extends ClayElement {
     }
 
     public Attribute getIntKeyAttribute() {
-        Attribute target = null;
-        
         for (int i = 0; i < attributes.size(); i++)
             if (attributes.elementAt(i).isPrimary() && attributes.elementAt(i).isInt())
                 return attributes.elementAt(i);

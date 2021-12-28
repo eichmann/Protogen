@@ -1,4 +1,4 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.webapp;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -6,6 +6,10 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.uiowa.icts.protogen.loaders.ClaySaxLoader;
+import edu.uiowa.icts.protogen.loaders.DatabaseModelLoader;
+import edu.uiowa.icts.protogen.loaders.JDBCLoader;
+import edu.uiowa.icts.protogen.model.Database;
 import edu.uiowa.icts.protogen.springhibernate.BaseTestCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ColumnDeobfuscationCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ControllerCodeGenerator;
@@ -40,7 +44,7 @@ public class Generator {
 		pathPrefix = System.getProperty("user.dir") + "/../";
 	}
 
-	static Database theDatabase = null;
+	public static Database theDatabase = null;
 
 	public int runGenerator(Properties props) {
 		
@@ -58,9 +62,9 @@ public class Generator {
 		String modelSource = props.getProperty("model.source", "clay");
 		String mode = props.getProperty("mode", "tags");
 
-		DatabaseSchemaLoader theLoader = null;
+		DatabaseModelLoader theLoader = null;
 		if(modelSource.equalsIgnoreCase("clay")) {
-			theLoader = new ClayLoader();
+			theLoader = new ClaySaxLoader();
 			String clayFile = "";
 			try {
 				clayFile = props.getProperty("clay.file", pathPrefix + projectName + "/WebContent/resources/" + projectName + ".clay");
@@ -304,7 +308,7 @@ public class Generator {
 		log.debug("Generator mode: "+ myProps.getProperty("mode"));
 	}
 
-	static Database getDatabase() {
+	public static Database getDatabase() {
 		return theDatabase;
 	}
 

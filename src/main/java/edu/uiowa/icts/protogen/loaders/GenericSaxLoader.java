@@ -1,4 +1,4 @@
-package edu.uiowa.loaders;
+package edu.uiowa.icts.protogen.loaders;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,7 +11,7 @@ import java.net.*;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class generic extends DefaultHandler {
+public class GenericSaxLoader extends DefaultHandler {
     protected static boolean debug = true;
     protected static boolean verbose = false;
     protected static boolean terse = false;
@@ -24,11 +24,11 @@ public class generic extends DefaultHandler {
 	protected static XMLReader xr = null;
 
 	public static void main (String args[]) throws Exception {
-		generic handler = new generic();
+		GenericSaxLoader handler = new GenericSaxLoader();
 		handler.run(args);
 	}
 	
-	static Logger log = LogManager.getLogger(generic.class);
+	static Logger log = LogManager.getLogger(GenericSaxLoader.class);
 
 	public void run(String args[]) throws Exception {
 		xr = XMLReaderFactory.createXMLReader();
@@ -118,7 +118,7 @@ public class generic extends DefaultHandler {
         IODesc.close();
     }
 
-    public generic () {
+    public GenericSaxLoader () {
 		super();
     }
 

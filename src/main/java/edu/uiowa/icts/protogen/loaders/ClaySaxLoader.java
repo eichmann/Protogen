@@ -1,4 +1,4 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.loaders;
 
 import java.util.Properties;
 
@@ -6,9 +6,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 
-import edu.uiowa.loaders.generic;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Database;
+import edu.uiowa.icts.protogen.model.Domain;
+import edu.uiowa.icts.protogen.model.Relationship;
+import edu.uiowa.icts.protogen.model.Schema;
+import edu.uiowa.icts.protogen.webapp.Generator;
 
-public class ClayLoader extends generic implements DatabaseSchemaLoader {
+public class ClaySaxLoader extends GenericSaxLoader implements DatabaseModelLoader {
     enum mode {DOMAIN, TABLE};
 	
 	Database currentDatabase = null;
@@ -18,12 +23,12 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 	Attribute currentAttribute = null;
 	Relationship currentRelationship = null;
 	
-	static Logger log = LogManager.getLogger(ClayLoader.class);
+	static Logger log = LogManager.getLogger(ClaySaxLoader.class);
 
 	mode currentMode = mode.DOMAIN;
 	private String referencedEntityName;
 	
-	public ClayLoader() {
+	public ClaySaxLoader() {
 		super();
 		debug = true;
 		verbose = true;
@@ -164,7 +169,6 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
         return currentDatabase;
     }
 
-	@Override
 	public void run(Properties props) throws Exception {
 		// TODO Auto-generated method stub
 	}

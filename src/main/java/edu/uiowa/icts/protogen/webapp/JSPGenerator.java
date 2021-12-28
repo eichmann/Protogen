@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.webapp;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,6 +15,11 @@ import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import edu.uiowa.icts.protogen.loaders.Entity;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Database;
+import edu.uiowa.icts.protogen.model.Schema;
 
 public class JSPGenerator {
 	static Logger log = LogManager.getLogger(JSPGenerator.class);
@@ -128,6 +133,7 @@ public class JSPGenerator {
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("<%@ include file=\"/_include.jsp\"  %>\n");
         out.write("<img src=\"<c:url value=\"/resources/images/logo-icts.png\" />\" alt=\"logo\">\n");
+        out.close();
 	}
 
 	/**
@@ -139,6 +145,7 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(f);
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("\n");
+        out.close();
 	}
 
 	/**

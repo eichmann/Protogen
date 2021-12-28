@@ -13,6 +13,15 @@ src/main/java/META-INF/MANIFEST.MF svneol=native#text/plain
 src/main/java/dispatcher-servlet.tmplt -text
 src/main/java/edu/uiowa/icts/plugin/protogen/Clean.java -text svneol=unset#text/plain
 src/main/java/edu/uiowa/icts/plugin/protogen/WebApp.java svneol=native#text/x-java-source
+src/main/java/edu/uiowa/icts/protogen/loaders/ClaySaxLoader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/DBConnect.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/DatabaseModelLoader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/Entity.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/GenericSaxLoader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/JDBCLoader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/JDBCReader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/PrivateReader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/PropertyLoader.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Attribute.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Database.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Domain.java -text
@@ -33,26 +42,11 @@ src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractControlle
 src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/AbstractVelocityGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/ControllerMvcTestGenerator.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/velocity/VelocityControllerGenerator.java -text svneol=unset#text/plain
-src/main/java/edu/uiowa/loaders/DBConnect.java -text
-src/main/java/edu/uiowa/loaders/JDBCReader.java -text
-src/main/java/edu/uiowa/loaders/PrivateReader.java -text
-src/main/java/edu/uiowa/loaders/PropertyLoader.java -text
-src/main/java/edu/uiowa/loaders/generic.java -text
-src/main/java/edu/uiowa/webapp/Attribute.java -text
-src/main/java/edu/uiowa/webapp/ClayElement.java -text
-src/main/java/edu/uiowa/webapp/ClayLoader.java -text
-src/main/java/edu/uiowa/webapp/DTDump.java -text
-src/main/java/edu/uiowa/webapp/Database.java -text
-src/main/java/edu/uiowa/webapp/DatabaseSchemaLoader.java -text
-src/main/java/edu/uiowa/webapp/Domain.java -text
-src/main/java/edu/uiowa/webapp/Entity.java -text
-src/main/java/edu/uiowa/webapp/Generator.java -text
-src/main/java/edu/uiowa/webapp/JDBCLoader.java -text
-src/main/java/edu/uiowa/webapp/JSPGenerator.java -text
-src/main/java/edu/uiowa/webapp/Relationship.java -text
-src/main/java/edu/uiowa/webapp/Schema.java -text
-src/main/java/edu/uiowa/webapp/TLDGenerator.java -text
-src/main/java/edu/uiowa/webapp/TagClassGenerator.java -text
+src/main/java/edu/uiowa/icts/protogen/webapp/DTDump.java -text
+src/main/java/edu/uiowa/icts/protogen/webapp/Generator.java -text
+src/main/java/edu/uiowa/icts/protogen/webapp/JSPGenerator.java -text
+src/main/java/edu/uiowa/icts/protogen/webapp/TLDGenerator.java -text
+src/main/java/edu/uiowa/icts/protogen/webapp/TagClassGenerator.java -text
 src/main/resources/velocity-templates/AbstractControllerMVCTests.java -text
 src/main/resources/velocity-templates/Controller.java -text svneol=unset#text/plain
 src/main/resources/velocity-templates/ControllerMvcTest.java -text

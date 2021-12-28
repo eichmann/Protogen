@@ -1,4 +1,4 @@
-package edu.uiowa.loaders;
+package edu.uiowa.icts.protogen.loaders;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

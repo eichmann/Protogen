@@ -1,4 +1,4 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.webapp;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -10,6 +10,10 @@ import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+
+import edu.uiowa.icts.protogen.loaders.Entity;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Relationship;
 
 import org.dom4j.Node;
 
@@ -45,6 +49,7 @@ public class DTDump {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static void print(Node node, String indent) {
 		logger.debug(indent + node.getName()
 				+ " : name=" + ((Element)node).attributeValue("name")
@@ -63,6 +68,7 @@ public class DTDump {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static void attributeWalk(Node node) {
 		logger.info("Scanning for free-standing attributes");
 		List nodes = node.selectNodes("*");
@@ -82,6 +88,7 @@ public class DTDump {
 		}		
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static void entityWalk(Node node) {
 		logger.info("Scanning for entities");
 		List nodes = node.selectNodes("*");
@@ -106,6 +113,7 @@ public class DTDump {
 		}		
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static void relationWalk(Node node) {
 		logger.info("Scanning for relations");
 		List nodes = node.selectNodes("*");
@@ -136,6 +144,7 @@ public class DTDump {
 		}		
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static void attributeAssignment(Node root) {
 		logger.info("Assigning attributes to entities");
 		List nodes = root.selectNodes("*");
@@ -176,6 +185,7 @@ public class DTDump {
 		}
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static void walkSequence(Entity theEntity, Element node) {
 		List subNodes = node.selectNodes("*");
 		Iterator subNodeIterator = subNodes.iterator();

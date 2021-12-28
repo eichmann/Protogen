@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.webapp;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,6 +17,10 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import edu.uiowa.icts.protogen.loaders.Entity;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Database;
 
 public class TLDGenerator {
 

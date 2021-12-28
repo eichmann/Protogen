@@ -1,4 +1,4 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.loaders;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -12,10 +12,12 @@ import java.util.Vector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.loaders.DBConnect;
-import edu.uiowa.loaders.PropertyLoader;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Database;
+import edu.uiowa.icts.protogen.model.Relationship;
+import edu.uiowa.icts.protogen.model.Schema;
 
-public class JDBCLoader implements DatabaseSchemaLoader {
+public class JDBCLoader implements DatabaseModelLoader {
 
 	private Database database = null;
 	private Connection conn = null;

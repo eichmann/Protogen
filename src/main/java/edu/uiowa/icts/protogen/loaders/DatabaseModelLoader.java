@@ -1,8 +1,10 @@
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.loaders;
 
 import java.util.Properties;
 
-public abstract interface DatabaseSchemaLoader {
+import edu.uiowa.icts.protogen.model.Database;
+
+public abstract interface DatabaseModelLoader {
     
     public abstract void run(String descriptor) throws Exception;
     

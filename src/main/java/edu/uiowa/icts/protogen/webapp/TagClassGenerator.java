@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package edu.uiowa.webapp;
+package edu.uiowa.icts.protogen.webapp;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +16,13 @@ import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import edu.uiowa.icts.protogen.loaders.Entity;
+import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Database;
+import edu.uiowa.icts.protogen.model.Domain;
+import edu.uiowa.icts.protogen.model.Relationship;
+import edu.uiowa.icts.protogen.model.Schema;
 
 public class TagClassGenerator {
 	static Logger log = LogManager.getLogger(TagClassGenerator.class);
@@ -878,7 +885,6 @@ public class TagClassGenerator {
             return;
 
         Vector<Attribute> primaryKeys = theEntity.getPrimaryKeyAttributes();
-        Vector<Attribute> parentKeys = theEntity.getParentKeyAttributes();
         Vector<Attribute> subKeys = theEntity.getSubKeyAttributes();
         Attribute keyAttribute = (subKeys.size() == 0 ? theEntity.getPrimaryKeyAttributes().firstElement() : subKeys.firstElement());
         File baseClassFile = new File(tagDirectory, "/" + theEntity.getUnqualifiedLabel() + "Iterator.java");
@@ -1197,7 +1203,6 @@ public class TagClassGenerator {
         }
         out.write(" from \" + generateFromClause() + \" where 1=1\"\n");
         out.write("                                                        + generateJoinCriteria()\n");
-        StringBuffer paramBuffer = new StringBuffer();
         queryBuffer = new StringBuffer();
         
         for (int i = 0; i < theEntity.getParents().size(); i++) {
@@ -1487,9 +1492,6 @@ public class TagClassGenerator {
             return;
 
         Vector<Attribute> primaryKeys = theEntity.getPrimaryKeyAttributes();
-        Vector<Attribute> parentKeys = theEntity.getParentKeyAttributes();
-        Vector<Attribute> subKeys = theEntity.getSubKeyAttributes();
-        Attribute keyAttribute = (subKeys.size() == 0 ? theEntity.getPrimaryKeyAttributes().firstElement() : subKeys.firstElement());
         File baseClassFile = new File(tagDirectory, "/" + theEntity.getUnqualifiedLabel() + "Deleter.java");
         FileWriter fstream = new FileWriter(baseClassFile);
         BufferedWriter out = new BufferedWriter(fstream);
@@ -1746,9 +1748,6 @@ public class TagClassGenerator {
 
     private void generateEntityShifterClass(Entity theEntity) throws IOException {
         Vector<Attribute> primaryKeys = theEntity.getPrimaryKeyAttributes();
-        Vector<Attribute> parentKeys = theEntity.getParentKeyAttributes();
-        Vector<Attribute> subKeys = theEntity.getSubKeyAttributes();
-        Attribute keyAttribute = (subKeys.size() == 0 ? theEntity.getPrimaryKeyAttributes().firstElement() : subKeys.firstElement());
         File baseClassFile = new File(tagDirectory, "/" + theEntity.getUnqualifiedLabel() + "Shifter.java");
         FileWriter fstream = new FileWriter(baseClassFile);
         BufferedWriter out = new BufferedWriter(fstream);
@@ -2379,8 +2378,6 @@ public class TagClassGenerator {
     private void generateEntityUploadClass(Entity theEntity) throws IOException {
         if ((theEntity.getPrimaryKeyAttributes() == null || theEntity.getPrimaryKeyAttributes().size() == 0) && (theEntity.getSubKeyAttributes() == null || theEntity.getSubKeyAttributes().size() == 0))
             return;
-        Attribute keyAttribute = (theEntity.getSubKeyAttributes().size() == 0 ? theEntity.getPrimaryKeyAttributes().firstElement() : theEntity.getSubKeyAttributes().firstElement());
-
 
         File baseClassFile = new File(tagDirectory, "/" + theEntity.getUnqualifiedLabel() + "Upload.java");
         FileWriter fstream = new FileWriter(baseClassFile);
