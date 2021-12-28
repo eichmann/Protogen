@@ -12,9 +12,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
+import edu.uiowa.icts.protogen.model.Attribute;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
-import edu.uiowa.webapp.Attribute;
 
 /**
  * Generate spring controllers using velocity templates.
