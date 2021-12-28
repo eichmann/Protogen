@@ -3,8 +3,8 @@ package edu.uiowa.webapp;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Schema extends ClayElement {
 
@@ -12,7 +12,7 @@ public class Schema extends ClayElement {
     Vector<Entity> entities = new Vector<Entity>();
     Vector<Relationship> relationships = new Vector<Relationship>();
     
-	private static final Log log = LogFactory.getLog(Schema.class);
+	static Logger log = LogManager.getLogger(Schema.class);
 
 	public boolean containsRelationship( Relationship relationship ){
 		boolean contains = false;

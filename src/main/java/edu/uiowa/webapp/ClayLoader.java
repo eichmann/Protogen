@@ -2,8 +2,8 @@ package edu.uiowa.webapp;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 
 import edu.uiowa.loaders.generic;
@@ -18,7 +18,7 @@ public class ClayLoader extends generic implements DatabaseSchemaLoader {
 	Attribute currentAttribute = null;
 	Relationship currentRelationship = null;
 	
-	private static final Log log = LogFactory.getLog(ClayLoader.class);
+	static Logger log = LogManager.getLogger(ClayLoader.class);
 
 	mode currentMode = mode.DOMAIN;
 	private String referencedEntityName;

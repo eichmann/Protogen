@@ -12,16 +12,15 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Generates DAO test classes
  * @author bkusenda
  */
 public class BaseTestCodeGenerator extends AbstractSpringHibernateCodeGenerator {
-
-	protected static final Log log = LogFactory.getLog( BaseTestCodeGenerator.class );
+	static Logger log = LogManager.getLogger(BaseTestCodeGenerator.class);
 
 	private Properties properties;
 

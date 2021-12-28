@@ -9,15 +9,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.icts.util.IctsStringUtils;
 import edu.uiowa.webapp.Schema;
 
 public class ColumnDeobfuscationCodeGenerator extends AbstractSpringHibernateCodeGenerator {
-
-	protected static final Log log = LogFactory.getLog( ColumnDeobfuscationCodeGenerator.class );
+	static Logger log = LogManager.getLogger(ColumnDeobfuscationCodeGenerator.class);
 	private Properties properties;
 
 	public ColumnDeobfuscationCodeGenerator( SpringHibernateModel model, String pathBase, String packageRoot, Properties properties ) {

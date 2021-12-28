@@ -17,15 +17,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Entity;
 
 public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
-
-	protected static final Log log = LogFactory.getLog( DomainCodeGenerator.class );
+	static Logger log = LogManager.getLogger(DomainCodeGenerator.class);
 
 	/**
 	 * @param model

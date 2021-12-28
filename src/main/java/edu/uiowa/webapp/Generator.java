@@ -3,8 +3,8 @@ package edu.uiowa.webapp;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.icts.protogen.springhibernate.BaseTestCodeGenerator;
 import edu.uiowa.icts.protogen.springhibernate.ColumnDeobfuscationCodeGenerator;
@@ -25,7 +25,7 @@ public class Generator {
 	//static String dbschema = "";
 	//static boolean dbssl = true;
 
-	private static final Log log = LogFactory.getLog(Generator.class);
+	static Logger log = LogManager.getLogger(Generator.class);
 	/**
 	 * @param args
 	 * arg 0 = qualified package name (required)

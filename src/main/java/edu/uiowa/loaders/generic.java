@@ -1,7 +1,7 @@
 package edu.uiowa.loaders;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
@@ -28,7 +28,7 @@ public class generic extends DefaultHandler {
 		handler.run(args);
 	}
 	
-	private static final Log log = LogFactory.getLog(generic.class);
+	static Logger log = LogManager.getLogger(generic.class);
 
 	public void run(String args[]) throws Exception {
 		xr = XMLReaderFactory.createXMLReader();

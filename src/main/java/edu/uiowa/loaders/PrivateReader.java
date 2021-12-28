@@ -6,8 +6,8 @@ import java.net.*;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PrivateReader extends Reader {
 	protected static boolean debug = false;
@@ -17,8 +17,7 @@ public class PrivateReader extends Reader {
 	String header = null;
 	String footer = null;
 	
-	
-	private static final Log log = LogFactory.getLog(PrivateReader.class);
+	static Logger log = LogManager.getLogger(PrivateReader.class);
 
 	public PrivateReader(String file, String head, String foot) throws MalformedURLException, IOException {
 		header = head;

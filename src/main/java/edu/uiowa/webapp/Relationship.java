@@ -2,8 +2,8 @@ package edu.uiowa.webapp;
 
 import java.util.Hashtable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Relationship extends ClayElement {
 
@@ -16,7 +16,7 @@ public class Relationship extends ClayElement {
 		ONE_TO_ONE, ONE_TO_MANY, ONE, MANY
 	};
 
-	private static final Log log = LogFactory.getLog(Relationship.class);
+	static Logger log = LogManager.getLogger(Relationship.class);
 
 	CardinalityEnum relationshipCardinality = CardinalityEnum.ONE_TO_MANY;
 	CardinalityEnum sourceEntityCardinality = CardinalityEnum.ONE;

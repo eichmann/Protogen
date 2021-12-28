@@ -15,8 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.plexus.util.StringUtils;
 
 import edu.uiowa.icts.protogen.springhibernate.velocity.AbstractControllerMVCTestsGenerator;
@@ -26,8 +26,7 @@ import edu.uiowa.webapp.Attribute;
 import edu.uiowa.webapp.Schema;
 
 public class ControllerCodeGenerator extends AbstractSpringHibernateCodeGenerator {
-
-	protected static final Log log = LogFactory.getLog( ControllerCodeGenerator.class );
+	static Logger log = LogManager.getLogger(ControllerCodeGenerator.class);
 
 	private String interfaceSuffix = "Service";
 	private Properties properties;

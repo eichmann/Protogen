@@ -11,18 +11,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractSpringHibernateCodeGenerator {
+	static Logger log = LogManager.getLogger(AbstractSpringHibernateCodeGenerator.class);
 
 	protected String pathBase = null; 
 	protected String packageRoot = null; 
 	protected String packageRootPath = null; 
 	protected SpringHibernateModel model=null;
-
-	protected static final Log log = LogFactory.getLog(AbstractSpringHibernateCodeGenerator.class);
-
 
 	public AbstractSpringHibernateCodeGenerator(SpringHibernateModel model, String pathBase,String packageRoot) {
 		this.model = model;

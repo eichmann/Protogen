@@ -12,9 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
-import ${domainPackageName}.*;
+import $
 import edu.uiowa.icts.spring.GenericDaoListOptions;
 import edu.uiowa.icts.util.SortColumn;
 import edu.uiowa.icts.util.DataTableHeader;
@@ -43,7 +42,7 @@ import edu.uiowa.icts.util.DataTableHeader;
 @RequestMapping( "${pathPrefix}/*" )
 public class ${className} extends ${abstractControllerClassName} {
 
-    private static final Log log = LogFactory.getLog( ${className}.class );
+	static Logger log = LogManager.getLogger(${className}.class);
 
     @RequestMapping( value = "list_alt${pathExtension}", method = RequestMethod.GET )
     public String listNoScript(Model model) {

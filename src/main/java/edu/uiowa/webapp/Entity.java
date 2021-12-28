@@ -2,8 +2,8 @@ package edu.uiowa.webapp;
 
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
 
@@ -20,8 +20,7 @@ public class Entity extends ClayElement {
 	
 	private DomainClass domainClass;
 
-	private static final Log log = LogFactory.getLog(Entity.class);
-
+	static Logger log = LogManager.getLogger(Entity.class);
 	
 	public Schema getSchema() {
         return schema;

@@ -2,24 +2,34 @@ package edu.uiowa.webapp;
 
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Attribute extends ClayElement {
 
     @Override
 	public String toString() {
-		return "Attribute [domain=" + domain + ", sqlType=" + sqlType
-				+ ", type=" + type + ", remarks=" + remarks + ", origLabel="
-				+ origLabel + ", mandatory=" + mandatory + ", primary="
-				+ primary + ", autoIncrement=" + autoIncrement + ", foreign="
-				+ foreign + ", sequence=" + sequence + ", counter=" + counter
-				+ ", sequenceName=" + sequenceName + ", dominantEntity="
-				+ dominantEntity + ", referencedEntityName="
-				+ referencedEntityName + ", referencedEntity="
-				+ referencedEntity + ", entity=" + entity
-				// + ", foreignAttribute=" + foreignAttribute
-				+ ", childAttributes=" + childAttributes + "]";
+		return "Attribute ["
+				+ "sqlLabel=" + sqlLabel
+				+ ", domain=" + domain
+				+ ", sqlType=" + sqlType
+				+ ", type=" + type
+				+ ", remarks=" + remarks
+				+ ", origLabel=" + origLabel
+				+ ", mandatory=" + mandatory
+				+ ", primary=" + primary
+				+ ", autoIncrement=" + autoIncrement
+				+ ", foreign=" + foreign
+				+ ", sequence=" + sequence
+				+ ", counter=" + counter
+				+ ", sequenceName=" + sequenceName
+				+ ", dominantEntity=" + dominantEntity
+				+ ", referencedEntityName="	+ referencedEntityName
+				+ ", referencedEntity="	+ referencedEntity
+				+ ", entity=" + entity
+				+ ", foreignAttribute=" + foreignAttribute
+				+ ", childAttributes=" + childAttributes
+				+ "]";
 	}
 
 	private Domain domain = null;
@@ -41,9 +51,7 @@ public class Attribute extends ClayElement {
 	private Attribute foreignAttribute = null;
 	private Vector<Attribute> childAttributes = new Vector<Attribute>();
 	
-	private static final Log log = LogFactory.getLog(Attribute.class);
-
-	
+	static Logger log = LogManager.getLogger(Attribute.class);
 
 	public Vector<Attribute> getChildAttributes() {
 		return childAttributes;
@@ -147,7 +155,7 @@ public class Attribute extends ClayElement {
     }
 
     public String getDefaultValue() {
-        if (isInt())
+        if (isInt() && !isForeign())
             return "Sequence.generateID()";
         else if (isLong())
             return "0";

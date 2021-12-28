@@ -6,12 +6,11 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class PropertyLoader {
-	
-	private static final Log log = LogFactory.getLog(PropertyLoader.class);
+	static Logger log = LogManager.getLogger(PropertyLoader.class);
 	
     /**
      * Looks up a resource named 'name' in the classpath. The resource must map

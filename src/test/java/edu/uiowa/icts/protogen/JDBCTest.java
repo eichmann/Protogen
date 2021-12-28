@@ -2,8 +2,8 @@ package edu.uiowa.icts.protogen;
 
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.webapp.Generator;
 import junit.framework.Test;
@@ -15,8 +15,7 @@ import junit.framework.TestSuite;
  * Unit test for simple App.
  */
 public class JDBCTest extends TestCase {
-
-	private static final Log log = LogFactory.getLog( JDBCTest.class );
+	static Logger log = LogManager.getLogger(JDBCTest.class);
 
 	/**
 	 * Create the test case
@@ -57,9 +56,9 @@ public class JDBCTest extends TestCase {
 
 		props.setProperty( "model.source", "jdbc" );
 		props.setProperty( "db.schema", "hero" );
-		props.setProperty( "db.url", "jdbc:postgresql://localhost/test" );
-		props.setProperty( "db.username", "test" );
-		props.setProperty( "db.password", "test" );
+		props.setProperty( "db.url", "jdbc:postgresql://localhost/cd2h" );
+		props.setProperty( "db.username", "eichmann" );
+		props.setProperty( "db.password", "translational" );
 		props.setProperty( "db.ssl", "false" );
 		props.setProperty( "db.driver", "org.postgresql.Driver" );
 

@@ -7,8 +7,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class JDBCReader extends Reader {
 	static boolean debug = true;
@@ -19,8 +19,7 @@ public abstract class JDBCReader extends Reader {
 	String header = null;
 	String footer = null;
 
-	private static final Log log = LogFactory.getLog(JDBCReader.class);
-
+	static Logger log = LogManager.getLogger(JDBCReader.class);
 	
 	public JDBCReader(String className, String jdbcURL, String userID, String password) throws IOException, ClassNotFoundException, SQLException {
 		Class.forName(className); 

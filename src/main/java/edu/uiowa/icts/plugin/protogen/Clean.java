@@ -1,7 +1,7 @@
 package edu.uiowa.icts.plugin.protogen;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -13,8 +13,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @requiresDependencyResolution test
  */
 public class Clean extends AbstractMojo {
-	
-	private static final Log log = LogFactory.getLog( Clean.class );
+	static Logger log = LogManager.getLogger(Clean.class);
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {

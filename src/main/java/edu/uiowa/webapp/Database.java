@@ -2,14 +2,11 @@ package edu.uiowa.webapp;
 
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Database extends ClayElement {
-
-	private static final Log log = LogFactory.getLog(Database.class);
+	static Logger log = LogManager.getLogger(Database.class);
 
     Vector<Schema> schemas = new Vector<Schema>();
 
@@ -22,8 +19,6 @@ public class Database extends ClayElement {
     }
 
     public Schema getSchemaByName(String label) {
-        Entity target = null;
-
         for (int i = 0; i < schemas.size(); i++)
             if (schemas.elementAt(i).getLabel().equals(label))
                 return schemas.elementAt(i);

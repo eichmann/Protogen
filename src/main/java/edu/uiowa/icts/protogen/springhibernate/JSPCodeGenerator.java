@@ -14,8 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.plexus.util.StringUtils;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
@@ -35,7 +35,7 @@ public class JSPCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 		jspRoot = pathBase;
 	}
 
-	private static final Log log = LogFactory.getLog( JSPCodeGenerator.class );
+	static Logger log = LogManager.getLogger(JSPCodeGenerator.class);
 	public String jspRoot;
 	private Properties properties;
 

@@ -166,7 +166,7 @@ public class VelocityControllerGeneratorTest {
 		assertThat(sourceCode, containsString(ft.format(new Date())));
 		assertThat(sourceCode, containsString("@RequestMapping( \"/ictssysadmin/clinicaldocument/*\" )"));
 		assertThat(sourceCode, containsString("ClinicalDocumentController extends AbstractIctssysadminController"));
-		assertThat(sourceCode, containsString("private static final Log log = LogFactory.getLog( ClinicalDocumentController.class );"));
+//		assertThat(sourceCode, containsString("private static final Log log = LogFactory.getLog( ClinicalDocumentController.class );"));
 		
 		// test list_alt
 		assertThat(sourceCode, containsString("public String listNoScript(Model model) {"));
@@ -205,7 +205,7 @@ public class VelocityControllerGeneratorTest {
 		assertThat(sourceCode, containsString(ft.format(new Date())));
 		assertThat(sourceCode, containsString("@RequestMapping( \"/clinicaldocument/*\" )"));
 		assertThat(sourceCode, containsString("ClinicalDocumentController extends AbstractIctssysadminController"));
-		assertThat(sourceCode, containsString("private static final Log log = LogFactory.getLog( ClinicalDocumentController.class );"));
+//		assertThat(sourceCode, containsString("private static final Log log = LogFactory.getLog( ClinicalDocumentController.class );"));
 		
 		// test list_alt
 		assertThat(sourceCode, containsString("public String listNoScript(Model model) {"));

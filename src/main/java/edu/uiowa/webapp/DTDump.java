@@ -5,16 +5,16 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+
 import org.dom4j.Node;
 
 public class DTDump {
-	private static final Log logger = LogFactory.getLog(Generator.class);
+	static Logger logger = LogManager.getLogger(DTDump.class);
 	static Hashtable<String,Attribute> attributeHash = new Hashtable<String,Attribute>();
 	static Hashtable<String,Entity> entityHash = new Hashtable<String,Entity>();
 	static Hashtable<String,Relationship> relationHash = new Hashtable<String,Relationship>();

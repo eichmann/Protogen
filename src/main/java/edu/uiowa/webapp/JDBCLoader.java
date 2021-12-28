@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.loaders.DBConnect;
 import edu.uiowa.loaders.PropertyLoader;
@@ -25,9 +25,7 @@ public class JDBCLoader implements DatabaseSchemaLoader {
 
 	}
 
-	private static final Log log = LogFactory.getLog(JDBCLoader.class);
-
-
+	static Logger log = LogManager.getLogger(JDBCLoader.class);
 
 	public Database getDatabase() {
 		return database;

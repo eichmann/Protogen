@@ -7,11 +7,12 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 import edu.uiowa.webapp.Database;
@@ -24,9 +25,9 @@ import edu.uiowa.webapp.Generator;
  * @requiresDependencyResolution test
  */
 public class WebApp  extends AbstractMojo {
+	static Logger log = LogManager.getLogger(WebApp.class);
 
 	private static final String PROPS_FILE="protogen.properties";
-	private Log log = getLog();
 	
 	
     /**

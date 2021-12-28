@@ -17,15 +17,14 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.icts.util.IctsStringUtils;
 import edu.uiowa.webapp.Schema;
 
 public class DAOCodeGenerator extends AbstractSpringHibernateCodeGenerator {
-
-	protected static final Log log = LogFactory.getLog( DAOCodeGenerator.class );
+	static Logger log = LogManager.getLogger(DAOCodeGenerator.class);
 
 	private String interfaceSuffix = "Service";
 	private String impleSuffix = "Home";

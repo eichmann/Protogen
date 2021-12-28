@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TLDGenerator {
 
@@ -28,8 +28,7 @@ public class TLDGenerator {
     File theTLD = null;
     BufferedWriter out = null;
 
-	private static final Log log = LogFactory.getLog(TLDGenerator.class);
-
+	static Logger log = LogManager.getLogger(TLDGenerator.class);
 	
     File packagePrefixDirectory = null;
     File tagDirectory = null;

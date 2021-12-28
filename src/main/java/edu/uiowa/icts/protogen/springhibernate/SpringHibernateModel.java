@@ -13,8 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.RelationshipType;
@@ -37,7 +37,7 @@ public class SpringHibernateModel {
 	private List<DomainClass> domainClassList = new ArrayList<DomainClass>();
 	private HashMap<Schema, List<DomainClass>> schemaMap;
 	//private Schema currentSchema;
-	private static final Log log = LogFactory.getLog( SpringHibernateModel.class );
+	static Logger log = LogManager.getLogger(SpringHibernateModel.class);
 	
 	private Properties properties;
 

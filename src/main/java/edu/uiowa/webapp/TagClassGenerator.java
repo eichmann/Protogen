@@ -14,12 +14,11 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TagClassGenerator {
-	
-	private static final Log log = LogFactory.getLog(TagClassGenerator.class);
+	static Logger log = LogManager.getLogger(TagClassGenerator.class);
 
     String projectPath = null;
 

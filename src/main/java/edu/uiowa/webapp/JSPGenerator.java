@@ -13,12 +13,11 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class JSPGenerator {
-
-	private static final Log log = LogFactory.getLog(JSPGenerator.class);
+	static Logger log = LogManager.getLogger(JSPGenerator.class);
 
 	String tagLibrayPrefix = null;
     String webAppPath = null;
