@@ -9,8 +9,8 @@ import java.util.Properties;
 
 import org.junit.Test;
 
+import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
-import edu.uiowa.webapp.Schema;
 
 public class ControllerMvcTestGeneratorTest {
 	@Test

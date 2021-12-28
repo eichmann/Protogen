@@ -9,7 +9,7 @@ import junit.framework.TestSuite;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.webapp.Generator;
+import edu.uiowa.icts.protogen.webapp.Generator;
 
 /**
  * Unit test for simple web application.

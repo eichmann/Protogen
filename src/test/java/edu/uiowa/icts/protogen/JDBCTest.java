@@ -5,7 +5,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.webapp.Generator;
+import edu.uiowa.icts.protogen.webapp.Generator;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;

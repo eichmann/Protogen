@@ -9,11 +9,9 @@ import java.util.Date;
 import java.util.Properties;
 
 import org.junit.Test;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
+import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
-import edu.uiowa.webapp.Schema;
 
 public class VelocityControllerGeneratorTest {
 	
