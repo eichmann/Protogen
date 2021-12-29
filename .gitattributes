@@ -14,9 +14,9 @@ src/main/java/dispatcher-servlet.tmplt -text
 src/main/java/edu/uiowa/icts/plugin/protogen/Clean.java -text svneol=unset#text/plain
 src/main/java/edu/uiowa/icts/plugin/protogen/WebApp.java svneol=native#text/x-java-source
 src/main/java/edu/uiowa/icts/protogen/loaders/ClaySaxLoader.java -text
+src/main/java/edu/uiowa/icts/protogen/loaders/ClayXpathLoader.java -text
 src/main/java/edu/uiowa/icts/protogen/loaders/DBConnect.java -text
 src/main/java/edu/uiowa/icts/protogen/loaders/DatabaseModelLoader.java -text
-src/main/java/edu/uiowa/icts/protogen/loaders/Entity.java -text
 src/main/java/edu/uiowa/icts/protogen/loaders/GenericSaxLoader.java -text
 src/main/java/edu/uiowa/icts/protogen/loaders/JDBCLoader.java -text
 src/main/java/edu/uiowa/icts/protogen/loaders/JDBCReader.java -text
@@ -26,6 +26,7 @@ src/main/java/edu/uiowa/icts/protogen/model/Attribute.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Database.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Domain.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Element.java -text
+src/main/java/edu/uiowa/icts/protogen/model/Entity.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Relationship.java -text
 src/main/java/edu/uiowa/icts/protogen/model/Schema.java -text
 src/main/java/edu/uiowa/icts/protogen/springhibernate/AbstractSpringHibernateCodeGenerator.java svneol=native#text/x-java-source

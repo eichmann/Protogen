@@ -12,7 +12,17 @@ public class Domain extends Element {
     String type = null;
     boolean mandatory = false;
 
-    public String getSqlType() {
+	public Domain() {
+		
+	}
+	
+	public Domain(String sqlLabel, String remarks) {
+		this.sqlLabel = sqlLabel;
+		this.label = sqlLabel;
+		this.remarks = remarks;
+	}
+	
+   public String getSqlType() {
         return sqlType;
     }
 

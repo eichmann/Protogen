@@ -20,8 +20,8 @@ import java.util.TimeZone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
 import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Entity;
 
 public class DomainCodeGenerator extends AbstractSpringHibernateCodeGenerator {
 	static Logger log = LogManager.getLogger(DomainCodeGenerator.class);

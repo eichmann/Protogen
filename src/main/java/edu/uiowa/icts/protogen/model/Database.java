@@ -9,7 +9,21 @@ public class Database extends Element {
 	static Logger log = LogManager.getLogger(Database.class);
 
     Vector<Schema> schemas = new Vector<Schema>();
+    
+    public Database() {
+    	
+    }
+    
+    public Database(String sqlLabel, String remarks) {
+    	this.sqlLabel = sqlLabel;
+    	this.label = sqlLabel;
+    	this.remarks = remarks;
+    }
 
+    public void addSchema(Schema schema) {
+    	schemas.add(schema);
+    }
+    
     public Vector<Schema> getSchemas() {
         return schemas;
     }

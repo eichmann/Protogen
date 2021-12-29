@@ -12,6 +12,8 @@ public class Element {
 
     public String sqlLabel = null;
     public String label = null;
+    String remarks = null;
+    String description = null;
     protected String uid = null;
     protected String lowerLabel = null;
     protected String upperLabel = null;
@@ -102,5 +104,21 @@ public class Element {
     public String toString() {
         return getLabel();
     }
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 }

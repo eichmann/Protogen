@@ -6,16 +6,23 @@ import java.util.Vector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
-
 public class Schema extends Element {
+	static Logger log = LogManager.getLogger(Schema.class);
 
     Vector<Domain> domains = new Vector<Domain>();
     Vector<Entity> entities = new Vector<Entity>();
     Vector<Relationship> relationships = new Vector<Relationship>();
     
-	static Logger log = LogManager.getLogger(Schema.class);
-
+    public Schema() {
+    	
+    }
+    
+    public Schema(String sqlLabel, String remarks) {
+    	this.sqlLabel = sqlLabel;
+    	this.label = sqlLabel;
+    	this.remarks = remarks;
+    }
+    
 	public boolean containsRelationship( Relationship relationship ){
 		boolean contains = false;
 		for(Relationship r : this.getRelationships()){
@@ -45,6 +52,18 @@ public class Schema extends Element {
                 return domains.elementAt(i);
 
         return null;
+    }
+    
+    public void addEntity(Entity entity) {
+    	entities.add(entity);
+    }
+    
+    public void addRelationship(Relationship relationship) {
+    	relationships.add(relationship);
+    }
+
+    public void addDomain(Domain domain) {
+    	domains.add(domain);
     }
 
     public Vector<Entity> getEntities() {
@@ -122,4 +141,5 @@ public class Schema extends Element {
         for (int i = 0; i < relationships.size(); i++)
             relationships.elementAt(i).dump();
     }
+
 }

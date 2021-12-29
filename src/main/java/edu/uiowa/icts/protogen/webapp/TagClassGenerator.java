@@ -17,10 +17,10 @@ import java.util.Vector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
 import edu.uiowa.icts.protogen.model.Attribute;
 import edu.uiowa.icts.protogen.model.Database;
 import edu.uiowa.icts.protogen.model.Domain;
+import edu.uiowa.icts.protogen.model.Entity;
 import edu.uiowa.icts.protogen.model.Relationship;
 import edu.uiowa.icts.protogen.model.Schema;
 

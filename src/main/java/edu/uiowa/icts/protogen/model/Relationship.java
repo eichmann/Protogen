@@ -5,8 +5,6 @@ import java.util.Hashtable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
-
 public class Relationship extends Element {
 
 	public Entity sourceEntity = null;

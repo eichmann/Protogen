@@ -9,6 +9,7 @@ import org.xml.sax.Attributes;
 import edu.uiowa.icts.protogen.model.Attribute;
 import edu.uiowa.icts.protogen.model.Database;
 import edu.uiowa.icts.protogen.model.Domain;
+import edu.uiowa.icts.protogen.model.Entity;
 import edu.uiowa.icts.protogen.model.Relationship;
 import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.webapp.Generator;

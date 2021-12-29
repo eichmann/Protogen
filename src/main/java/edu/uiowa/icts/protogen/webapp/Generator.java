@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import edu.uiowa.icts.protogen.loaders.ClaySaxLoader;
+import edu.uiowa.icts.protogen.loaders.ClayXpathLoader;
 import edu.uiowa.icts.protogen.loaders.DatabaseModelLoader;
 import edu.uiowa.icts.protogen.loaders.JDBCLoader;
 import edu.uiowa.icts.protogen.model.Database;
@@ -64,7 +65,7 @@ public class Generator {
 
 		DatabaseModelLoader theLoader = null;
 		if(modelSource.equalsIgnoreCase("clay")) {
-			theLoader = new ClaySaxLoader();
+			theLoader = new ClayXpathLoader();
 			String clayFile = "";
 			try {
 				clayFile = props.getProperty("clay.file", pathPrefix + projectName + "/WebContent/resources/" + projectName + ".clay");

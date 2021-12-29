@@ -5,7 +5,6 @@ import java.util.Vector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
 import edu.uiowa.icts.protogen.webapp.Generator;
 
 public class Attribute extends Element {
@@ -55,6 +54,15 @@ public class Attribute extends Element {
 	private Vector<Attribute> childAttributes = new Vector<Attribute>();
 	
 	static Logger log = LogManager.getLogger(Attribute.class);
+	
+	public Attribute() {
+		
+	}
+	
+	public Attribute(String label, String remarks) {
+		this.label = label;
+		this.remarks = remarks;
+	}
 
 	public Vector<Attribute> getChildAttributes() {
 		return childAttributes;
@@ -234,7 +242,7 @@ public class Attribute extends Element {
     }
 
     public void setForeignAttribute(Attribute foreignAttribute) {
-        setForeign(true);
+//        setForeign(true);
         this.foreignAttribute = foreignAttribute;
     }
 

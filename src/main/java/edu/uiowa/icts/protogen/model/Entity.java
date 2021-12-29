@@ -1,14 +1,10 @@
-package edu.uiowa.icts.protogen.loaders;
+package edu.uiowa.icts.protogen.model;
 
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.model.Attribute;
-import edu.uiowa.icts.protogen.model.Element;
-import edu.uiowa.icts.protogen.model.Relationship;
-import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.DomainClass;
 
 public class Entity extends Element {
@@ -26,12 +22,30 @@ public class Entity extends Element {
 
 	static Logger log = LogManager.getLogger(Entity.class);
 	
+	public Entity() {
+		
+	}
+	
+	public Entity(String sqlLabel, String remarks) {
+		this.sqlLabel = sqlLabel;
+		this.label = sqlLabel;
+		this.remarks = remarks;
+	}
+	
 	public Schema getSchema() {
         return schema;
     }
 
     public void setSchema(Schema schema) {
         this.schema = schema;
+    }
+    
+    public void addAttribute(Attribute attribute) {
+    	attributes.add(attribute);
+    }
+
+    public void addPrimaryKey(Attribute attribute) {
+    	primaryKeyAttributes.add(attribute);
     }
 
     public Vector<Attribute> getAttributes() {
@@ -182,7 +196,7 @@ public class Entity extends Element {
         return false;
     }
 
-    protected void generateParentKeys() {
+    public void generateParentKeys() {
         log.debug("\n" + this + " primary keys: " + getPrimaryKeyAttributes());
         for (int i = 0; i < getParents().size(); i++) {
             Entity theSourceEntity = getParents().elementAt(i).getSourceEntity();
@@ -204,7 +218,7 @@ public class Entity extends Element {
         log.debug(this + " parent keys: " + parentKeyAttributes);
     }
 
-    protected void generateSubKeys() {
+    public void generateSubKeys() {
         parentLoop: for (int j = 0; j < getPrimaryKeyAttributes().size(); j++) {
             Attribute primaryKey = getPrimaryKeyAttributes().elementAt(j);
             for (int k = 0; k < parentKeyAttributes.size(); k++) {

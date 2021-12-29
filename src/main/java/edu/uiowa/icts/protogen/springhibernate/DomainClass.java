@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
+import edu.uiowa.icts.protogen.model.Entity;
 import edu.uiowa.icts.protogen.model.Schema;
 import edu.uiowa.icts.protogen.springhibernate.ClassVariable.AttributeType;
 

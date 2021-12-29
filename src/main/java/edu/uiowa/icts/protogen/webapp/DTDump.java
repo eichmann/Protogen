@@ -11,8 +11,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import edu.uiowa.icts.protogen.loaders.Entity;
 import edu.uiowa.icts.protogen.model.Attribute;
+import edu.uiowa.icts.protogen.model.Entity;
 import edu.uiowa.icts.protogen.model.Relationship;
 
 import org.dom4j.Node;
