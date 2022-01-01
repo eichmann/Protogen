@@ -1,6 +1,7 @@
 package edu.uiowa.icts.protogen.model;
 
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,6 +47,14 @@ public class Relationship extends Element {
 	public void setTargetEntity(Entity targetEntity) {
 		this.targetEntity = targetEntity;
 	}
+	
+	public Set<String> getSourceAttributes() {
+		return attributeMap.keySet();
+	}
+	
+	public String getTargetAttribute(String source) {
+		return attributeMap.get(source);
+	}
 
 	public CardinalityEnum getRelationshipCardinality() {
 		return relationshipCardinality;
@@ -89,9 +98,12 @@ public class Relationship extends Element {
 
 	@Override
 	public String toString() {
-		return "Relationship [sourceEntity=" + sourceEntity
-				+ ", sourceEntityName=" + sourceEntityName + ", targetEntity="
-				+ targetEntity + "]";
+		return "Relationship ["
+				+ "sourceEntity=" + sourceEntity
+				+ ", sourceEntityName=" + sourceEntityName
+				+ ", targetEntity="	+ targetEntity
+				+ ", attributeMap="	+ attributeMap
+				+ "]";
 	}
     
 }

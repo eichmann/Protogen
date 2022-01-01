@@ -149,10 +149,30 @@ public class Entity extends Element {
     }
     
     public boolean hasDateTime() {
-        for (int i = 0; i < attributes.size(); i++)
-            if (attributes.elementAt(i).isDateTime())
-                return true;
-        
+    	for (Attribute attribute : attributes)
+    		if (attribute.isDateTime())
+                 return true;       
+        return false;
+    }
+
+    public boolean hasPrimaryDateTime() {
+    	for (Attribute attribute : attributes)
+    		if (attribute.isDateTime() && attribute.isPrimary())
+                 return true;       
+        return false;
+    }
+
+    public boolean hasTimestamp() {
+    	for (Attribute attribute : attributes)
+    		if (attribute.isTimestamp())
+                 return true;       
+        return false;
+    }
+
+    public boolean hasPrimaryTimestamp() {
+    	for (Attribute attribute : attributes)
+    		if (attribute.isTimestamp() && attribute.isPrimary())
+                 return true;       
         return false;
     }
 

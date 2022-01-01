@@ -166,7 +166,7 @@ public class Attribute extends Element {
     }
 
     public String getDefaultValue() {
-        if (isInt() && !isForeign())
+        if (isInt())
             return "Sequence.generateID()";
         else if (isLong())
             return "0";
@@ -298,9 +298,9 @@ public class Attribute extends Element {
         else if (type.toLowerCase().equals("timetz"))
             type = "Date";
         else if (type.toLowerCase().equals("timestamp"))
-            type = "Date";
+            type = "Timestamp";
         else if (type.toLowerCase().equals("timestamptz"))
-            type = "Date";
+            type = "Timestamp";
         else if (type.toLowerCase().equals("double"))
             type = "double";
         else if (type.toLowerCase().equals("double precision"))
@@ -349,7 +349,7 @@ public class Attribute extends Element {
         return type.equals("Date");
     }
     
-    public boolean isTime() {
+    public boolean isTimestamp() {
         return sqlType.equals("Timestamp");
     }
     
@@ -434,7 +434,7 @@ public class Attribute extends Element {
         else if (sqlType.toLowerCase().equals("boolean"))        	
             return "Boolean.parseBoolean(" + label + ")";
         else if (sqlType.toLowerCase().equals("timestamp"))
-            return "new java.util.Date(Integer.parseInt(" + label + "))";
+            return "new java.sql.Timestamp(Integer.parseInt(" + label + "))";
         else if (sqlType.toLowerCase().equals("bytea"))
             return label;
         else

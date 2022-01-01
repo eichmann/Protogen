@@ -161,7 +161,7 @@ public class TagClassGenerator {
             generateEntityHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
             if (theEntity.hasImage() || theEntity.hasBinaryDomainAttribute())
                 generateEntityUploadHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
-            if (theEntity.getAttributes().elementAt(i).isDateTime())
+            if (theEntity.getAttributes().elementAt(i).isDateTime() || theEntity.getAttributes().elementAt(i).isTimestamp())
                 generateEntityToNowHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
         }
     }
@@ -219,11 +219,13 @@ public class TagClassGenerator {
         // out.write("import org.json.JSONObject;\n");
         // out.write("import org.json.JSONException;\n\n");
         
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
         
         if (theEntity.hasDateTime())
             out.write("import java.util.Date;\n");
+          if (theEntity.hasTimestamp())
+            out.write("import java.sql.Timestamp;\n");
 //        if (theEntity.hasImage())
 //            out.write("import java.awt.Image;\n");
         out.write("\n");
@@ -245,7 +247,7 @@ public class TagClassGenerator {
         out.write("\tstatic " + theEntity.getUnqualifiedLabel() + " currentInstance = null;\n");
         out.write("\tboolean commitNeeded = false;\n");
         out.write("\tboolean newRecord = false;\n\n");
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +".class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel() +".class);\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
 
         // declare attributes
@@ -372,7 +374,7 @@ public class TagClassGenerator {
 	                            + ","
 	                            + theAttribute.getLabel()
 	                            + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-	                                    + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+	                                    + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
 	                                    : "") + ");\n");
 	                    keySeq++;
 	                    firstParam = false;
@@ -384,7 +386,7 @@ public class TagClassGenerator {
 	                			+ "(" + (keySeq + 1) + ","
 	                			+ theAttribute.getLabel()
 	                			+ (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-	                			+ (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "") + ");\n");
+	                			+ (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "") + ");\n");
 	                	keySeq++;
 	                	firstParam = false;
 	                } else {
@@ -437,7 +439,7 @@ public class TagClassGenerator {
                         + ","
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : "") + ");\n");
                 keySeq++;
             } else {
@@ -589,7 +591,7 @@ public class TagClassGenerator {
 				queryBuffer.append( "\t\t\t\t} else {\n" );
 				queryBuffer.append( "\t\t\t\t\t" + "stmt." + theAttribute.getSQLMethod( false ) + "( " + ( attrSeq + 1 ) + ", " + theAttribute.getLabel() );
 				if ( theAttribute.isDateTime() ) {
-					queryBuffer.append( " == null ? null : new java.sql." + ( theAttribute.isTime() ? "Timestamp" : "Date" ) + "( " + theAttribute.getLabel() + ".getTime() )" );
+					queryBuffer.append( " == null ? null : new java.sql." + ( theAttribute.isTimestamp() ? "Timestamp" : "Date" ) + "( " + theAttribute.getLabel() + ".getTime() )" );
 				}
 				queryBuffer.append( " );\n" );
 				
@@ -601,7 +603,7 @@ public class TagClassGenerator {
 				out.write( ( attrSeq == 0 ? " " : ", " ) + theAttribute.getSqlLabel() + " = ?" );
 				queryBuffer.append( "\t\t\t\t" + "stmt." + theAttribute.getSQLMethod( false ) + "( " + ( attrSeq + 1 ) + ", " + theAttribute.getLabel() );
 				if ( theAttribute.isDateTime() ) {
-					queryBuffer.append( " == null ? null : new java.sql." + ( theAttribute.isTime() ? "Timestamp" : "Date" ) + "( " + theAttribute.getLabel() + ".getTime() )" );
+					queryBuffer.append( " == null ? null : new java.sql." + ( theAttribute.isTimestamp() ? "Timestamp" : "Date" ) + "( " + theAttribute.getLabel() + ".getTime() )" );
 				}
 				queryBuffer.append( " );\n" );
 				attrSeq++;
@@ -620,7 +622,7 @@ public class TagClassGenerator {
                         + ","
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : "") + ");\n");
                 keySeq++;
             }
@@ -730,7 +732,7 @@ public class TagClassGenerator {
                         + ","
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "")
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "")
                         + ");\n");
                 queryBuffer.append("\t\t}\n");
             } else {
@@ -741,7 +743,7 @@ public class TagClassGenerator {
                         + ","
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "")
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "")
                         + ");\n");
             }
             attrSeq++;
@@ -777,8 +779,8 @@ public class TagClassGenerator {
             if (keysOnly && !theAttribute.isPrimary())
                 continue;
             generateSetterGetter(theAttribute.getType(), theAttribute.getLabel(), theAttribute.getDomain(), theAttribute.isPrimary(), parentTag, out);
-            if (theAttribute.isDateTime())
-                generateSetterNow(theAttribute.getType(), theAttribute.getLabel(), theAttribute.getDomain(), theAttribute.isPrimary(), out);
+            if (theAttribute.isDateTime() || theAttribute.isTimestamp())
+                generateSetterNow(theAttribute, out);
         }
     }
     
@@ -815,12 +817,15 @@ public class TagClassGenerator {
         out.write("\t}\n");
 }
     
-    private void generateSetterNow(String type, String label, Domain domain, boolean primary, BufferedWriter out) throws IOException {
+    private void generateSetterNow(Attribute attribute, BufferedWriter out) throws IOException {
         // generate setter method for current time
-        out.write("\n\tpublic void set" + Character.toUpperCase(label.charAt(0))
-                + label.substring(1) + "ToNow ( ) {\n");
-        out.write("\t\tthis." + label + " = new java.util.Date();\n");
-        if (!primary)
+        out.write("\n\tpublic void set" + Character.toUpperCase(attribute.getLabel().charAt(0))
+                + attribute.getLabel().substring(1) + "ToNow ( ) {\n");
+        if (attribute.isDateTime())
+        		out.write("\t\tthis." + attribute.getLabel() + " = new java.util.Date();\n");
+        else
+    		out.write("\t\tthis." + attribute.getLabel() + " = new java.sql.Timestamp(new java.util.Date().getTime());\n");
+        if (!attribute.isPrimary())
             out.write("\t\tcommitNeeded = true;\n");
         out.write("\t}\n");     
     }
@@ -897,10 +902,12 @@ public class TagClassGenerator {
                 + "import java.sql.ResultSet;\n"
                 + "import java.sql.SQLException;\n"
                 + "import java.util.Vector;\n");
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
-        if (theEntity.hasDateTime())
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
+        if (theEntity.hasPrimaryDateTime() || theEntity.hasPrimaryTimestamp())
             out.write("import java.util.Date;\n");
+        if (theEntity.hasTimestamp())
+            out.write("import java.sql.Timestamp;\n");
 //        if (theEntity.hasImage())
 //            out.write("import java.awt.Image;\n");
         out.write("\n"
@@ -926,7 +933,7 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Iterator.class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel() +"Iterator.class);\n\n");
         
         out.write("\n    PreparedStatement stat = null;\n"
                 + "    ResultSet rs = null;\n"
@@ -976,8 +983,8 @@ public class TagClassGenerator {
         // string list to avoid duplicate variables and functions
         entityList = new ArrayList<String>();
         
-        for (int i = 0; i < theEntity.getParents().size(); i++) {
-            Entity parentEntity = theEntity.getParents().elementAt(i).getSourceEntity();
+        for (Relationship relationship : theEntity.getParents()) {
+            Entity parentEntity = relationship.getSourceEntity();
             StringBuffer keyBuffer = new StringBuffer();
             StringBuffer booleanBuffer = new StringBuffer();
             
@@ -994,9 +1001,8 @@ public class TagClassGenerator {
             	out.write("\t\ttry {\n"
             			+ "\t\t\tPreparedStatement stat = theIterator.getConnection().prepareStatement(\"SELECT count(*)");
             	out.write(" from " + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + " where 1=1\"\n");
-            	for (int j = 0; j < parentEntity.getPrimaryKeyAttributes().size(); j++) {
-            		Attribute theAttribute = parentEntity.getPrimaryKeyAttributes().elementAt(j);
-            		out.write("\t\t\t\t\t\t+ \" and " + theAttribute.getSqlLabel() + " = ?\"\n");
+            	for (String source : relationship.getSourceAttributes()) {
+            		out.write("\t\t\t\t\t\t+ \" and " + relationship.getTargetAttribute(source) + " = ?\"\n");            		
             	}
             	out.write("\t\t\t\t\t\t);\n\n");
             	out.write(keyBuffer.toString());
@@ -1163,7 +1169,7 @@ public class TagClassGenerator {
                         + "(webapp_keySeq++, "
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : "") + ");\n");
             }
             
@@ -1221,7 +1227,7 @@ public class TagClassGenerator {
                         + "(webapp_keySeq++, "
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : "") + ");\n");
             }
             
@@ -1283,14 +1289,14 @@ public class TagClassGenerator {
         out.write("    private String generateJoinCriteria() {\n"
                 + "       StringBuffer theBuffer = new StringBuffer();\n");
         if (theEntity.getParents().size() > 1) {
-            for (int i = 0; i < theEntity.getParents().size(); i++){
-                Entity parent = theEntity.getParents().elementAt(i).getSourceEntity();
-                for (int j = 0; j < parent.getPrimaryKeyAttributes().size(); j++) {
-                    Attribute for_el = parent.getPrimaryKeyAttributes().elementAt(j);
-                    Attribute this_el = parent.getPrimaryKeyAttributes().elementAt(j).getForeignAttribute();
-                	out.write("       if (use" + parent.getUpperLabel() + ")\n");
-                    out.write("          theBuffer.append(\" and " + parent.getSqlLabel() + "." + ( for_el == null ? "" : for_el.getSqlLabel() ) + " = " + theEntity.getSqlLabel() + "." + ( this_el == null ? "" : this_el.getSqlLabel() ) + "\");\n");
-                }
+            for (Relationship relationship : theEntity.getParents()) {
+            	log.info(relationship);
+            	for (String source : relationship.getSourceAttributes()) {
+            		String target = relationship.getTargetAttribute(source);
+                	out.write("       if (use" + relationship.getSourceEntity().getUpperLabel() + ")\n");
+                    out.write("          theBuffer.append(\" and " + relationship.getSourceEntity().getSqlLabel() + "." + source
+                    										+ " = " + relationship.getTargetEntity().getSqlLabel() + "." + target + "\");\n");
+            	}
             }
             out.write("\n");
         }
@@ -1502,11 +1508,13 @@ public class TagClassGenerator {
                 + "import java.sql.ResultSet;\n"
                 + "import java.sql.SQLException;\n"
                 + "import java.util.Vector;\n");
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
         
         if (theEntity.hasDateTime())
             out.write("import java.util.Date;\n");
+        if (theEntity.hasTimestamp())
+            out.write("import java.sql.Timestamp;\n");
 //        if (theEntity.hasImage())
 //            out.write("import java.awt.Image;\n");
         out.write("\n"
@@ -1531,7 +1539,7 @@ public class TagClassGenerator {
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
 
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Deleter.class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel() +"Deleter.class);\n\n");
 
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
@@ -1555,7 +1563,7 @@ public class TagClassGenerator {
             queryBuffer.append("            if (" + theAttribute.getLabel() + " != " + theAttribute.getInitializer() + ") stat."
                     + theAttribute.getSQLMethod(false)
                     + "(webapp_keySeq++, " + theAttribute.getLabel() + (theAttribute.isDateTime() ? " == null ? null : new java.sql." 
-                    + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "") 
+                    + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : "") 
                     + ");\n");
         }
         
@@ -1582,7 +1590,7 @@ public class TagClassGenerator {
             	out.write("\n                                                        + (" + attribute.getLabel() + " == " + attribute.getInitializer() + " ? \"\" : \" and " + attribute.getSqlLabel() + " = ? \")");
                 queryBuffer.append("\t\t\tif (" + attribute.getLabel() + " != " + attribute.getInitializer() + ") stat."+ attribute.getSQLMethod(false)
                         + "(webapp_keySeq++, " + attribute.getLabel() + (attribute.isDateTime() ? " == null ? null : new java.sql." 
-                        + (attribute.isTime() ? "Timestamp" : "Date") + "(" + attribute.getLabel() + ".getTime())" : "") 
+                        + (attribute.isTimestamp() ? "Timestamp" : "Date") + "(" + attribute.getLabel() + ".getTime())" : "") 
                         + ");\n");
             }
         }
@@ -1623,7 +1631,7 @@ public class TagClassGenerator {
                         + "(webapp_keySeq++, "
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : ""));
                 queryBuffer.append(");");
             }
@@ -1654,7 +1662,7 @@ public class TagClassGenerator {
                 queryBuffer.append(theAttribute.getSQLMethod(false));
                 queryBuffer.append("(webapp_keySeq++, ");
                 queryBuffer.append((theAttribute == theKey ? "_keyVal" : theAttribute.getLabel())); 
-                queryBuffer.append((theAttribute.isDateTime() ? " == null ? null : new java.sql."+ (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : ""));
+                queryBuffer.append((theAttribute.isDateTime() ? " == null ? null : new java.sql."+ (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())" : ""));
                 queryBuffer.append(");");
             }
             out.write(");\n");
@@ -1766,8 +1774,8 @@ public class TagClassGenerator {
                 + "import " + packagePrefix + "." + projectName + "TagSupport;\n"
                 + "import " + packagePrefix + "." + projectName + "BodyTagSupport;\n");
         generateParentImports(out, theEntity);
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
         
         out.write("\n"
                 + "@SuppressWarnings(\"serial\")" 
@@ -1779,7 +1787,7 @@ public class TagClassGenerator {
         }
         out.write("\tint newNumber = 0;\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Shifter.class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel() +"Shifter.class);\n\n");
 
         out.write("\n    ResultSet rs = null;\n"
                 + "    String var = null;\n"
@@ -1812,7 +1820,7 @@ public class TagClassGenerator {
                         + "(webapp_keySeq++, "
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : ""));
                 queryBuffer.append(");\n");
             }
@@ -1844,7 +1852,7 @@ public class TagClassGenerator {
 	                        + "(webapp_keySeq++, "
 	                        + theAttribute.getLabel()
 	                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-	                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+	                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
 	                                : ""));
 	                queryBuffer.append(");\n");
 	            }
@@ -1877,7 +1885,7 @@ public class TagClassGenerator {
 	                        + "(webapp_keySeq++, "
 	                        + theAttribute.getLabel()
 	                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-	                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+	                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
 	                                : ""));
 	                queryBuffer.append(");\n");
                 }
@@ -2004,8 +2012,10 @@ public class TagClassGenerator {
             out.write("import java.text.DateFormat;\n");
             out.write("import java.text.SimpleDateFormat;\n");
         }
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        if (theAttribute.isTimestamp())
+            out.write("import java.sql.Timestamp;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
 
 //        if (theAttribute.isImage() || (theAttribute.isDomain() && theEntity.hasImage()))
 //            out.write("import java.awt.Image;\n");
@@ -2021,7 +2031,7 @@ public class TagClassGenerator {
         	out.write("\tString timeStyle = \"DEFAULT\";\n");
         	out.write("\tString pattern = null;\n");
         }
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ uploadString + theAttribute.getUpperLabel()+".class);\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel()+ uploadString + theAttribute.getUpperLabel()+".class);\n");
 
         
         if (theAttribute.isBinaryDomain() || theAttribute.isImage()) {
@@ -2052,7 +2062,7 @@ public class TagClassGenerator {
                             + ","
                             + entityAttribute.getLabel()
                             + (entityAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                    + (entityAttribute.isTime() ? "Timestamp" : "Date") + "(" + entityAttribute.getLabel() + ".getTime())"
+                                    + (entityAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + entityAttribute.getLabel() + ".getTime())"
                                     : "") + ");\n");
                     keySeq++;
                     firstParam = false;
@@ -2285,18 +2295,20 @@ public class TagClassGenerator {
         out.write("import javax.servlet.jsp.JspTagException;\n");
         out.write("import javax.servlet.jsp.tagext.Tag;\n\n");
         
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
         
-        if (theAttribute.isDateTime() && !theAttribute.isPrimary()){
+        if (theAttribute.isDateTime()){
         	out.write("import java.util.Date;\n");
         }
+        if (theEntity.hasTimestamp())
+            out.write("import java.sql.Timestamp;\n");
         
         out.write("\nimport " + packagePrefix + "." + projectName + "TagSupport;\n");
 
         out.write("\n@SuppressWarnings(\"serial\")\n");
         out.write("public class " + theEntity.getUnqualifiedLabel() + theAttribute.getUpperLabel() + "ToNow extends " + projectName + "TagSupport {\n\n");
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel()+ theAttribute.getUpperLabel() +"ToNow.class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel()+ theAttribute.getUpperLabel() +"ToNow.class);\n\n");
 
         out.write("\n\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\ttry {\n");
@@ -2390,8 +2402,8 @@ public class TagClassGenerator {
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Vector;\n");
         out.write("import java.io.InputStream;\n");
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
         
         if (theEntity.hasImage()) {
             out.write("import java.io.ByteArrayOutputStream;\n");
@@ -2436,7 +2448,7 @@ public class TagClassGenerator {
         out.write("\tboolean newRecord = false;\n\n");
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
-        out.write("\tprivate static final Log log = LogFactory.getLog("+theEntity.getUnqualifiedLabel() +"Upload.class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel() +"Upload.class);\n\n");
         
 
         // declare attributes
@@ -2691,7 +2703,7 @@ public class TagClassGenerator {
                                 + ","
                                 + theAttribute.getLabel()
                                 + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                        + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                        + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                         : "") + ");\n");
                         keySeq++;
                         firstParam = false;
@@ -2744,7 +2756,7 @@ public class TagClassGenerator {
                         + ","
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : "") + ");\n");
                 keySeq++;
             } else {
@@ -2858,7 +2870,7 @@ public class TagClassGenerator {
 	                        + ","
 	                        + (theAttribute.isByteA() ? "getBytes(" : "") + theAttribute.getLabel() + (theAttribute.isByteA() ? ")" : "")
 	                        + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-	                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+	                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
 	                                : "") + ");\n");
                 }
                 attrSeq++;
@@ -2877,7 +2889,7 @@ public class TagClassGenerator {
                         + ","
                         + theAttribute.getLabel()
                         + (theAttribute.isDateTime() ? " == null ? null : new java.sql."
-                                + (theAttribute.isTime() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
+                                + (theAttribute.isTimestamp() ? "Timestamp" : "Date") + "(" + theAttribute.getLabel() + ".getTime())"
                                 : "") + ");\n");
                 keySeq++;
             }
@@ -2942,8 +2954,8 @@ public class TagClassGenerator {
                 + "import javax.servlet.jsp.JspTagException;\n" 
                 + "import javax.servlet.jsp.tagext.BodyTagSupport;\n"
                 + "import javax.sql.DataSource;\n"
-                + "import org.apache.commons.logging.Log;\n"
-                + "import org.apache.commons.logging.LogFactory;\n\n"
+                + "import org.apache.logging.log4j.Logger;\n"
+                + "import org.apache.logging.log4j.LogManager;\n\n"
                 //+ "import org.codehaus.jackson.annotate.JsonIgnore;\n"
                 + "\n" 
                 + "@SuppressWarnings(\"serial\")" 
@@ -2957,7 +2969,7 @@ public class TagClassGenerator {
                 + "        super();\n" 
                 + "    }\n" 
                 + "\n" 
-                + "    private static final Log log = LogFactory.getLog("+ projectName + "BodyTagSupport.class);\n"
+                + "    private static final Logger log = LogManager.getLogger("+ projectName + "BodyTagSupport.class);\n"
                 + "\n"
                 + "    @Override\n"
                 + "    public int doEndTag() throws JspException {\n" 
@@ -3008,8 +3020,8 @@ public class TagClassGenerator {
                 + "import javax.servlet.jsp.JspTagException;\n" 
                 + "import javax.servlet.jsp.tagext.TagSupport;\n"
                 + "import javax.sql.DataSource;\n" 
-                + "import org.apache.commons.logging.Log;\n"
-                + "import org.apache.commons.logging.LogFactory;\n\n"
+                + "import org.apache.logging.log4j.Logger;\n"
+                + "import org.apache.logging.log4j.LogManager;\n\n"
                 //+ "import org.codehaus.jackson.annotate.JsonIgnore;\n"
                 + "\n" 
                 + "@SuppressWarnings(\"serial\")"
@@ -3018,7 +3030,7 @@ public class TagClassGenerator {
                 + "\n" 
                 + "    protected DataSource theDataSource = null;\n"
                 + "    protected Connection theConnection = null;\n"
-                + "    private static final Log log = LogFactory.getLog("+ projectName + "TagSupport.class);\n"
+                + "    private static final Logger log = LogManager.getLogger("+ projectName + "TagSupport.class);\n"
                 + "\n" 
                 + "    public " + projectName + "TagSupport() {\n"
                 + "        super();\n" 
@@ -3071,8 +3083,8 @@ public class TagClassGenerator {
         out.write("import java.sql.ResultSet;\n");
         out.write("import java.sql.SQLException;\n");
         out.write("import java.util.Hashtable;\n");
-        out.write("import org.apache.commons.logging.Log;\n");
-        out.write("import org.apache.commons.logging.LogFactory;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.apache.logging.log4j.LogManager;\n");
         
         out.write("\n");
         out.write("import javax.servlet.jsp.JspException;\n");
@@ -3090,7 +3102,7 @@ public class TagClassGenerator {
         out.write("\t\ttheDriverHash.put(\"Microsoft SQL Server\", Driver.SQLSERVER);\n");
         out.write("\t}\n");
         
-        out.write("\tprivate static final Log log = LogFactory.getLog(Sequence.class);\n\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger(Sequence.class);\n\n");
 
         out.write("\tpublic int doStartTag() throws JspException {\n");
         out.write("\t\tpageContext.setAttribute(var, generateID());\n");
@@ -3160,12 +3172,12 @@ public class TagClassGenerator {
 		out.write( "import java.sql.Statement;" + "\n" );
 		out.write( "import javax.servlet.jsp.JspException;" + "\n" );
 		out.write( "import javax.servlet.jsp.JspTagException;" + "\n" );
-		out.write( "import org.apache.commons.logging.Log;\n" );
-		out.write( "import org.apache.commons.logging.LogFactory;\n\n\n" );
+		out.write( "import org.apache.logging.log4j.Logger;\n" );
+		out.write( "import org.apache.logging.log4j.LogManager;\n\n\n" );
 		out.write( "@SuppressWarnings(\"serial\")" );
 		out.write( "\n" );
 		out.write( "public class DBTest extends " + this.projectName + "BodyTagSupport {\n\n" );
-		out.write( "\tprivate static final Log log = LogFactory.getLog( DBTest.class );\n\n" );
+		out.write( "\tprivate static final Logger log = LogManager.getLogger( DBTest.class );\n\n" );
 		out.write( "\tpublic int doStartTag() throws JspException {\n" );
 		out.write( "\t\ttry { \n" );
 		out.write( "\t\t\tJspWriter out = pageContext.getOut();\n" );

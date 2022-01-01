@@ -223,16 +223,16 @@ public class TLDGenerator {
             out.write("\t</tag>\n");
         }
 
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            generateAttributeTag(theEntity, theEntity.getAttributes().elementAt(i));
+        for (Attribute theAttribute : theEntity.getAttributes()) {
+            generateAttributeTag(theEntity, theAttribute);
             if (! (theEntity.hasBinaryDomainAttribute() || theEntity.hasImage())) {
-                // generateAttributeFunction(theEntity, theEntity.getAttributes().elementAt(i));
+                // generateAttributeFunction(theEntity, theAttribute);
             }
-            if (theEntity.getAttributes().elementAt(i).isDateTime()) {
-                generateAttributeToNowTag(theEntity, theEntity.getAttributes().elementAt(i));
+            if (theAttribute.isDateTime() || theAttribute.isTimestamp()) {
+                generateAttributeToNowTag(theEntity, theAttribute);
             }
             if (theEntity.hasBinaryDomainAttribute() || theEntity.hasImage()) {
-                generateUploadAttributeTag(theEntity, theEntity.getAttributes().elementAt(i));
+                generateUploadAttributeTag(theEntity, theAttribute);
             }
         }
     }
