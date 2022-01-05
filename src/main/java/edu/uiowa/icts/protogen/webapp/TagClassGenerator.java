@@ -1254,7 +1254,7 @@ public class TagClassGenerator {
                 + "            }\n");
         
         out.write("        } catch (SQLException e) {\n");
-        out.write("            log.error(\"JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString(), e);\n\n");
+        out.write("            log.error(\"JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat, e);\n\n");
         
         out.write("\t\t\tfreeConnection();\n");
         out.write("\t\t\tclearServiceState();\n\n");
@@ -1263,10 +1263,10 @@ public class TagClassGenerator {
         out.write("\t\t\tif(parent != null){\n");
         out.write("\t\t\t\tpageContext.setAttribute(\"tagError\", true);\n");
         out.write("\t\t\t\tpageContext.setAttribute(\"tagErrorException\", e);\n");
-        out.write("\t\t\t\tpageContext.setAttribute(\"tagErrorMessage\", \"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString());\n");
+        out.write("\t\t\t\tpageContext.setAttribute(\"tagErrorMessage\", \"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat);\n");
         out.write("\t\t\t\treturn parent.doEndTag();\n");
         out.write("\t\t\t}else{\n");
-        out.write("\t\t\t\tthrow new JspException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat.toString(),e);\n");
+        out.write("\t\t\t\tthrow new JspException(\"Error: JDBC error generating " + theEntity.getLabel() + " iterator: \" + stat,e);\n");
         out.write("\t\t\t}\n\n");
         out.write("        }\n");
         out.write("\n");

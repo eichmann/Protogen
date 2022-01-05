@@ -138,6 +138,9 @@ public class Generator {
 					theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
 				}
 				
+				if (props.getProperty("jsp.resources.location") != null)
+					theJSPgenerator.setResourcesPath(props.getProperty("jsp.resources.location"));
+				
 				try {
 					theJSPgenerator.generateJSPs(theDatabase);
 				} catch (IOException e) {

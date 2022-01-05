@@ -10,6 +10,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -19,35 +27,51 @@ import org.apache.logging.log4j.Logger;
 import edu.uiowa.icts.protogen.model.Attribute;
 import edu.uiowa.icts.protogen.model.Database;
 import edu.uiowa.icts.protogen.model.Entity;
+import edu.uiowa.icts.protogen.model.Relationship;
 import edu.uiowa.icts.protogen.model.Schema;
 
 public class JSPGenerator {
 	static Logger log = LogManager.getLogger(JSPGenerator.class);
 
-	String tagLibrayPrefix = null;
+	String tagLibraryPrefix = null;
     String webAppPath = null;
+    String webAppName = null;
     String packagePrefix = null;
     String projectName = null;
 
+    boolean multiSchema = false;
     File packagePrefixDirectory = null;
     File tagDirectory = null;
+    Path sourceResourcePath = null;
 
     public JSPGenerator(String webAppPath, String packagePrefix, String projectName) {
         this.webAppPath = webAppPath;
         this.packagePrefix = packagePrefix;
         this.projectName = projectName;
-        this.tagLibrayPrefix = packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1);
+        this.tagLibraryPrefix = packagePrefix.substring(packagePrefix.lastIndexOf('.') + 1);
     }
     
-    public JSPGenerator(String webAppPath, String packagePrefix, String projectName, String tagLibrayPrefix) {
+    public JSPGenerator(String webAppPath, String packagePrefix, String projectName, String tagLibraryPrefix) {
         this.webAppPath = webAppPath;
         this.packagePrefix = packagePrefix;
         this.projectName = projectName;
-        this.tagLibrayPrefix = tagLibrayPrefix;
+        this.tagLibraryPrefix = tagLibraryPrefix;
+    }
+    
+    public void setResourcesPath(String path) {
+    	sourceResourcePath = Paths.get(path);
     }
 
     public void generateJSPs(Database theDatabase) throws IOException {
+    	multiSchema = theDatabase.getSchemas().size() > 1;
+    	webAppName = webAppPath.substring(webAppPath.indexOf("..")+3);
+    	webAppName = webAppName.substring(0, webAppName.indexOf('/'));
+    	log.info("webApp name: " + webAppName);
+    	
         generateEntityDirectories(theDatabase);
+        
+        if (sourceResourcePath != null)
+        	copyFolder(sourceResourcePath, Paths.get(webAppPath + "resources"));
 
         generateNav(theDatabase);
         generateBranding(theDatabase);
@@ -55,6 +79,7 @@ public class JSPGenerator {
         generateMenu(theDatabase);
         generateIndex(theDatabase);
         generateInclude(theDatabase);
+        generateHead(theDatabase);
         generateHeader(theDatabase);
         generateFooter(theDatabase);
         generateDbtest(theDatabase);
@@ -81,13 +106,20 @@ public class JSPGenerator {
         }
     }
 
+	private String entityPathPrefix(Schema theSchema) {
+		if (multiSchema)
+			return webAppPath + theSchema.getLowerLabel() + "/";
+		else
+			return webAppPath;
+	}
+
     /**
 	 * @param theSchema
 	 * @param theEntity
      * @throws IOException 
 	 */
 	private void generateDeleteEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-		File f = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/delete.jsp");
+		File f = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/delete.jsp");
         FileWriter fstream = new FileWriter(f);
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("<%@ include file=\"/_include.jsp\"  %>\n\n");
@@ -109,7 +141,7 @@ public class JSPGenerator {
                 out.write("<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
         }
         
-        out.write("\n<" + tagLibrayPrefix + ":delete" + theEntity.getUpperLabel());
+        out.write("\n<" + tagLibraryPrefix + ":delete" + theEntity.getUpperLabel());
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isPrimary()){
@@ -132,7 +164,7 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(f);
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("<%@ include file=\"/_include.jsp\"  %>\n");
-        out.write("<img src=\"<c:url value=\"/resources/images/logo-icts.png\" />\" alt=\"logo\">\n");
+        out.write("<img src=\"<c:url value=\"/resources/images/logo.png\" />\" alt=\"logo\">\n");
         out.close();
 	}
 
@@ -159,7 +191,7 @@ public class JSPGenerator {
 		out.write("<%@ taglib prefix=\"sql\" uri=\"http://java.sun.com/jsp/jstl/sql\"%>\n");
         out.write("<%@ taglib prefix=\"c\" uri=\"http://java.sun.com/jsp/jstl/core\"%>\n");
         out.write("<%@ taglib prefix=\"fmt\" uri=\"http://java.sun.com/jsp/jstl/fmt\"%>\n");
-        out.write("<%@ taglib prefix=\"" + tagLibrayPrefix + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
+        out.write("<%@ taglib prefix=\"" + tagLibraryPrefix + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
         out.flush();
         out.close();
 	}
@@ -175,7 +207,7 @@ public class JSPGenerator {
         
         generateHeaderPrefix(out);
         
-        out.write("<ul class=\"nav nav-list\">\n");
+        out.write("<ul>\n");
         out.write(spaces(4)+"<li><a href=\"<c:url value=\"/index.jsp\" />\">Home</a></li>");
         Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
         while (schemaEnum.hasMoreElements()) {
@@ -186,7 +218,7 @@ public class JSPGenerator {
                 // skip over subordinate entities
                 // if (theEntity.getParents().size() > 0)
                 //   continue;
-                out.write(spaces(4)+"<li><a href=\"<c:url value=\"/" + theEntity.getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "List.jsp\" /> \">" + theEntity.getUnqualifiedLabel() + " list</a></li>\n");
+                out.write(spaces(4)+"<li><a href=\"<c:url value=\"/" + theEntity.getUnqualifiedLowerLabel() + "/list.jsp\" /> \">" + theEntity.getUnqualifiedLabel() + " list</a></li>\n");
             }
         }
         out.write("</ul>\n");
@@ -194,22 +226,24 @@ public class JSPGenerator {
         out.close();
 		
 	}
-
+	
 	private void generateEntityDirectories(Database theDatabase) throws IOException {
         Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
         while (schemaEnum.hasMoreElements()) {
             Schema theSchema = schemaEnum.nextElement();
-            File schemaDir = new File(webAppPath + theSchema.getLowerLabel());
-            if (schemaDir.exists()) {
-                if (schemaDir.isFile())
-                    throw new IOException("webapp directory " + schemaDir.getAbsolutePath() + " is a normal file");
-            } else {
-                schemaDir.mkdir();
-            }
-            Enumeration<Entity> entityEnum = theSchema.getEntities().elements();
+            if (multiSchema) {
+				File schemaDir = new File(webAppPath + theSchema.getLowerLabel());
+				if (schemaDir.exists()) {
+					if (schemaDir.isFile())
+						throw new IOException("webapp directory " + schemaDir.getAbsolutePath() + " is a normal file");
+				} else {
+					schemaDir.mkdir();
+				} 
+			}
+			Enumeration<Entity> entityEnum = theSchema.getEntities().elements();
             while (entityEnum.hasMoreElements()) {
                 Entity theEntity = entityEnum.nextElement();
-                File entityDir = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel());
+                File entityDir = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel());
                 if (entityDir.exists()) {
                     if (entityDir.isFile())
                         throw new IOException("webapp directory " + entityDir.getAbsolutePath() + " is a normal file");
@@ -225,36 +259,11 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
+        generateHeaderPrefix(out);
         generateHeaderBlock(out, false, false, true);
         
-        out.write(spaces(20)+"<div class=\"hero-unit\">\n");
         out.write(spaces(24)+"<h1>Hello World.</h1>\n");
-        out.write(spaces(24)+"<p>\n");
-        out.write(spaces(28)+"Bacon ipsum dolor sit amet sirloin pork chop pancetta, kielbasa beef ribs shankle hamburger salami sausage.\n"); 
-        out.write(spaces(28)+"Spare ribs capicola shankle short ribs, bacon chicken ground round. Jerky ribeye meatball bacon sausage. \n");
-        out.write(spaces(28)+"Tail pork loin pastrami capicola shank andouille tri-tip bacon bresaola tenderloin prosciutto swine sirloin.\n");
-        out.write(spaces(24)+"</p>\n");
-        out.write(spaces(24)+"<a href=\"#myModal\" class=\"btn btn-primary btn-large\" data-toggle=\"modal\">Learn More</a>\n");
-        out.write(spaces(20)+"</div>\n\n");
-        
-        out.write(spaces(20)+"<div id=\"myModal\" class=\"modal hide fade\">\n");
-        out.write(spaces(24)+"<div class=\"modal-header\">\n");
-        out.write(spaces(28)+"<h3>Hello</h3>\n");
-        out.write(spaces(24)+"</div>\n");
-        out.write(spaces(24)+"<div class=\"modal-body\">\n");
-        out.write(spaces(28)+"<p>Welcome.</p>\n");
-        out.write(spaces(24)+"</div>\n");
-        out.write(spaces(24)+"<div class=\"modal-footer\">\n");
-        out.write(spaces(28)+"<a class=\"btn btn-primary\" id=\"okModalButton\">Ok</a>\n");
-        out.write(spaces(28)+"<a class=\"btn\" id=\"closeModalButton\">Close</a> \n");
-        out.write(spaces(24)+"</div>\n");
-        out.write(spaces(20)+"</div>\n\n");
-
-        out.write(spaces(20)+"<script type=\"text/javascript\">\n");
-        out.write(spaces(24)+"$('#closeModalButton, #okModalButton').click(function(){\n");
-        out.write(spaces(28)+"$('#myModal').modal('hide');\n");
-        out.write(spaces(24)+"});\n");
-        out.write(spaces(20)+"</script>\n");
+        out.write(spaces(24)+"<p>This interface was synthesized from the " + projectName + " clay diagram using Protogen\n");
         
         generateFooterBlock(out, false);
         
@@ -262,7 +271,7 @@ public class JSPGenerator {
     }
     
     public void generateEntityListJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/list.jsp");
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/list.jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
@@ -278,7 +287,7 @@ public class JSPGenerator {
     }
     
     public void generateEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/show.jsp");
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/show.jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
@@ -294,7 +303,7 @@ public class JSPGenerator {
             if (theAttribute.isPrimary() && theAttribute.isDateTime())
                 out.write("<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
         }
-        out.write("<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel());
+        out.write("<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isPrimary())
@@ -306,9 +315,25 @@ public class JSPGenerator {
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute.isPrimary())
-                out.write(" <" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " />");
+                out.write(" <" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " />");
         }
         out.write("</h2>\n");
+        
+        if (theEntity.getParents().size() > 0) {
+            out.write("<ul>\n");
+        	for (Relationship relationship : theEntity.getParents()) {
+        		Entity parent = relationship.getSourceEntity();
+                out.write("\t<li><a href=\"../" + parent.getUnqualifiedLowerLabel() + "/show.jsp");
+                boolean first = true;
+                for (String parentLabel : relationship.getSourceAttributes()) {
+                	String effectiveLabel = parentLabel.equals("id") ? "ID" : parentLabel;
+					out.write((first ? "?" : "&") + effectiveLabel + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel()
+					        + theEntity.getAttributeBySQLLabel(relationship.getForeignReferencedAttribute(parentLabel)).getUpperLabel() + " />");
+               }
+                out.write("\">" + parent.getLabel() + "</a>\n");
+        	}
+            out.write("</ul>\n");
+        }
 
         out.write("\t\t<table border=1>\n");
         out.write("\t\t\t<tr>\n");
@@ -328,9 +353,9 @@ public class JSPGenerator {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
                     if (j > 0)
                         out.write("&");
-                    out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    out.write(currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
                 }
-                out.write("\"><" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
+                out.write("\"><" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
             } else {
                 out.write("\t\t\t\t<td>");
                 generateAttributeTag(true, out, theEntity, theAttribute);
@@ -356,7 +381,7 @@ public class JSPGenerator {
             generateEntityListBlock(out, theSchema, childEntity);
         }
         
-        out.write("</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+        out.write("</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
 
         generateFooterBlock(out, true);
 
@@ -372,7 +397,7 @@ public class JSPGenerator {
                 if (j > 0){
                 	out.write("&");
                 }
-                out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " />");
+                out.write(currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " />");
             }
             out.write("\">");
         }
@@ -384,22 +409,22 @@ public class JSPGenerator {
                 if (j > 0)
                     out.write("&");
                 out.write(currentAttribute.getLabel() + "=" );
-                out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + "" + currentAttribute.getUpperLabel() + " />");            
+                out.write("<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + "" + currentAttribute.getUpperLabel() + " />");            
             }
             out.write("\">");
-            out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ""
+            out.write("<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ""
                     + theAttribute.getUpperLabel() + "Name />");        	
             out.write("</a>");
         } else if (theAttribute.isImage()){
             out.write("<img src=\"../" + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel()  + theAttribute.getUpperLabel() + ".jsp?&size=120");
             for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
                 Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
-                out.write("&" + currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":"
+                out.write("&" + currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":"
                         + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
             }
             out.write("\">");
         } else {
-            out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ""
+            out.write("<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ""
                     + theAttribute.getUpperLabel() + " />");        	
         }
 
@@ -415,7 +440,7 @@ public class JSPGenerator {
 
         generateHeaderPrefix(out);
         
-        out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
+        out.write("<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
         for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
             Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
             out.write(" " + currentAttribute.getLabel() + "=\"${param." + currentAttribute.getLabel() + "}\"");
@@ -432,7 +457,7 @@ public class JSPGenerator {
         
         generateHeaderPrefix(out);
         
-        out.write("<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
+        out.write("<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
         for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
             Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
             out.write(" " + currentAttribute.getLabel() + "=\"${param." + currentAttribute.getLabel() + "}\"");
@@ -471,9 +496,9 @@ public class JSPGenerator {
         
         out.write(tabs(tabs)+"<tbody>\n");
         tabs++;
-        out.write(tabs(tabs)+"<" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
+        out.write(tabs(tabs)+"<" + tagLibraryPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
         tabs++;
-        out.write(tabs(tabs)+"<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
+        out.write(tabs(tabs)+"<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
         tabs++;
         out.write(tabs(tabs)+"<tr>\n");
         tabs++;
@@ -484,7 +509,7 @@ public class JSPGenerator {
             if (theAttribute == keyAttribute) {
             	editUrl = "edit.jsp?";
             	deleteUrl = "delete.jsp?";
-                out.write(tabs(tabs)+"<td><a href=\"show.jsp?");
+                out.write(tabs(tabs)+"<td><a href=\"../" + theEntity.getUnqualifiedLowerLabel() + "/show.jsp?");
                 for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
                     if (j > 0){
@@ -492,12 +517,12 @@ public class JSPGenerator {
                     	editUrl += "&";
                     	deleteUrl += "&";
                     }
-                    out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
-                    editUrl += currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />";
-                    deleteUrl += currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />";
+                    out.write(currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    editUrl += currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />";
+                    deleteUrl += currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />";
                     
                 }
-                out.write("\"><" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
+                out.write("\"><" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a></td>\n");
                 
             } else {
                 out.write(tabs(tabs)+"<td>");
@@ -509,9 +534,9 @@ public class JSPGenerator {
         tabs--;
         out.write(tabs(tabs)+"</tr>\n");
         tabs--;
-        out.write(tabs(tabs)+"</" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
+        out.write(tabs(tabs)+"</" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
         tabs--;
-        out.write(tabs(tabs)+"</" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
+        out.write(tabs(tabs)+"</" + tagLibraryPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
         tabs--;
         out.write(tabs(tabs)+"</tbody>\n");
         
@@ -529,9 +554,9 @@ public class JSPGenerator {
         out.write(tabs(tabs)+"<br/><br/>\n\n");
         
         //create list
-        out.write("\t\t<" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
+        out.write("\t\t<" + tagLibraryPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + " var=\"" + keyAttribute.getLowerLabel() + "Iter\">\n");
   
-        out.write("\t\t\t<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + " " + (keyAttribute.getLabel().equals("ID") ? keyAttribute.getLabel() : keyAttribute.getLowerLabel()) + "=\"${" + keyAttribute.getLowerLabel() + "Iter}\">\n");
+        out.write("\t\t\t<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute == keyAttribute) {
@@ -540,9 +565,9 @@ public class JSPGenerator {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
                     if (j > 0)
                         out.write("&");
-                    out.write(currentAttribute.getLabel() + "=<" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
+                    out.write(currentAttribute.getLabel() + "=<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + currentAttribute.getUpperLabel() + " />");
                 }
-                out.write("\"><" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a>\n");
+                out.write("\"><" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " /></a>\n");
             } else {
                 out.write("\t\t");
                 generateAttributeTag(true, out, theEntity, theAttribute);
@@ -552,14 +577,14 @@ public class JSPGenerator {
         }
         out.write("\t\t\t<c:if test=\"${"+ keyAttribute.getLowerLabel() + "Iter != "+ keyAttribute.getLowerLabel() + "IterTotal}\" >, </c:if>" );
         
-        out.write("\t\t\t\t\t</" + tagLibrayPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
-        out.write("\t\t\t</" + tagLibrayPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
+        out.write("\t\t\t\t\t</" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
+        out.write("\t\t\t</" + tagLibraryPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
         
         
     }
 
     public void generateAddEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getLowerLabel() + "/" + "add" + theEntity.getLabel() + ".jsp");
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getLowerLabel() + "/" + "add" + theEntity.getLabel() + ".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
@@ -618,8 +643,8 @@ public class JSPGenerator {
         out.write("\t</c:when>\n");
         out.write("\t<c:when test=\"${param.submit == 'Save'}\">\n");
         if (theEntity.hasDomainAttribute() || theEntity.hasImage()) {
-            out.write(generateIndent(2) + "<" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
-            out.write("</" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
+            out.write(generateIndent(2) + "<" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
+            out.write("</" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
         } else {
             for (int i = 0; i < theEntity.getAttributes().size(); i++) {
                 Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -639,21 +664,21 @@ public class JSPGenerator {
                     ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();
                 else
                     ancestorKey = ancestors.elementAt(i).getPrimaryKeyAttributes().firstElement();
-                out.write(generateIndent(i+2) + "<" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
+                out.write(generateIndent(i+2) + "<" + tagLibraryPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
             }
-            out.write(generateIndent(ancestors.size()+2) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+            out.write(generateIndent(ancestors.size()+2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
             for (int i = 0; i < theEntity.getAttributes().size(); i++) {
                 Attribute theAttribute = theEntity.getAttributes().elementAt(i);
                 if (theAttribute.isPrimary()) {
-                	out.write(generateIndent(ancestors.size()+3) + "<c:set var=\"" + theAttribute.getLabel() + "\" ><" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + "/></c:set>\n");
+                	out.write(generateIndent(ancestors.size()+3) + "<c:set var=\"" + theAttribute.getLabel() + "\" ><" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + "/></c:set>\n");
                 	if (theAttribute.isInt())
                 		continue;
                 }
-                out.write(generateIndent(ancestors.size()+3) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
+                out.write(generateIndent(ancestors.size()+3) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
             }
-            out.write(generateIndent(ancestors.size()+2) + "</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+            out.write(generateIndent(ancestors.size()+2) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
             for (int i = ancestors.size() - 1; i >= 0; i--) {
-                out.write(generateIndent(i+2) + "</" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
+                out.write(generateIndent(i+2) + "</" + tagLibraryPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
             }
         }
 
@@ -678,14 +703,14 @@ public class JSPGenerator {
     
     
     public void generateUploadEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getLowerLabel() + "/" + "upload" + theEntity.getLabel() + ".jsp");
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getLowerLabel() + "/" + "upload" + theEntity.getLabel() + ".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
         generateHeaderPrefix(out);
 
-        out.write("<" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
-        out.write("</" + tagLibrayPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
+        out.write("<" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
+        out.write("</" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
 
         out.write("<c:redirect url=\"" + theEntity.getUnqualifiedLowerLabel() + "List.jsp \"/>\n");
 
@@ -697,7 +722,7 @@ public class JSPGenerator {
     }
     
     public void generateAddEditEntityJSP(Schema theSchema, Entity theEntity, Boolean isEdit) throws IOException {
-        File theIndexJSP = new File(webAppPath + theSchema.getLowerLabel() + "/" + theEntity.getLowerLabel() + "/"+ ( isEdit ? "edit" : "add" ) +".jsp");
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getLowerLabel() + "/"+ ( isEdit ? "edit" : "add" ) +".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
@@ -723,7 +748,7 @@ public class JSPGenerator {
         			out.write(tabs(tabs) + "<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd HH:mm:ss.S\" />\n");
         		}
         	}
-        	out.write(tabs(tabs) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel());
+        	out.write(tabs(tabs) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
         	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
         		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
         		if (theAttribute.isPrimary()){
@@ -770,7 +795,7 @@ public class JSPGenerator {
         out.write(tabs(tabs) + "</form>\n");
         tabs--;
         if(isEdit){
-        	out.write(tabs(tabs) + "</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+        	out.write(tabs(tabs) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
         }
         
         tabs = 2;
@@ -806,7 +831,7 @@ public class JSPGenerator {
 //            }
 //            out.write(generateIndent(i+2) + "<" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
 //        }
-        out.write(tabs(2) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel());
+        out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
         if(isEdit){
         	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
         		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -822,9 +847,9 @@ public class JSPGenerator {
             if ((theAttribute.isPrimary() && theAttribute.isInt()) || theAttribute.isDomain() || theAttribute.isImage()){
             	continue;
             }
-            out.write(tabs(3) + "<" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
+            out.write(tabs(3) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
         }
-        out.write(tabs(2) + "</" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+        out.write(tabs(2) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
 //        for (int i = ancestors.size() - 1; i >= 0; i--) {
 //            out.write(generateIndent(i+2) + "</" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
 //        }
@@ -852,11 +877,44 @@ public class JSPGenerator {
         return theIndent.toString();
     }
 
+    public void generateHead(Database theDatabase) throws IOException {
+        File theHeaderJSP  = new File(webAppPath + "head.jsp");
+        FileWriter fstream = new FileWriter(theHeaderJSP);
+        BufferedWriter out = new BufferedWriter(fstream);
+        int spaces = 4;
+        out.write(spaces(spaces) + "<head>\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "<title>" + webAppName + "</title>\n");
+        out.write(spaces(spaces) + "<meta charset=\"utf-8\">\n");
+        out.write(spaces(spaces) + "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n");
+        out.write(spaces(spaces) + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
+        out.write(spaces(spaces) + "<script	src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\n");
+        out.write(spaces(spaces) + "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css\" integrity=\"sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk\" crossorigin=\"anonymous\">\n");
+        out.write(spaces(spaces) + "<link rel=\"stylesheet\" id='font-awesome' href=\"https://use.fontawesome.com/releases/v5.7.2/css/all.css\" integrity=\"sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr\" crossorigin=\"anonymous\">\n");
+        out.write(spaces(spaces) + "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>\n");
+        out.write(spaces(spaces) + "<link rel=\"stylesheet\" type=\"text/css\" href=\"<util:applicationRoot/>/resources/DataTables/css/jquery.dataTables.min.css\">\n");
+        out.write(spaces(spaces) + "<script type=\"text/javascript\" charset=\"utf8\" src=\"" + webAppName + "/resources/DataTables/js/jquery.dataTables.min.js\"></script>\n");
+        out.write(spaces(spaces) + "<style type=\"text/css\" media=\"all\">\n");
+        out.write(spaces(spaces) + "@import \"/" + webAppName + "/resources/n3c_login_style.css\";\n");
+        out.write(spaces(spaces) + "@import \"/" + webAppName + "/resources/main_style.css\";\n");
+        out.write(spaces(spaces) + "</style>\n");
+        out.write(spaces(spaces) + "<style type=\"text/css\">\n");
+        out.write(spaces(spaces) + "table.dataTable thead .sorting_asc {\n");
+        spaces += 4;
+        out.write(spaces(spaces) + "background-image: none !important;\n");
+        spaces -= 4;
+        out.write(spaces(spaces) + "}\n");
+        out.write(spaces(spaces) + "</style>\n");
+        spaces -= 4;
+        out.write(spaces(spaces) + "</head>\n");
+        out.close();
+    }
+    
     public void generateHeader(Database theDatabase) throws IOException {
         File theHeaderJSP  = new File(webAppPath + "header.jsp");
         FileWriter fstream = new FileWriter(theHeaderJSP);
         BufferedWriter out = new BufferedWriter(fstream);
-        out.write("<img src=\"/" + projectName + "/images/icts_logo2.jpg\"><br>\n");
+        out.write("<img src=\"/" + webAppName + "/resources/images/logo.png\" height=50px ><br>\n");
         out.write("<h1><a href=\"/" + projectName + "/index.jsp\">" + projectName + " scaffolding</a></h1>\n");
         out.close();
     }
@@ -880,27 +938,20 @@ public class JSPGenerator {
     public void generateHeaderBlock(BufferedWriter out, boolean uplink, boolean hasDateTime, boolean menu, int spaces) throws IOException {
         out.write(spaces(spaces) + "<html>\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<head>\n");
-        spaces += 4;
         out.write(spaces(spaces) + "<c:import url=\"/head.jsp\" />\n");
-        out.write(spaces(spaces) + "<title>Page Title</title>\n");
-        spaces -= 4;
-        out.write(spaces(spaces) + "</head>\n");
         out.write(spaces(spaces) + "<body>\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<div id=\"main-content\">\n");
-        spaces += 4;
-        out.write(spaces(spaces) + "<c:import url=\"/header.jsp\" />\n");
         out.write(spaces(spaces) + "<div class=\"container-fluid\">\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<div class=\"row-fluid\">\n");
+        out.write(spaces(spaces) + "<c:import url=\"/header.jsp\" />\n");
+        out.write(spaces(spaces) + "<div class=\"row flex-nowrap\">\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<div class=\"span2\" id=\"menu\">\n");
+        out.write(spaces(spaces) + "<div class=\"col-xs-3\">\n");
         spaces += 4;
         out.write(spaces(spaces) + "<c:import url=\"/menu.jsp\" />\n");
         spaces -= 4;
         out.write(spaces(spaces) + "</div>\n");
-        out.write(spaces(spaces) + "<div class=\"span10\" id=\"content\">\n");
+        out.write(spaces(spaces) + "<div class=\"col-xs-8\">\n");
     }
     
     public String spaces(int count){
@@ -928,7 +979,6 @@ public class JSPGenerator {
     }
     
     public void generateFooterBlock(BufferedWriter out, boolean uplink, int spaces) throws IOException {
-        out.write(spaces(spaces + 20)+"</div>\n");
         out.write(spaces(spaces + 16)+"</div>\n");
         out.write(spaces(spaces + 12)+"</div>\n");
         out.write(spaces(spaces + 8)+"</div>\n");
@@ -943,7 +993,28 @@ public class JSPGenerator {
         BufferedWriter out = new BufferedWriter(fstream);
         generateHeaderPrefix(out);
         out.write("<%@ taglib prefix=\"" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
-        out.write("<%@ page  errorPage=\"/error/dberror.jsp\" %>" + "\n" + "<" +  tagLibrayPrefix + ":dbtest/>");
+        out.write("<%@ page  errorPage=\"/error/dberror.jsp\" %>" + "\n" + "<" +  tagLibraryPrefix + ":dbtest/>");
         out.close();
     }
+    
+    public void copyFolder(Path source, Path target) throws IOException {
+    	copyFolder(source, target, StandardCopyOption.REPLACE_EXISTING);
+    }
+    
+	public void copyFolder(Path source, Path target, CopyOption... options) throws IOException {
+		Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				Files.createDirectories(target.resolve(source.relativize(dir)));
+				return FileVisitResult.CONTINUE;
+			}
+
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				Files.copy(file, target.resolve(source.relativize(file)), options);
+				return FileVisitResult.CONTINUE;
+			}
+		});
+	}
 }
