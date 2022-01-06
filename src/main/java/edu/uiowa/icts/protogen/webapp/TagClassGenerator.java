@@ -1294,8 +1294,8 @@ public class TagClassGenerator {
             	for (String source : relationship.getSourceAttributes()) {
             		String target = relationship.getTargetAttribute(source);
                 	out.write("       if (use" + relationship.getSourceEntity().getUpperLabel() + ")\n");
-                    out.write("          theBuffer.append(\" and " + relationship.getSourceEntity().getSqlLabel() + "." + source
-                    										+ " = " + relationship.getTargetEntity().getSqlLabel() + "." + target + "\");\n");
+                    out.write("          theBuffer.append(\" and " + relationship.getSourceEntity().getSchema().getSqlLabel() + "." + relationship.getSourceEntity().getSqlLabel() + "." + source
+                    										+ " = " + relationship.getTargetEntity().getSchema().getSqlLabel() + "." + relationship.getTargetEntity().getSqlLabel() + "." + target + "\");\n");
             	}
             }
             out.write("\n");
