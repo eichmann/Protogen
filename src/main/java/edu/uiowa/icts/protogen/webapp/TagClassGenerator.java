@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -1249,7 +1250,8 @@ public class TagClassGenerator {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
         }
-        out.write("                pageContext.setAttribute(var, ++rsCount);\n"
+        out.write("                if (var != null)\n"
+                + "                    pageContext.setAttribute(var, this);\n"
                 + "                return EVAL_BODY_INCLUDE;\n"
                 + "            }\n");
         
@@ -1338,7 +1340,6 @@ public class TagClassGenerator {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
         }
-        out.write("                pageContext.setAttribute(var, ++rsCount);\n");
         out.write("                return EVAL_BODY_AGAIN;\n");
         out.write("            }\n");
         out.write("        } catch (SQLException e) {\n");
@@ -1369,6 +1370,8 @@ public class TagClassGenerator {
         out.write("    public int doEndTag() throws JspTagException, JspException {\n");
         out.write("        try {\n");
         
+        out.write("\t\t\tif( var != null )\n");
+        out.write("\t\t\t\tpageContext.removeAttribute(var);\n");
         out.write("\t\t\tif( pageContext != null ){\n");
         out.write("\t\t\t\tBoolean error = (Boolean) pageContext.getAttribute(\"tagError\");\n");
         out.write("\t\t\t\tif( error != null && error ){\n\n");
@@ -1465,6 +1468,14 @@ public class TagClassGenerator {
                 + "\n"
                 + "    public void setVar(String var) {\n"
                 + "        this.var = var;\n"
+                + "    }\n"
+                + "\n"
+                + "    public Boolean isFirst() throws SQLException {\n"
+                + "        return rs.isFirst();\n"
+                + "    }\n"
+                + "\n"
+                + "    public Boolean isLast() throws SQLException {\n"
+                + "        return rs.isLast();\n"
                 + "    }\n"
                 + "\n"
                 + "\n");

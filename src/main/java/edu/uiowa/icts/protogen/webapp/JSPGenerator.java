@@ -575,7 +575,7 @@ public class JSPGenerator {
                //out.write("\t\t\t\t<td><" + tagLibrayPrefix + ":" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + " /></td>\n");
             }
         }
-        out.write("\t\t\t<c:if test=\"${"+ keyAttribute.getLowerLabel() + "Iter != "+ keyAttribute.getLowerLabel() + "IterTotal}\" >, </c:if>" );
+        out.write("\t\t\t<c:if test=\"${ ! "+ keyAttribute.getLowerLabel() + "Iter.isLast() }\" >, </c:if>" );
         
         out.write("\t\t\t\t\t</" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + ">\n");
         out.write("\t\t\t</" + tagLibraryPrefix + ":foreach" + theEntity.getUnqualifiedLabel() + ">\n");
