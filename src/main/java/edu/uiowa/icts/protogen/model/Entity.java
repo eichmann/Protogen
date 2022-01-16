@@ -162,6 +162,13 @@ public class Entity extends Element {
         return false;
     }
 
+    public boolean hasForeignDateTime() {
+    	for (Attribute attribute : attributes)
+    		if (attribute.isDateTime() && attribute.isForeign())
+                 return true;       
+        return false;
+    }
+
     public boolean hasTimestamp() {
     	for (Attribute attribute : attributes)
     		if (attribute.isTimestamp())
@@ -172,6 +179,13 @@ public class Entity extends Element {
     public boolean hasPrimaryTimestamp() {
     	for (Attribute attribute : attributes)
     		if (attribute.isTimestamp() && attribute.isPrimary())
+                 return true;       
+        return false;
+    }
+
+    public boolean hasForeignTimestamp() {
+    	for (Attribute attribute : attributes)
+    		if (attribute.isTimestamp() && attribute.isForeign())
                  return true;       
         return false;
     }
@@ -211,6 +225,14 @@ public class Entity extends Element {
     public boolean hasCounter() {
         for (int i = 0; i < attributes.size(); i++)
             if (attributes.elementAt(i).isCounter())
+                return true;
+        
+        return false;
+    }
+
+    public boolean hasForeign() {
+        for (int i = 0; i < attributes.size(); i++)
+            if (attributes.elementAt(i).isForeign())
                 return true;
         
         return false;

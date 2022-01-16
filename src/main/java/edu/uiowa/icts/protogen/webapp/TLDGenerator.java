@@ -299,14 +299,6 @@ public class TLDGenerator {
         }
     }
     
-    private void generateAttributeFunction(Entity theEntity, Attribute theAttribute) {
-        functionBuffer.append("\n\t<function>\n");
-        functionBuffer.append("\t\t<name>" + theEntity.getLowerLabel() + theAttribute.getUpperLabel() + "Value</name>\n");
-        functionBuffer.append("\t\t<function-class>" + packagePrefix + "." + theEntity.getUnqualifiedLowerLabel() + "." + theEntity.getUnqualifiedLabel() + "</function-class>\n");
-        functionBuffer.append("\t\t<function-signature>java.lang." + theAttribute.getJavaTypeClass() + " " + theAttribute.getLabel() + "Value()</function-signature>\n");
-        functionBuffer.append("\t</function>\n");
-    }
-    
     private void generateAttributeTag(Entity theEntity, Attribute theAttribute) throws IOException {
         out.write("\n\t<tag>\n");
         out.write("\t\t<name>" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + "</name>\n");

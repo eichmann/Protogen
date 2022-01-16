@@ -10,7 +10,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -238,7 +237,7 @@ public class TagClassGenerator {
         out.write("import " + packagePrefix + "." + projectName + "TagSupport;\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.getDefaultValue().startsWith("Sequence") || (theAttribute.isPrimary() && !theEntity.isForeignReference(theAttribute) && theAttribute.isInt())) {
+            if (theAttribute.getDefaultValue().startsWith("Sequence") || (theAttribute.isPrimary() && !theAttribute.isForeign() && theAttribute.isInt())) {
                 out.write("import " + packagePrefix + ".Sequence;\n");
                 break;
             }
@@ -905,9 +904,9 @@ public class TagClassGenerator {
                 + "import java.util.Vector;\n");
         out.write("import org.apache.logging.log4j.Logger;\n");
         out.write("import org.apache.logging.log4j.LogManager;\n");
-        if (theEntity.hasPrimaryDateTime() || theEntity.hasPrimaryTimestamp())
+        if (theEntity.hasPrimaryDateTime() || theEntity.hasForeignDateTime())
             out.write("import java.util.Date;\n");
-        if (theEntity.hasTimestamp())
+        if (theEntity.hasPrimaryTimestamp() || theEntity.hasForeignTimestamp())
             out.write("import java.sql.Timestamp;\n");
 //        if (theEntity.hasImage())
 //            out.write("import java.awt.Image;\n");
@@ -923,14 +922,12 @@ public class TagClassGenerator {
                 + "@SuppressWarnings(\"serial\")" 
         		+ "\n"
                 + "public class " + theEntity.getUnqualifiedLabel() + "Iterator extends " + projectName + "BodyTagSupport {\n");
-        for (int i = 0; i < primaryKeys.size(); i++) {
-            Attribute theKey = primaryKeys.elementAt(i);
+        for (Attribute theKey : primaryKeys) {
             out.write("    " + theKey.getType() + " " + theKey.getLabel() + " = " + theKey.getInitializer() + ";\n");
         }
-        for (int i = 0; i < theEntity.attributes.size(); i++) {
-            Attribute theKey = theEntity.attributes.elementAt(i);
-            if (!theEntity.isPrimaryReference(theKey))
-                out.write("    " + theKey.getType() + " " + theKey.getLabel() + " = " + theKey.getInitializer() + ";\n");
+        for (Attribute theKey : theEntity.attributes) {
+            if (theKey.isForeign() && !theKey.isPrimary())
+            	out.write("    " + theKey.getType() + " " + theKey.getLabel() + " = " + theKey.getInitializer() + ";\n");
         }
         out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
         
@@ -1136,8 +1133,9 @@ public class TagClassGenerator {
          * 
          */
         out.write("            //run count query  \n");
-        out.write("            int webapp_keySeq = 1;\n"
-                + "            stat = getConnection().prepareStatement(\"SELECT count(*)");
+        if (theEntity.hasForeign())
+        	out.write("            int webapp_keySeq = 1;\n");
+        out.write("            stat = getConnection().prepareStatement(\"SELECT count(*)");
         out.write(" from \" + generateFromClause() + \" where 1=1\"\n");
         out.write("                                                        + generateJoinCriteria()\n");
         
@@ -1197,8 +1195,9 @@ public class TagClassGenerator {
         /*
          * Create select id query
          */
-        out.write("            webapp_keySeq = 1;\n"
-                + "            stat = getConnection().prepareStatement(\"SELECT ");
+        if (theEntity.hasForeign())
+        	out.write("            webapp_keySeq = 1;\n");
+        out.write("            stat = getConnection().prepareStatement(\"SELECT ");
         
         if("sqlserver".equals(databaseType)){
         	out.write(" \" + generateLimitCriteria() + \" ");
@@ -1292,7 +1291,6 @@ public class TagClassGenerator {
                 + "       StringBuffer theBuffer = new StringBuffer();\n");
         if (theEntity.getParents().size() > 1) {
             for (Relationship relationship : theEntity.getParents()) {
-            	log.info(relationship);
             	for (String source : relationship.getSourceAttributes()) {
             		String target = relationship.getTargetAttribute(source);
                 	out.write("       if (use" + relationship.getSourceEntity().getUpperLabel() + ")\n");
@@ -2448,7 +2446,7 @@ public class TagClassGenerator {
         out.write("import " + packagePrefix + "." + projectName + "TagSupport;\n");
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if (theAttribute.getDefaultValue().startsWith("Sequence") || (theAttribute.isPrimary() && !theEntity.isForeignReference(theAttribute) && theAttribute.isInt())) {
+            if ((theAttribute.getDefaultValue().startsWith("Sequence") && !theAttribute.isForeign()) || (theAttribute.isPrimary() && !theAttribute.isForeign() && theAttribute.isInt())) {
                 out.write("import " + packagePrefix + ".Sequence;\n");
                 break;
             }

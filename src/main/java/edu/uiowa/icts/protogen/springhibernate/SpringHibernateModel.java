@@ -448,17 +448,6 @@ public class SpringHibernateModel {
 		return hash;
 	}
 
-	private HashMap<String, Attribute> getHashFromAttributesFfPt( Iterator<Attribute> attribIter ) {
-		HashMap<String, Attribute> hash = new HashMap<String, Attribute>();
-		while ( attribIter.hasNext() ){
-			Attribute attribute = attribIter.next();
-			if ( !attribute.isForeign() && attribute.isPrimary() ){
-				hash.put( attribute.getUnqualifiedLabel(), attribute );
-			}
-		}
-		return hash;
-	}
-
 	private HashMap<String, Attribute> getHashFromAttributesFtPf( Iterator<Attribute> attribIter ) {
 
 		log.debug( "getHashFromAttributesFtPf" );
@@ -469,18 +458,6 @@ public class SpringHibernateModel {
 			if ( attribute.isForeign() && !attribute.isPrimary() ) {
 				hash.put( attribute.getUnqualifiedLabel(), attribute );
 			}
-		}
-		return hash;
-	}
-
-	private HashMap<String, Attribute> getHashFromAttributesFfPf( Iterator<Attribute> attribIter )
-	{
-		HashMap<String, Attribute> hash = new HashMap<String, Attribute>();
-		while ( attribIter.hasNext() )
-		{
-			Attribute attribute = attribIter.next();
-			if ( !attribute.isForeign() && !attribute.isPrimary() )
-				hash.put( attribute.getUnqualifiedLabel(), attribute );
 		}
 		return hash;
 	}

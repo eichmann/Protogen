@@ -6,7 +6,6 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.uiowa.icts.protogen.loaders.ClaySaxLoader;
 import edu.uiowa.icts.protogen.loaders.ClayXpathLoader;
 import edu.uiowa.icts.protogen.loaders.DatabaseModelLoader;
 import edu.uiowa.icts.protogen.loaders.JDBCLoader;

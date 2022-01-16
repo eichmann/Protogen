@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -354,16 +353,6 @@ public class JDBCLoader implements DatabaseModelLoader {
 
 
 
-	}
-
-	private boolean relationshipExists(Relationship r, Vector<Relationship> relationships) {
-		for (Relationship rl : relationships) {
-			if(r.getSourceEntity().getLabel().equals(rl.getSourceEntity().getLabel()) && 
-					r.getTargetEntity().getLabel().equals(rl.getTargetEntity().getLabel())){
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private Schema getSchema(String schemaName)
