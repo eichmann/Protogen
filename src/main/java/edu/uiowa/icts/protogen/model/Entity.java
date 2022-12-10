@@ -82,13 +82,9 @@ public class Entity extends Element {
 	
 	public Vector<Entity> getAncestors() {
 	    Vector<Entity> ancestors = new Vector<Entity>();
-	    Vector<Relationship> currentParents = parents;
-	    log.debug("starting ancestor chain for " + this);
-	    while (currentParents.size() > 0) {
-	        //TODO for now, just pick the first parent in the vector - we'll worry about multipaths later
-	        log.debug("\tancestor: "  + currentParents.firstElement().getSourceEntity());
-	        ancestors.insertElementAt(currentParents.firstElement().getSourceEntity(), 0);
-	        currentParents = ancestors.firstElement().getParents();
+
+	    for (Relationship relationship : parents) {
+	    	ancestors.add(relationship.getSourceEntity());
 	    }
 	    
 	    return ancestors;
@@ -146,6 +142,10 @@ public class Entity extends Element {
 //        for (int i = 0; i < primaryKeyAttributes.size(); i++){
 //        	primaryKeyAttributes.elementAt(i).relabel();
 //        }
+    }
+    
+    public boolean hasAncestor() {
+    	return getParents().size() > 0;
     }
     
     public boolean hasDateTime() {

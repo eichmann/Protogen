@@ -82,7 +82,7 @@ public class JSPGenerator {
         generateHead(theDatabase);
         generateHeader(theDatabase);
         generateFooter(theDatabase);
-        generateDbtest(theDatabase);
+//        generateDbtest(theDatabase);
 
         Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
         while (schemaEnum.hasMoreElements()) {
@@ -122,7 +122,7 @@ public class JSPGenerator {
 		File f = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/delete.jsp");
         FileWriter fstream = new FileWriter(f);
         BufferedWriter out = new BufferedWriter(fstream);
-        out.write("<%@ include file=\"/_include.jsp\"  %>\n\n");
+        out.write("<%@ include file=\"../_include.jsp\"  %>\n\n");
         
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -163,8 +163,8 @@ public class JSPGenerator {
 		File f  = new File(webAppPath + "branding.jsp");
         FileWriter fstream = new FileWriter(f);
         BufferedWriter out = new BufferedWriter(fstream);
-        out.write("<%@ include file=\"/_include.jsp\"  %>\n");
-        out.write("<img src=\"<c:url value=\"/resources/images/logo.png\" />\" alt=\"logo\">\n");
+        out.write("<%@ include file=\"_include.jsp\"  %>\n");
+        out.write("<img src=\"<util:applicationRoot/>/resources/images/logo.png\" alt=\"logo\">\n");
         out.close();
 	}
 
@@ -191,6 +191,7 @@ public class JSPGenerator {
 		out.write("<%@ taglib prefix=\"sql\" uri=\"http://java.sun.com/jsp/jstl/sql\"%>\n");
         out.write("<%@ taglib prefix=\"c\" uri=\"http://java.sun.com/jsp/jstl/core\"%>\n");
         out.write("<%@ taglib prefix=\"fmt\" uri=\"http://java.sun.com/jsp/jstl/fmt\"%>\n");
+        out.write("<%@ taglib prefix=\"util\" uri=\"http://icts.uiowa.edu/tagUtil\"%>\n");
         out.write("<%@ taglib prefix=\"" + tagLibraryPrefix + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
         out.flush();
         out.close();
@@ -205,10 +206,10 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
         
-        generateHeaderPrefix(out);
+        generateTopLevelHeaderPrefix(out);
         
         out.write("<ul>\n");
-        out.write(spaces(4)+"<li><a href=\"<c:url value=\"/index.jsp\" />\">Home</a></li>");
+        out.write(spaces(4)+"<li><a href=\"<util:applicationRoot/>/index.jsp\">Home</a></li>\n");
         Enumeration<Schema> schemaEnum = theDatabase.getSchemas().elements();
         while (schemaEnum.hasMoreElements()) {
             Schema theSchema = schemaEnum.nextElement();
@@ -218,7 +219,7 @@ public class JSPGenerator {
                 // skip over subordinate entities
                 // if (theEntity.getParents().size() > 0)
                 //   continue;
-                out.write(spaces(4)+"<li><a href=\"<c:url value=\"/" + theEntity.getUnqualifiedLowerLabel() + "/list.jsp\" /> \">" + theEntity.getUnqualifiedLabel() + " list</a></li>\n");
+                out.write(spaces(4)+"<li><a href=\"<util:applicationRoot/>/" + theEntity.getUnqualifiedLowerLabel() + "/list.jsp\" />" + theEntity.getUnqualifiedLabel() + " list</a></li>\n");
             }
         }
         out.write("</ul>\n");
@@ -259,7 +260,7 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        generateHeaderPrefix(out);
+        generateTopLevelHeaderPrefix(out);
         generateHeaderBlock(out, false, false, true);
         
         out.write(spaces(24)+"<h1>Hello World.</h1>\n");
@@ -277,7 +278,7 @@ public class JSPGenerator {
 
         generateHeaderPrefix(out);
         
-        generateHeaderBlock(out, false, false, true);
+        generateHeaderBlock(out, true, false, true);
         
         generateEntityListBlock(out, theSchema, theEntity);
 
@@ -323,7 +324,7 @@ public class JSPGenerator {
             out.write("<ul>\n");
         	for (Relationship relationship : theEntity.getParents()) {
         		Entity parent = relationship.getSourceEntity();
-                out.write("\t<li><a href=\"../" + parent.getUnqualifiedLowerLabel() + "/show.jsp");
+                out.write("\t<li><a href=\"../" + parent.getUnqualifiedLowerLabel() + "<util:applicationRoot/>/show.jsp");
                 boolean first = true;
                 for (String parentLabel : relationship.getSourceAttributes()) {
                 	String effectiveLabel = parentLabel.equals("id") ? "ID" : parentLabel;
@@ -507,8 +508,8 @@ public class JSPGenerator {
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute == keyAttribute) {
-            	editUrl = "edit.jsp?";
-            	deleteUrl = "delete.jsp?";
+            	editUrl = "../" + theEntity.getUnqualifiedLowerLabel() + "/edit.jsp?";
+            	deleteUrl = "../" + theEntity.getUnqualifiedLowerLabel() + "/delete.jsp?";
                 out.write(tabs(tabs)+"<td><a href=\"../" + theEntity.getUnqualifiedLowerLabel() + "/show.jsp?");
                 for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
@@ -530,7 +531,8 @@ public class JSPGenerator {
                 out.write("</td>\n");
             }
         }
-        out.write(tabs(tabs)+"<td><a href=\""+editUrl+"\">edit</a> <a href=\""+ deleteUrl +"\">delete</a></td>\n");
+        out.write(tabs(tabs)+"<td><a href=\""+editUrl+"\">edit</a></td>\n");
+        out.write(tabs(tabs)+"<td><a href=\""+ deleteUrl +"\">delete</a></td>\n");
         tabs--;
         out.write(tabs(tabs)+"</tr>\n");
         tabs--;
@@ -549,7 +551,22 @@ public class JSPGenerator {
         out.write(tabs(tabs)+"<br/>\n\n");
 
         //create add link
-        out.write(tabs(tabs)+"<a class=\"btn\" href=\"add.jsp\">add</a>\n");
+        out.write(tabs(tabs)+"<a class=\"btn\" href=\"../" + theEntity.getLowerLabel() + "/add.jsp");
+        boolean firstAttr = true;
+        for (Relationship relationship : theEntity.getParents()) {
+        	Entity parent = relationship.sourceEntity;
+            for (Attribute attribute : parent.getAttributes()) {
+            	if (attribute.isPrimary()) {
+            		if (firstAttr)
+            			out.write("?");
+            		else
+            			out.write("&");
+            		out.write(attribute.getLabel() + "=${param." + attribute.getLabel() + "}");
+            		firstAttr = false;
+            	}
+            }        	
+        }
+        out.write("\">add " + theEntity.getUnqualifiedLabel() + "</a>\n");
         
         out.write(tabs(tabs)+"<br/><br/>\n\n");
         
@@ -646,6 +663,16 @@ public class JSPGenerator {
             out.write(generateIndent(2) + "<" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
             out.write("</" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
         } else {
+            for (Relationship relationship : theEntity.getParents()) {
+            	Entity parent = relationship.sourceEntity;
+        		out.write("\t\t<" + tagLibraryPrefix + ":" + parent.getLowerLabel());
+                for (Attribute attribute : parent.getAttributes()) {
+                	if (attribute.isPrimary()) {
+                		out.write(" " + attribute.getLabel() + " = ${param." + attribute.getLabel() + "}");
+                	}
+                }        	
+                out.write(">\n");
+            }
             for (int i = 0; i < theEntity.getAttributes().size(); i++) {
                 Attribute theAttribute = theEntity.getAttributes().elementAt(i);
                 if (theAttribute.isInt()) {
@@ -654,6 +681,10 @@ public class JSPGenerator {
                     //out.write("\t\t<%-- We have a bean info instance and a property editor defined, but not yet successfully bound, hence... --%>\n");
                     out.write("\t\t<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd\" />\n");
                 }
+            }
+            for (Relationship relationship : theEntity.getParents()) {
+            	Entity parent = relationship.sourceEntity;
+        		out.write("\t\t</" + tagLibraryPrefix + ":" + parent.getLowerLabel() + ">\n");
             }
             
             Vector<Entity> ancestors = theEntity.getAncestors();
@@ -776,16 +807,23 @@ public class JSPGenerator {
                 if(isEdit){
                 	generateAttributeTag(false, out, theEntity, theAttribute);
                 }
-                out.write("\">\n\n");
+                out.write("\">\n");
+                out.write(tabs(tabs) + "<br>\n\n");
             }
         }
         out.write(tabs(tabs) + "<input type=\"submit\" name=\"submit\" value=\"Save\">\n");
         out.write(tabs(tabs) + "<input type=\"submit\" name=\"submit\" value=\"Cancel\">\n");
-        if(isEdit){
-	        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-	            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-	            if (theAttribute.isPrimary() && theAttribute.isInt()) {
-	                out.write(tabs(tabs) + "<input type=\"hidden\" name=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\">\n");
+    	for (Entity parent : theEntity.getAncestors()) {
+            for (Attribute attribute : parent.getAttributes()) {
+            	if (attribute.isPrimary()) {
+	                out.write(tabs(tabs) + "<input type=\"hidden\" name=\"" + attribute.getLabel() + "\" value=\"${param." + attribute.getLabel() + "}\">\n");
+            	}
+            }
+    	}
+        if (isEdit) {
+	        for (Attribute attribute : theEntity.getAttributes()) {
+	            if (attribute.isPrimary() && attribute.isInt() && !attribute.isForeign()) {
+	                out.write(tabs(tabs) + "<input type=\"hidden\" name=\"" + attribute.getLabel() + "\" value=\"${param." + attribute.getLabel() + "}\">\n");
 	            }
 	        }
         }
@@ -805,7 +843,7 @@ public class JSPGenerator {
         
         out.write("\t</c:when>\n");
         out.write("\t<c:when test=\"${param.submit eq 'Cancel'}\">\n");
-        out.write("\t\t<c:redirect url=\"/" + theEntity.getLowerLabel() + "/list.jsp\" />\n");
+        out.write("\t\t<c:redirect url=\"list.jsp\" />\n");
         out.write("\t</c:when>\n");
         out.write("\t<c:when test=\"${param.submit eq 'Save'}\">\n");
         
@@ -820,41 +858,46 @@ public class JSPGenerator {
 	        }
         }
         
-//        Vector<Entity> ancestors = theEntity.getAncestors();
-//        for (int i = 0; i < ancestors.size(); i++) {
-//            log.debug("entity: " + theEntity + "\tancestor: " + ancestors.elementAt(i) + "\tsubkeys: " + ancestors.elementAt(i).getSubKeyAttributes() + "\tparent keys: " + ancestors.elementAt(i).primaryKeyAttributes);
-//            Attribute ancestorKey = null;
-//            if (ancestors.elementAt(i).getSubKeyAttributes().size() > 0){
-//            	ancestorKey = ancestors.elementAt(i).getSubKeyAttributes().firstElement();
-//            } else {
-//            	ancestorKey = ancestors.elementAt(i).getPrimaryKeyAttributes().firstElement();
-//            }
-//            out.write(generateIndent(i+2) + "<" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + " " + ancestorKey.getLabel() + "=\"${" + (ancestorKey.isInt() || ancestorKey.isDateTime() ? "" : "param.") + ancestorKey.getLabel() + "}\" >\n");
-//        }
-        out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
-        if(isEdit){
+        boolean hasParent = false;
+        if (isEdit) {
+            out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
         	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
         		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
         		if (theAttribute.isPrimary()){
         			out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
         		}
         	}
+            out.write(">\n");
+        } else {
+        	for (Entity parent : theEntity.getAncestors()) {
+        		out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + parent.getLowerLabel());
+                for (Attribute attribute : parent.getAttributes()) {
+                	if (attribute.isPrimary()) {
+                		out.write(" " + attribute.getLabel() + " = \"${param." + attribute.getLabel() + "}\"");
+                	}
+                }        	
+                out.write(">\n");
+                hasParent = true;
+        	}
+            out.write(tabs(hasParent ? 3 : 2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
         }
-        out.write(">\n");
         
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if ((theAttribute.isPrimary() && theAttribute.isInt()) || theAttribute.isDomain() || theAttribute.isImage()){
             	continue;
             }
-            out.write(tabs(3) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
+            out.write(tabs(hasParent ? 4 : 3) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
         }
-        out.write(tabs(2) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
-//        for (int i = ancestors.size() - 1; i >= 0; i--) {
-//            out.write(generateIndent(i+2) + "</" + tagLibrayPrefix + ":" + ancestors.elementAt(i).getLowerLabel() + ">\n");
-//        }
 
-        out.write("\t\t<c:redirect url=\"/" + theEntity.getLowerLabel() + "/list.jsp\" />\n");
+        out.write(tabs(hasParent ? 3 : 2) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+    	if (!isEdit) {
+    		for (Entity parent : theEntity.getAncestors()) {
+    			out.write(tabs(2) + "</" + tagLibraryPrefix + ":" + parent.getLowerLabel() + ">\n");
+    		}
+    	}
+
+        out.write("\t\t<c:redirect url=\"list.jsp\" />\n");
 //        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
 //            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
 //            if (theAttribute.isPrimary() && theAttribute.isInt()) {
@@ -938,17 +981,17 @@ public class JSPGenerator {
     public void generateHeaderBlock(BufferedWriter out, boolean uplink, boolean hasDateTime, boolean menu, int spaces) throws IOException {
         out.write(spaces(spaces) + "<html>\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<c:import url=\"/head.jsp\" />\n");
+        out.write(spaces(spaces) + "<jsp:include page=\"" + (uplink ? "../" : "") + "head.jsp\" />\n");
         out.write(spaces(spaces) + "<body>\n");
         spaces += 4;
         out.write(spaces(spaces) + "<div class=\"container-fluid\">\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<c:import url=\"/header.jsp\" />\n");
+        out.write(spaces(spaces) + "<jsp:include page=\"" + (uplink ? "../" : "") + "header.jsp\" />\n");
         out.write(spaces(spaces) + "<div class=\"row flex-nowrap\">\n");
         spaces += 4;
         out.write(spaces(spaces) + "<div class=\"col-xs-3\">\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<c:import url=\"/menu.jsp\" />\n");
+        out.write(spaces(spaces) + "<jsp:include page=\"" + (uplink ? "../" : "") + "menu.jsp\" />\n");
         spaces -= 4;
         out.write(spaces(spaces) + "</div>\n");
         out.write(spaces(spaces) + "<div class=\"col-xs-8\">\n");
@@ -971,7 +1014,11 @@ public class JSPGenerator {
     }
     
     public void generateHeaderPrefix(BufferedWriter out) throws IOException {
-        out.write("<%@ include file=\"/_include.jsp\" %>\n");
+        out.write("<%@ include file=\"../_include.jsp\" %>\n");
+    }
+
+    public void generateTopLevelHeaderPrefix(BufferedWriter out) throws IOException {
+        out.write("<%@ include file=\"_include.jsp\" %>\n");
     }
 
     public void generateFooterBlock(BufferedWriter out, boolean uplink) throws IOException {
@@ -982,7 +1029,7 @@ public class JSPGenerator {
         out.write(spaces(spaces + 16)+"</div>\n");
         out.write(spaces(spaces + 12)+"</div>\n");
         out.write(spaces(spaces + 8)+"</div>\n");
-        out.write(spaces(spaces + 8)+"<c:import url=\"/footer.jsp\" />\n");
+        out.write(spaces(spaces + 8)+"<jsp:include page=\"" + (uplink ? "../" : "") + "footer.jsp\" />\n");
         out.write(spaces(spaces + 4)+"</body>\n");
         out.write(spaces(spaces)+"</html>");
     }
@@ -991,9 +1038,9 @@ public class JSPGenerator {
         File theIndexJSP  = new File(webAppPath + "dbtest.jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
-        generateHeaderPrefix(out);
+        generateTopLevelHeaderPrefix(out);
         out.write("<%@ taglib prefix=\"" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\" uri=\"http://icts.uiowa.edu/" + packagePrefix.substring(packagePrefix.lastIndexOf('.')+1) + "\"%>\n");
-        out.write("<%@ page  errorPage=\"/error/dberror.jsp\" %>" + "\n" + "<" +  tagLibraryPrefix + ":dbtest/>");
+        out.write("<%@ page  errorPage=\"<util:applicationRoot/>/error/dberror.jsp\" %>" + "\n" + "<" +  tagLibraryPrefix + ":dbtest/>");
         out.close();
     }
     
