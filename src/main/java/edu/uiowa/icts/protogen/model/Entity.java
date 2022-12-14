@@ -148,6 +148,10 @@ public class Entity extends Element {
     	return getParents().size() > 0;
     }
     
+    public int ancestorCount() {
+    	return getParents().size();
+    }
+    
     public boolean hasDateTime() {
     	for (Attribute attribute : attributes)
     		if (attribute.isDateTime())

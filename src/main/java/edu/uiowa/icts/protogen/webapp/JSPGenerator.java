@@ -322,7 +322,7 @@ public class JSPGenerator {
             out.write("<ul>\n");
         	for (Relationship relationship : theEntity.getParents()) {
         		Entity parent = relationship.getSourceEntity();
-                out.write("\t<li><a href=\"../" + parent.getUnqualifiedLowerLabel() + "<util:applicationRoot/>/show.jsp");
+                out.write("\t<li><a href=\"../" + parent.getUnqualifiedLowerLabel() + "/show.jsp");
                 boolean first = true;
                 for (String parentLabel : relationship.getSourceAttributes()) {
                 	String effectiveLabel = parentLabel.equals("id") ? "ID" : parentLabel;
@@ -347,7 +347,7 @@ public class JSPGenerator {
         	
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             if (theAttribute == keyAttribute) {
-                out.write("\t\t\t\t<td><a href=\"../../" + theEntity.getSchema().getUnqualifiedLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/edit" + theEntity.getUnqualifiedLabel() + ".jsp?");
+                out.write("\t\t\t\t<td><a href=\"edit.jsp?");
                 for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
                     Attribute currentAttribute = theEntity.getPrimaryKeyAttributes().elementAt(j);
                     if (j > 0)
@@ -663,8 +663,10 @@ public class JSPGenerator {
             out.write(generateIndent(2) + "<" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + "> ");
             out.write("</" + tagLibraryPrefix + ":upload" + theEntity.getUpperLabel() + ">\n");
         } else {
+        	Vector<Entity> nestingStack = new Vector<Entity>();
             for (Relationship relationship : theEntity.getParents()) {
             	Entity parent = relationship.sourceEntity;
+            	nestingStack.add(0, parent);
         		out.write("\t\t<" + tagLibraryPrefix + ":" + parent.getLowerLabel());
                 for (Attribute attribute : parent.getAttributes()) {
                 	if (attribute.isPrimary()) {
@@ -682,8 +684,7 @@ public class JSPGenerator {
                     out.write("\t\t<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd\" />\n");
                 }
             }
-            for (Relationship relationship : theEntity.getParents()) {
-            	Entity parent = relationship.sourceEntity;
+            for (Entity parent : nestingStack) {
         		out.write("\t\t</" + tagLibraryPrefix + ":" + parent.getLowerLabel() + ">\n");
             }
             
@@ -762,7 +763,97 @@ public class JSPGenerator {
         int tabs = 1;
         
         out.write("\n<c:choose>\n");
-        out.write(tabs(tabs) + "<c:when test=\"${empty param.submit}\">\n");
+        if (!theEntity.hasAncestor())
+        	generateAddEditWhenBlock(out, tabs, theSchema, theEntity, null, isEdit);
+        else {
+        	for (Entity parent : theEntity.getAncestors()) {
+            	generateAddEditWhenBlock(out, tabs, theSchema, theEntity, parent, isEdit);
+        	}
+        }
+        
+        out.write("\t<c:when test=\"${param.submit eq 'Cancel'}\">\n");
+        out.write("\t\t<c:redirect url=\"list.jsp\" />\n");
+        out.write("\t</c:when>\n");
+        out.write("\t<c:when test=\"${param.submit eq 'Save'}\">\n");
+        
+        if(isEdit){
+	        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+	            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+	            if (theAttribute.isInt()) {
+	                out.write("\t\t<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
+	            } else if (theAttribute.isDateTime()) {
+	                out.write("\t\t<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd\" />\n");
+	            }
+	        }
+        }
+        
+        boolean hasParent = false;
+        Vector<Entity> nestingStack = new Vector<Entity>();
+        if (isEdit) {
+            out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
+        	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+        		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+        		if (theAttribute.isPrimary()){
+        			out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
+        		}
+        	}
+            out.write(">\n");
+        } else {
+        	for (Entity parent : theEntity.getAncestors()) {
+        		nestingStack.add(0, parent);
+        		out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + parent.getLowerLabel());
+                for (Attribute attribute : parent.getAttributes()) {
+                	if (attribute.isPrimary()) {
+                		out.write(" " + attribute.getLabel() + " = \"${param." + attribute.getLabel() + "}\"");
+                	}
+                }        	
+                out.write(">\n");
+                hasParent = true;
+        	}
+            out.write(tabs(hasParent ? 3 : 2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+        }
+        
+        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+            if ((theAttribute.isPrimary() && theAttribute.isInt()) || theAttribute.isDomain() || theAttribute.isImage()){
+            	continue;
+            }
+            out.write(tabs(hasParent ? 4 : 3) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
+        }
+
+        out.write(tabs(hasParent ? 3 : 2) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
+    	if (!isEdit) {
+    		for (Entity parent : nestingStack) {
+    			out.write(tabs(2) + "</" + tagLibraryPrefix + ":" + parent.getLowerLabel() + ">\n");
+    		}
+    	}
+
+        out.write("\t\t<c:redirect url=\"list.jsp\" />\n");
+//        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
+//            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
+//            if (theAttribute.isPrimary() && theAttribute.isInt()) {
+//                out.write("\t\t\t<c:param name=\"" + theAttribute.getLabel() + "\" value=\"${" + theAttribute.getLabel() + "}\"/>\n");
+//            }
+//        }
+        //out.write("\t\t</c:redirect>\n");
+        out.write("\t</c:when>\n");
+        out.write("\t<c:otherwise>\n");
+        out.write("\t\tA task is required for this function.\n");
+        out.write("\t</c:otherwise>\n");
+        out.write("</c:choose>");
+        out.close();
+    }
+    
+	public void generateAddEditWhenBlock(BufferedWriter out, int tabs, Schema theSchema, Entity theEntity, Entity focusParent, Boolean isEdit) throws IOException {
+        if (focusParent == null)
+        	out.write(tabs(tabs) + "<c:when test=\"${empty param.submit}\">\n");
+        else {
+        	out.write(tabs(tabs) + "<c:when test=\"${empty param.submit");
+        	for (Attribute keyAttribute : focusParent.primaryKeyAttributes) {
+            	out.write(" and not empty param." + keyAttribute.getLabel());
+        	}
+        	out.write("}\">\n");
+        }
         
         tabs++;
         
@@ -799,6 +890,33 @@ public class JSPGenerator {
         tabs++;
         out.write(tabs(tabs) + "<legend>"+ theEntity.getUnqualifiedLabel() + "</legend>\n");
         
+        if (theEntity.ancestorCount() > 1) {
+	    	for (Entity parent : theEntity.getAncestors()) {
+	    		if (parent == focusParent && !isEdit)
+	    			continue;
+                out.write(tabs(tabs) + "<label for=\""+parent.getLabel()+"\">" + parent.getUpperLabel() + "</label>\n");
+                out.write(tabs(tabs) + "<br>\n");
+	            tabs++;
+	            out.write(tabs(tabs)+"<" + tagLibraryPrefix + ":foreach" + parent.getUnqualifiedLabel() + " var=\"" + parent.getLowerLabel() + "Iter\">\n");
+	            tabs++;
+	            out.write(tabs(tabs)+"<" + tagLibraryPrefix + ":" + parent.getUnqualifiedLowerLabel() + ">\n");
+	            for (Attribute attribute : parent.getAttributes()) {
+	            	if (attribute.isPrimary()) {
+	            		out.write(tabs(tabs) + "<input type=\"radio\" name=\"" + attribute.getLabel() + "\" value=\"");
+	            		generateAttributeTag(false,out,parent,attribute);
+	            		out.write("\">");
+	            		out.write("<label for=\"" + attribute.getLabel() + "\">");
+	            		generateAttributeTag(false,out,parent,attribute);
+	            		out.write("</label>\n");
+	                    out.write(tabs(tabs) + "<br>\n");
+	            	}
+	            }	 
+	            out.write(tabs(tabs)+"</" + tagLibraryPrefix + ":" + parent.getUnqualifiedLowerLabel() + ">\n");
+	            tabs--;
+	            out.write(tabs(tabs)+"</" + tagLibraryPrefix + ":foreach" + parent.getUnqualifiedLabel() + ">\n");
+	            tabs--;
+	    	}
+        }
         
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -821,6 +939,8 @@ public class JSPGenerator {
         out.write(tabs(tabs) + "<input type=\"submit\" name=\"submit\" value=\"Save\">\n");
         out.write(tabs(tabs) + "<input type=\"submit\" name=\"submit\" value=\"Cancel\">\n");
     	for (Entity parent : theEntity.getAncestors()) {
+    		if (parent != focusParent && !isEdit)
+    			continue;
             for (Attribute attribute : parent.getAttributes()) {
             	if (attribute.isPrimary()) {
 	                out.write(tabs(tabs) + "<input type=\"hidden\" name=\"" + attribute.getLabel() + "\" value=\"${param." + attribute.getLabel() + "}\">\n");
@@ -849,83 +969,14 @@ public class JSPGenerator {
         out.write("\n");
         
         out.write("\t</c:when>\n");
-        out.write("\t<c:when test=\"${param.submit eq 'Cancel'}\">\n");
-        out.write("\t\t<c:redirect url=\"list.jsp\" />\n");
-        out.write("\t</c:when>\n");
-        out.write("\t<c:when test=\"${param.submit eq 'Save'}\">\n");
-        
-        if(isEdit){
-	        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-	            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-	            if (theAttribute.isInt()) {
-	                out.write("\t\t<fmt:parseNumber var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" />\n");
-	            } else if (theAttribute.isDateTime()) {
-	                out.write("\t\t<fmt:parseDate var=\"" + theAttribute.getLabel() + "\" value=\"${param." + theAttribute.getLabel() + "}\" pattern=\"yyyy-MM-dd\" />\n");
-	            }
-	        }
-        }
-        
-        boolean hasParent = false;
-        if (isEdit) {
-            out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel());
-        	for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-        		Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-        		if (theAttribute.isPrimary()){
-        			out.write(" " + theAttribute.getLabel() + "=\"${" + (theAttribute.isInt() || theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\"");
-        		}
-        	}
-            out.write(">\n");
-        } else {
-        	for (Entity parent : theEntity.getAncestors()) {
-        		out.write(tabs(2) + "<" + tagLibraryPrefix + ":" + parent.getLowerLabel());
-                for (Attribute attribute : parent.getAttributes()) {
-                	if (attribute.isPrimary()) {
-                		out.write(" " + attribute.getLabel() + " = \"${param." + attribute.getLabel() + "}\"");
-                	}
-                }        	
-                out.write(">\n");
-                hasParent = true;
-        	}
-            out.write(tabs(hasParent ? 3 : 2) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
-        }
-        
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if ((theAttribute.isPrimary() && theAttribute.isInt()) || theAttribute.isDomain() || theAttribute.isImage()){
-            	continue;
-            }
-            out.write(tabs(hasParent ? 4 : 3) + "<" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + "" + theAttribute.getUpperLabel() + " " + theAttribute.getLabel() + " = \"${" + (theAttribute.isDateTime() ? "" : "param.") + theAttribute.getLabel() + "}\" />\n");
-        }
-
-        out.write(tabs(hasParent ? 3 : 2) + "</" + tagLibraryPrefix + ":" + theEntity.getLowerLabel() + ">\n");
-    	if (!isEdit) {
-    		for (Entity parent : theEntity.getAncestors()) {
-    			out.write(tabs(2) + "</" + tagLibraryPrefix + ":" + parent.getLowerLabel() + ">\n");
-    		}
-    	}
-
-        out.write("\t\t<c:redirect url=\"list.jsp\" />\n");
-//        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-//            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-//            if (theAttribute.isPrimary() && theAttribute.isInt()) {
-//                out.write("\t\t\t<c:param name=\"" + theAttribute.getLabel() + "\" value=\"${" + theAttribute.getLabel() + "}\"/>\n");
-//            }
-//        }
-        //out.write("\t\t</c:redirect>\n");
-        out.write("\t</c:when>\n");
-        out.write("\t<c:otherwise>\n");
-        out.write("\t\tA task is required for this function.\n");
-        out.write("\t</c:otherwise>\n");
-        out.write("</c:choose>");
-        out.close();
-    }
-    
-    public String generateIndent(int length) {
-        StringBuffer theIndent = new StringBuffer();
-        for (int i = 0; i < length; i++)
-            theIndent.append("\t");
-        return theIndent.toString();
-    }
+	}
+	
+	public String generateIndent(int length) {
+		StringBuffer theIndent = new StringBuffer();
+		for (int i = 0; i < length; i++)
+			theIndent.append("\t");
+		return theIndent.toString();
+	}
 
     public void generateHead(Database theDatabase) throws IOException {
         File theHeaderJSP  = new File(webAppPath + "head.jsp");
