@@ -441,6 +441,33 @@ public class Attribute extends Element {
             return label;
     }
 
+    public String parseUploadValue() {
+    	return parseUploadValue(getLabel());
+    }
+
+    public String parseUploadValue(String label) {
+        if (type.equals("double") || type.equals("float"))
+            return "Double.parseDouble(request.getParameter(\"" + label + "\").trim())";
+        else if (sqlType.equals("Numeric"))
+            return "Integer.parseInt(request.getParameter(\"" + label + "\").trim())";
+        else if (sqlType.equals("Text") || sqlType.toLowerCase().equals("char") || sqlType.toLowerCase().equals("varchar"))
+            return "request.getParameter(\"" + label + "\").trim()";
+        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("int") || sqlType.toLowerCase().equals("smallint"))
+            return "Integer.parseInt(request.getParameter(\"" + label + "\").trim())";
+        else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
+            return "Long.parseLong(request.getParameter(\"" + label + "\").trim())";
+        else if (sqlType.toLowerCase().equals("decimal"))
+            return "Integer.parseInt(request.getParameter(\"" + label + "\").trim())";
+        else if (sqlType.toLowerCase().equals("boolean"))        	
+            return "Boolean.parseBoolean(request.getParameter(\"" + label + "\").trim())";
+        else if (sqlType.toLowerCase().equals("timestamp"))
+            return "new java.sql.Timestamp(Integer.parseInt(request.getParameter(\"" + label + "\").trim()))";
+        else if (sqlType.toLowerCase().equals("bytea"))
+            return "request.getParameter(\"" + label + "\").trim()";
+        else
+            return "request.getParameter(\" + label + \").trim()";
+    }
+
     public void dump() {
         log.debug("\t\t\tattribute: " + label + "\tuid: " + uid + "\ttype: " + type + "\tmandatory: " + mandatory + "\tprimary: " + primary + "\tauto-increment: " + autoIncrement + "\tremarks: " + remarks + "\tcounter: " + counter + "\tsequence: " + sequence + "\tsequence name: " + sequenceName);
     }

@@ -51,6 +51,7 @@ public class Generator {
 		int error = 0;
 		String projectName = props.getProperty("project.name");
 		String packageName = props.getProperty("package.name");
+		String webAppName = props.getProperty("jsp.project.name");
 		
 		if(props.getProperty("pathPrefix") != null){
 			pathPrefix = props.getProperty("path.prefix");
@@ -141,7 +142,7 @@ public class Generator {
 					theJSPgenerator.setResourcesPath(props.getProperty("jsp.resources.location"));
 				
 				try {
-					theJSPgenerator.generateJSPs(theDatabase);
+					theJSPgenerator.generateJSPs(webAppName, theDatabase);
 				} catch (IOException e) {
 					log.error("Could not generate JSP Files: " + jspLocation, e);
 					error = 1;

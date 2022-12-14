@@ -62,10 +62,8 @@ public class JSPGenerator {
     	sourceResourcePath = Paths.get(path);
     }
 
-    public void generateJSPs(Database theDatabase) throws IOException {
+    public void generateJSPs(String webAppName, Database theDatabase) throws IOException {
     	multiSchema = theDatabase.getSchemas().size() > 1;
-    	webAppName = webAppPath.substring(webAppPath.indexOf("..")+3);
-    	webAppName = webAppName.substring(0, webAppName.indexOf('/'));
     	log.info("webApp name: " + webAppName);
     	
         generateEntityDirectories(theDatabase);
@@ -91,17 +89,17 @@ public class JSPGenerator {
             while (entityEnum.hasMoreElements()) {
                 Entity theEntity = entityEnum.nextElement();
                 
-                generateAddEditEntityJSP(theSchema, theEntity);
-                generateAddEditEntityJSP(theSchema, theEntity, false);
+                generateAddEditEntityJSP(webAppName, theSchema, theEntity);
+                generateAddEditEntityJSP(webAppName, theSchema, theEntity, false);
                 generateDeleteEntityJSP(theSchema, theEntity);
                 generateEntityJSP(theSchema, theEntity);
                 generateEntityListJSP(theSchema, theEntity);
                 
                 // generateAddEntityJSP(theSchema, theEntity);
                 
-                if (theEntity.hasBinaryDomainAttribute()|| theEntity.hasImage()) {
-                    generateUploadEntityJSP(theSchema, theEntity);
-                }
+                //if (theEntity.hasBinaryDomainAttribute()|| theEntity.hasImage()) {
+                //    generateUploadEntityJSP(theSchema, theEntity);
+                //}
             }
         }
     }
@@ -365,9 +363,9 @@ public class JSPGenerator {
             }
         	
         	if (theAttribute.isDomain()) {
-        	    generateDisplayJSP(theEntity, theAttribute);
+        	    generateDisplayJSP(theSchema, theEntity, theAttribute);
         	} else if (theAttribute.isImage())
-                generateImageJSP(theEntity, theAttribute);
+                generateImageJSP(theSchema, theEntity, theAttribute);
         	
             //Attribute theAttribute = theEntity.getAttributes().elementAt(i);
             //out.write("\t\t\t\t<td>");
@@ -434,8 +432,8 @@ public class JSPGenerator {
         }
     }
     
-    public void generateDisplayJSP(Entity theEntity, Attribute theAttribute) throws IOException {
-        File theIndexJSP = new File(webAppPath + theEntity.getSchema().getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel() + theAttribute.getUpperLabel() + ".jsp");
+    public void generateDisplayJSP(Schema theSchema, Entity theEntity, Attribute theAttribute) throws IOException {
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel() + theAttribute.getUpperLabel() + ".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
 
@@ -451,12 +449,14 @@ public class JSPGenerator {
         out.close();
     }
     
-    public void generateImageJSP(Entity theEntity, Attribute theAttribute) throws IOException {
-        File theIndexJSP = new File(webAppPath + theEntity.getSchema().getLowerLabel() + "/" + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel() + theAttribute.getUpperLabel() + ".jsp");
+    public void generateImageJSP(Schema theSchema, Entity theEntity, Attribute theAttribute) throws IOException {
+        File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/display" + theEntity.getUpperLabel() + theAttribute.getUpperLabel() + ".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
         
+        out.write("<%@ page trimDirectiveWhitespaces=\"true\" %>\n");
         generateHeaderPrefix(out);
+        out.write("\n");
         
         out.write("<" + tagLibraryPrefix + ":" + theEntity.getUnqualifiedLowerLabel() + theAttribute.getUpperLabel() + " ");            
         for (int j = 0; j < theEntity.getPrimaryKeyAttributes().size(); j++) {
@@ -748,11 +748,11 @@ public class JSPGenerator {
         out.close();
     }
     
-    public void generateAddEditEntityJSP(Schema theSchema, Entity theEntity) throws IOException {
-    	generateAddEditEntityJSP(theSchema, theEntity, true);
+    public void generateAddEditEntityJSP(String webAppName, Schema theSchema, Entity theEntity) throws IOException {
+    	generateAddEditEntityJSP(webAppName, theSchema, theEntity, true);
     }
     
-    public void generateAddEditEntityJSP(Schema theSchema, Entity theEntity, Boolean isEdit) throws IOException {
+    public void generateAddEditEntityJSP(String webAppName, Schema theSchema, Entity theEntity, Boolean isEdit) throws IOException {
         File theIndexJSP = new File(entityPathPrefix(theSchema) + theEntity.getLowerLabel() + "/"+ ( isEdit ? "edit" : "add" ) +".jsp");
         FileWriter fstream = new FileWriter(theIndexJSP);
         BufferedWriter out = new BufferedWriter(fstream);
@@ -790,7 +790,10 @@ public class JSPGenerator {
         	tabs++;
         }
         
-        out.write(tabs(tabs) + "<form action=\""+ ( isEdit ? "edit.jsp" : "add.jsp" ) +"\" method=\"post\" >\n");
+        if (theEntity.hasBinaryDomainAttribute() || theEntity.hasImage())
+        	out.write(tabs(tabs) + "<form name=\"" + theEntity.getLowerLabel() + "\" method=\"post\" action=\"/" + webAppName + "/" + theEntity.getLabel() + "UploadServlet\"enctype=\"multipart/form-data\">\n");
+        else
+        	out.write(tabs(tabs) + "<form action=\""+ ( isEdit ? "edit.jsp" : "add.jsp" ) +"\" method=\"post\" >\n");
         tabs++;
         out.write(tabs(tabs) + "<fieldset>\n");
         tabs++;
@@ -803,11 +806,15 @@ public class JSPGenerator {
             	continue;
             } else {
                 out.write(tabs(tabs) + "<label for=\""+theAttribute.getLabel()+"\">" + theAttribute.getUpperLabel() + "</label>\n");
-                out.write(tabs(tabs) + "<input type=\"text\" id=\""+theAttribute.getLabel()+"\" name=\"" + theAttribute.getLabel() + "\" size=\"40\" value=\"");
-                if(isEdit){
-                	generateAttributeTag(false, out, theEntity, theAttribute);
+                if (theAttribute.isBinaryDomain() || theAttribute.isImage()) {
+                	out.write(tabs(tabs) + "<input type=\"file\" id=\""+theAttribute.getLabel()+"\" name=\"" + theAttribute.getLabel() + "\">\n");
+                } else {
+                	out.write(tabs(tabs) + "<input type=\"text\" id=\""+theAttribute.getLabel()+"\" name=\"" + theAttribute.getLabel() + "\" size=\"40\" value=\"");
+                    if(isEdit){
+                    	generateAttributeTag(false, out, theEntity, theAttribute);
+                    }
+                    out.write("\">\n");
                 }
-                out.write("\">\n");
                 out.write(tabs(tabs) + "<br>\n\n");
             }
         }

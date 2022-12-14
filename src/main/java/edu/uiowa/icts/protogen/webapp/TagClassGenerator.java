@@ -155,12 +155,12 @@ public class TagClassGenerator {
         if (theEntity.hasCounter())
         	generateEntityShifterClass(theEntity);
         if (theEntity.hasImage() || theEntity.hasBinaryDomainAttribute())
-            generateEntityUploadClass(theEntity);
+            generateEntityUploadServlet(theEntity);
 
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             generateEntityHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
-            if (theEntity.hasImage() || theEntity.hasBinaryDomainAttribute())
-                generateEntityUploadHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
+//            if (theEntity.hasImage() || theEntity.hasBinaryDomainAttribute())
+//                generateEntityUploadHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
             if (theEntity.getAttributes().elementAt(i).isDateTime() || theEntity.getAttributes().elementAt(i).isTimestamp())
                 generateEntityToNowHelperClass(theEntity, theEntity.getAttributes().elementAt(i));
         }
@@ -2396,88 +2396,283 @@ public class TagClassGenerator {
         out.close();
     }
 
-    private void generateEntityUploadClass(Entity theEntity) throws IOException {
+    private void generateEntityUploadServlet(Entity theEntity) throws IOException {
         if ((theEntity.getPrimaryKeyAttributes() == null || theEntity.getPrimaryKeyAttributes().size() == 0) && (theEntity.getSubKeyAttributes() == null || theEntity.getSubKeyAttributes().size() == 0))
             return;
 
-        File baseClassFile = new File(tagDirectory, "/" + theEntity.getUnqualifiedLabel() + "Upload.java");
+        File baseClassFile = new File(tagDirectory, "/" + theEntity.getUnqualifiedLabel() + "UploadServlet.java");
         FileWriter fstream = new FileWriter(baseClassFile);
         BufferedWriter out = new BufferedWriter(fstream);
 
         out.write("package " + packagePrefix + "." + theEntity.getUnqualifiedLowerLabel() + ";\n\n");
         out.write("import java.io.IOException;\n");
+        out.write("import java.sql.Connection;\n");
         out.write("import java.sql.PreparedStatement;\n");
         out.write("import java.sql.ResultSet;\n");
-        out.write("import java.sql.SQLException;\n");
-        out.write("import java.util.Vector;\n");
-        out.write("import java.io.InputStream;\n");
-        out.write("import org.apache.logging.log4j.Logger;\n");
-        out.write("import org.apache.logging.log4j.LogManager;\n");
-        
-        if (theEntity.hasImage()) {
-            out.write("import java.io.ByteArrayOutputStream;\n");
-        }
-        out.write("import java.util.Iterator;\n");
-        out.write("import java.util.List;\n");
+        out.write("import java.sql.SQLException;\n\n");
+
+        out.write("import javax.naming.InitialContext;\n");
+        out.write("import javax.servlet.ServletException;\n");
+        out.write("import javax.servlet.annotation.MultipartConfig;\n");
+        out.write("import javax.servlet.annotation.WebServlet;\n");
+        out.write("import javax.servlet.http.HttpServlet;\n");
         out.write("import javax.servlet.http.HttpServletRequest;\n");
-        out.write("import org.apache.commons.fileupload.FileItem;\n");
-        out.write("import org.apache.commons.fileupload.FileItemFactory;\n");
-        out.write("import org.apache.commons.fileupload.FileUploadException;\n");
-        out.write("import org.apache.commons.fileupload.disk.DiskFileItemFactory;\n");
-        out.write("import org.apache.commons.fileupload.servlet.ServletFileUpload;\n");
-        if (theEntity.hasImage()) {
-            out.write("import javax.imageio.ImageIO;\n");
-            out.write("import java.io.BufferedInputStream;\n");
-            out.write("import java.awt.Image;\n");
-            out.write("import java.awt.image.RenderedImage;\n");
-        }
-        if (theEntity.hasDateTime())
-            out.write("import java.util.Date;\n");
-//        if (theEntity.hasImage())
-//            out.write("import java.awt.Image;\n");
+        out.write("import javax.servlet.http.HttpServletResponse;\n");
+        out.write("import javax.servlet.http.Part;\n");
+        out.write("import javax.sql.DataSource;\n\n");
+
+        out.write("import org.apache.logging.log4j.LogManager;\n");
+        out.write("import org.apache.logging.log4j.Logger;\n");
+        out.write("import org.cd2h.N3CDashboardTagLib.Sequence;\n");
         out.write("\n");
         
-        out.write("import javax.servlet.jsp.JspException;\n");
-        out.write("import javax.servlet.jsp.JspTagException;\n");
-        out.write("import javax.servlet.jsp.tagext.Tag;\n");
+        out.write("@WebServlet(\"/" + theEntity.getUpperLabel() + "UploadServlet\")\n");
+        out.write("@MultipartConfig(fileSizeThreshold=1024*1024*10, 	// 10 MB\n");
+        out.write("                 maxFileSize=1024*1024*50,      	// 50 MB\n");
+        out.write("                 maxRequestSize=1024*1024*100)   	// 100 MB\n");
+        out.write("public class " + theEntity.getUnqualifiedLabel() + "UploadServlet extends HttpServlet {\n");
+        out.write("\tprivate static final long serialVersionUID = 1L;\n");
+        out.write("\tprivate static final Logger log = LogManager.getLogger(" + theEntity.getUnqualifiedLabel() + "UploadServlet.class);\n");
+        out.write("\tprotected DataSource theDataSource = null;\n\n");
         
-        generateParentImports(out, theEntity);
-        out.write("\n");
-        out.write("import " + packagePrefix + "." + projectName + "TagSupport;\n");
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            if ((theAttribute.getDefaultValue().startsWith("Sequence") && !theAttribute.isForeign()) || (theAttribute.isPrimary() && !theAttribute.isForeign() && theAttribute.isInt())) {
-                out.write("import " + packagePrefix + ".Sequence;\n");
-                break;
+        out.write("\tpublic " + theEntity.getUnqualifiedLabel() + "UploadServlet() {\n");
+        out.write("\t\tsuper();\n");
+        out.write("\t}\n\n");
+
+        out.write("\tprotected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {\n");
+        out.write("\t\tdoPost(request, response);\n");
+        out.write("\t}\n\n");
+
+        out.write("\tprotected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {\n");
+        /*
+         * declare "simple" attributes
+         */
+        for (Attribute attribute : theEntity.getAttributes()) {
+            if (attribute.isImage() || attribute.isBinaryDomain())
+            	continue;
+            if (attribute.isPrimary() && !attribute.isForeign()) {
+                out.write("\t\t" + attribute.getType() + " " + attribute.getLabel() + " = " + attribute.getInitializer() + ";\n");
+                out.write("\t\tif (request.getParameter(\"" + attribute.getLabel() + "\") != null)\n");
+                out.write("\t\t\t" + attribute.getLabel() + " = " + attribute.parseUploadValue() + ";\n");
+            	
+            } else {
+                out.write("\t\t" + (attribute.getDomain() == null ? attribute.getType() : attribute.getDomain().getJavaType()) + " " + attribute.getLabel() + " = " + attribute.parseUploadValue() + ";\n");            	
             }
         }
-        out.write("\n@SuppressWarnings(\"serial\")");
-        out.write("\npublic class " + theEntity.getUnqualifiedLabel() + "Upload extends " + projectName + "TagSupport {\n\n");
-        out.write("\tboolean commitNeeded = false;\n");
-        out.write("\tboolean newRecord = false;\n\n");
-        out.write("\tVector<" + projectName + "TagSupport> parentEntities = new Vector<" + projectName + "TagSupport>();\n\n");
+        out.write("\n");
         
-        out.write("\tprivate static final Logger log = LogManager.getLogger("+theEntity.getUnqualifiedLabel() +"Upload.class);\n\n");
-        
-
-        // declare attributes
-        for (int i = 0; i < theEntity.getAttributes().size(); i++) {
-            Attribute theAttribute = theEntity.getAttributes().elementAt(i);
-            out.write("\t" + (theAttribute.getDomain() == null ? theAttribute.getType() : theAttribute.getDomain().getJavaType()) + " " + theAttribute.getLabel() + " = " + theAttribute.getInitializer() + ";\n");
-            if (theAttribute.isImage() || theAttribute.isBinaryDomain())
-                out.write("\tFileItem " + theAttribute.getLabel() + "Item = " + theAttribute.getInitializer() + ";\n");
+        /*
+         * declare streamed attributes
+         */
+        Attribute imageAttribute = null; //we'll need this multiple times later
+        for (Attribute attribute : theEntity.getAttributes()) {
+            if (attribute.isImage() || attribute.isBinaryDomain()) {
+            	out.write("\t\tPart " + attribute.getLabel() + " = null;\n");
+            	imageAttribute = attribute;
+            }
         }
+        out.write("\n");
 
-        generateUploadDoStartTag(theEntity, out);
-
-        generateUploadDoEndTag(theEntity, out);
+        /*
+         * snag the streamed attributes
+         */
+        out.write("\t\tfor (Part part : request.getParts()) {\n");
+        out.write("\t\t\tPayload payload = getPayload(part);\n");
+        out.write("\t\t\tif (payload == null)\n");
+        out.write("\t\t\t\tcontinue;\n");
+        out.write("\t\t\tlog.debug(payload.name + \" file: \" + payload.file);\n");
+        out.write("\n");
+        out.write("\t\t\tswitch(payload.name) {\n");
+        for (Attribute attribute : theEntity.getAttributes()) {
+            if (attribute.isImage() || attribute.isBinaryDomain()) {
+            	out.write("\t\t\tcase \"" + attribute.getLabel() + "\":\n");            	
+            	out.write("\t\t\t\t" + attribute.getLabel() + " = part;\n");            	
+            	out.write("\t\t\t\t" + attribute.getLabel() + "Name = payload.file;\n");            	
+            	out.write("\t\t\t\tbreak;\n");
+            }
+        }
+        out.write("\t\t\t}\n");
+        out.write("\t\t}\n");
+        out.write("\n");
         
-        generateInsertEntity(theEntity, out);
-
-        generateSettersGetters(theEntity, out, false, false);
-
-        generateServiceStateReset(theEntity, out, true, true);
-
+        /*
+         * add/update the tuple
+         */
+        out.write("\t\ttry {\n");
+        out.write("\t\t\tConnection conn = getConnection();\n");
+        out.write("\t\t\tPreparedStatement stmt = null;\n");
+        out.write("\t\t\tboolean recordExists = false;\n");
+        out.write("\n");
+        
+        /*
+         * check if this is an add or an update
+         */
+        out.write("\t\t\tstmt = conn.prepareStatement(\"select count(*) from " + theEntity.getSchema().getSqlLabel() + "." + theEntity.getSqlLabel() + " where ");
+        String setBuffer = "";
+        int attrCount = 0;
+        for (Attribute attribute : theEntity.getPrimaryKeyAttributes()) {
+        	setBuffer += "\t\t\tstmt." + attribute.getSQLMethod(false) + "(" + ++attrCount + "," + attribute.getLabel() + ");\n";
+        	if (attrCount > 1) {
+        		out.write(" and ");
+        	}
+        	out.write(attribute.getSqlLabel() + " = ?");
+        }
+        out.write("\");\n");
+        out.write(setBuffer);
+        out.write("\t\t\tResultSet rs = stmt.executeQuery();\n");
+        out.write("\t\t\twhile (rs.next()) {\n");
+        out.write("\t\t\t\tint count = rs.getInt(1);\n");
+        out.write("\t\t\t\trecordExists = count == 1;\n");
+        out.write("\t\t\t}\n");
+        out.write("\t\t\tstmt.close();\n");
+        out.write("\n");
+        
+        out.write("\t\t\tif (recordExists) {\n");
+        /*
+         * doing an update
+         */
+        out.write("\t\t\t\tlog.debug(\"image upload: \" + " + imageAttribute.getLabel() + ");\n");
+        out.write("\t\t\t\tint paramCount = 0;\n");
+        out.write("\t\t\t\tstmt = conn.prepareStatement(\"update " + theEntity.getSchema().getSqlLabel() + "." + theEntity.getSqlLabel() + " set ");
+        boolean firstKey = true;
+        boolean firstNonKey = true;
+        String nonKeySetBuffer = "";
+        String keySetBuffer = "";
+        String nonKeyAssignBuffer = "";
+        String keyAssignBuffer = "";
+        for (Attribute attribute : theEntity.getAttributes()) {
+        	if (attribute.isImage() || attribute.isBinaryDomain())
+        		continue;
+        	if (attribute.isPrimary()) {
+        		if (firstKey) {
+        			firstKey = false;
+        		} else {
+        			keyAssignBuffer += " and ";
+        		}
+        		keyAssignBuffer += attribute.getSqlLabel() + " = ?";
+        		keySetBuffer += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount," + attribute.getLabel() + ");\n";
+        	} else {
+           		if (firstNonKey) {
+           			firstNonKey = false;
+        		} else {
+        			nonKeyAssignBuffer += ", ";
+        		}
+           		nonKeyAssignBuffer += attribute.getSqlLabel() + " = ?";
+        		nonKeySetBuffer += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount," + attribute.getLabel() + ");\n";
+        	}
+        }
+        out.write(nonKeyAssignBuffer + " where " + keyAssignBuffer + "\");\n");
+        out.write(nonKeySetBuffer);
+        out.write(keySetBuffer);
+        out.write("\t\t\t\tstmt.execute();\n");
+        out.write("\t\t\t\tstmt.close();\n");
+        out.write("\t\t\t\tif (" + imageAttribute.getLabel() + " != null) {\n");
+        out.write("\t\t\t\t\tparamCount = 0;\n");
+        out.write("\t\t\t\t\tstmt = conn.prepareStatement(\"update " + theEntity.getSchema().getSqlLabel() + "." + theEntity.getSqlLabel() + " set ");
+        out.write(imageAttribute.getLabel() + "=?," + imageAttribute.getLabel() + "_name=? where " + keyAssignBuffer + "\");\n");
+        out.write("\t\t\t\t\tstmt.setBinaryStream(++paramCount, " + imageAttribute.getLabel() + ".getInputStream(), " + imageAttribute.getLabel() + ".getSize());\n");
+        out.write("\t\t\t\t\tstmt.setString(++paramCount, " + imageAttribute.getLabel() + "Name);\n");
+        out.write(keySetBuffer.replaceAll("stmt\\.", "\tstmt."));
+        out.write("\t\t\t\t\tstmt.execute();\n");
+        out.write("\t\t\t\t\tstmt.close();\n");
+        out.write("\t\t\t\t}\n");
+        out.write("\t\t\t} else {\n");
+        /*
+         * doing an add
+         */
+        out.write("\t\t\t\tint paramCount = 0;\n");
+        out.write("\t\t\t\tstmt = conn.prepareStatement(\"insert into " + theEntity.getSchema().getSqlLabel() + "." + theEntity.getSqlLabel() + "(");
+        boolean firstAttr = true;
+        String attrList = "";
+        String mapList = "";
+        String assignList = "";
+        for (Attribute attribute : theEntity.getAttributes()) {
+        	if (attribute == imageAttribute) {
+    			attrList += ",";
+    			mapList += ",";
+    			assignList += "\t\t\t\tstmt.setBinaryStream(++paramCount, " + imageAttribute.getLabel() + ".getInputStream(), " + imageAttribute.getLabel() + ".getSize());\n";
+        	} else {
+        		if (!firstAttr) {
+        			attrList += ",";
+        			mapList += ",";
+        		} else {
+        			firstAttr = false;
+        		}
+        		if (attribute.isPrimary() && !attribute.isForeign())
+            		assignList += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount,Sequence.generateID());\n";
+        		else
+        			assignList += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount," + attribute.getLabel() + ");\n";
+        	}
+        	attrList += attribute.getSqlLabel();
+        	mapList += "?";
+        }
+        out.write(attrList +") values(" + mapList + ")\");\n");
+        out.write(assignList);
+        out.write("\t\t\t\tstmt.execute();\n");
+        out.write("\t\t\t\tstmt.close();\n");
+        out.write("\t\t\t}\n");
+        out.write("\n");
+        out.write("\t\t\tconn.close();\n");
+        out.write("\t\t} catch (SQLException e) {\n");
+        out.write("\t\t\tlog.error(\"Failed to make database connection: \" + e);\n");
+        out.write("\t\t}\n");
+        out.write("\n");
+        
+        /*
+         * tidy up the post method
+         */
+        out.write("\t\tresponse.sendRedirect(request.getContextPath() + \"/" + theEntity.getLowerLabel() + "/list.jsp\");\n");
+        out.write("\t}\n\n");
+        
+        /*
+         * Finally do all the helper elements
+         */
+ 
+        out.write("\tprivate Payload getPayload(Part part) {\n");
+        out.write("\t\tString contentDisp = part.getHeader(\"content-disposition\");\n");
+        out.write("\t\tString[] tokens = contentDisp.split(\";\");\n");
+        out.write("\t\tString name = null;\n");
+        out.write("\t\tString file = null;\n");
+        out.write("\t\tfor (String token : tokens) {\n");
+        out.write("\t\t\tif (token.trim().startsWith(\"name\")) {\n");
+        out.write("\t\t\t\tname =  token.substring(token.indexOf(\"=\") + 2, token.length()-1);\n");
+        out.write("\t\t\t}\n");
+        out.write("\t\t\tif (token.trim().startsWith(\"filename\")) {\n");
+        out.write("\t\t\t\tfile =  token.substring(token.indexOf(\"=\") + 2, token.length()-1);\n");
+        out.write("\t\t\t}\n");
+        out.write("\t\t}\n");
+        out.write("\n");
+        out.write("\t\tif (file == null || file.length() == 0)\n");
+        out.write("\t\t\treturn null;\n");
+        out.write("\n");
+        out.write("\t\treturn new Payload(name, file);\n");
+        out.write("\t}\n");
+        out.write("\n");
+        out.write("\tpublic DataSource getDataSource() {\n");
+        out.write("\t\tif (theDataSource == null) try {\n");
+        out.write("\t\t\ttheDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/N3CDashboardTagLib\");\n");
+        out.write("\t\t} catch (Exception e) {\n");
+        out.write("\t\t\tlog.error(\"Error in database initialization\", e);\n");
+        out.write("\t\t}\n");
+        out.write("\n");
+        out.write("\treturn theDataSource;\n");
+        out.write("\t}\n");
+        out.write("\n");
+        out.write("\tpublic Connection getConnection() throws SQLException {\n");
+        out.write("\t\treturn getDataSource().getConnection();\n");
+        out.write("\t}\n");
+        out.write("\n");
+        out.write("\tclass Payload {\n");
+        out.write("\t\tString name = null;\n");
+        out.write("\t\tString file = null;\n");
+        out.write("\n");
+        out.write("\t\tPayload(String name, String file) {\n");
+        out.write("\t\t\tthis.name = name;\n");
+        out.write("\t\t\tthis.file = file;\n");
+        out.write("\t\t}\n");
+        out.write("\t}\n");
+        out.write("\n");
+        
         // close out class
         out.write("\n}\n");
         out.close();
