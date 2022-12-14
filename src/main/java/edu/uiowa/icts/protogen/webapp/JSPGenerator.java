@@ -63,6 +63,7 @@ public class JSPGenerator {
     }
 
     public void generateJSPs(String webAppName, Database theDatabase) throws IOException {
+    	this.webAppName = webAppName;
     	multiSchema = theDatabase.getSchemas().size() > 1;
     	log.info("webApp name: " + webAppName);
     	
@@ -1016,7 +1017,7 @@ public class JSPGenerator {
         FileWriter fstream = new FileWriter(theHeaderJSP);
         BufferedWriter out = new BufferedWriter(fstream);
         out.write("<img src=\"/" + webAppName + "/resources/images/logo.png\" height=50px ><br>\n");
-        out.write("<h1><a href=\"/" + projectName + "/index.jsp\">" + projectName + " scaffolding</a></h1>\n");
+        out.write("<h1><a href=\"/" + webAppName + "/index.jsp\">" + projectName + " scaffolding</a></h1>\n");
         out.close();
     }
     
