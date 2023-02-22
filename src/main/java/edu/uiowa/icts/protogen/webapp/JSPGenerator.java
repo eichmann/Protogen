@@ -121,7 +121,10 @@ public class JSPGenerator {
 		File f = new File(entityPathPrefix(theSchema) + theEntity.getUnqualifiedLowerLabel() + "/delete.jsp");
         FileWriter fstream = new FileWriter(f);
         BufferedWriter out = new BufferedWriter(fstream);
-        out.write("<%@ include file=\"../_include.jsp\"  %>\n\n");
+        if (multiSchema)
+        	out.write("<%@ include file=\"../../_include.jsp\"  %>\n\n");
+        else
+        	out.write("<%@ include file=\"../_include.jsp\"  %>\n\n");
         
         for (int i = 0; i < theEntity.getAttributes().size(); i++) {
             Attribute theAttribute = theEntity.getAttributes().elementAt(i);
@@ -1040,17 +1043,17 @@ public class JSPGenerator {
     public void generateHeaderBlock(BufferedWriter out, boolean uplink, boolean hasDateTime, boolean menu, int spaces) throws IOException {
         out.write(spaces(spaces) + "<html>\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<jsp:include page=\"" + (uplink ? "../" : "") + "head.jsp\" />\n");
+        out.write(spaces(spaces) + "<jsp:include page=\"" + (multiSchema && uplink ? "../" : "") + (uplink ? "../" : "") + "head.jsp\" />\n");
         out.write(spaces(spaces) + "<body>\n");
         spaces += 4;
         out.write(spaces(spaces) + "<div class=\"container-fluid\">\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<jsp:include page=\"" + (uplink ? "../" : "") + "header.jsp\" />\n");
+        out.write(spaces(spaces) + "<jsp:include page=\"" + (multiSchema && uplink ? "../" : "") + (uplink ? "../" : "") + "header.jsp\" />\n");
         out.write(spaces(spaces) + "<div class=\"row flex-nowrap\">\n");
         spaces += 4;
         out.write(spaces(spaces) + "<div class=\"col-xs-3\">\n");
         spaces += 4;
-        out.write(spaces(spaces) + "<jsp:include page=\"" + (uplink ? "../" : "") + "menu.jsp\" />\n");
+        out.write(spaces(spaces) + "<jsp:include page=\"" + (multiSchema && uplink ? "../" : "") + (uplink ? "../" : "") + "menu.jsp\" />\n");
         spaces -= 4;
         out.write(spaces(spaces) + "</div>\n");
         out.write(spaces(spaces) + "<div class=\"col-xs-8\">\n");
@@ -1073,7 +1076,10 @@ public class JSPGenerator {
     }
     
     public void generateHeaderPrefix(BufferedWriter out) throws IOException {
-        out.write("<%@ include file=\"../_include.jsp\" %>\n");
+        if (multiSchema)
+        	out.write("<%@ include file=\"../../_include.jsp\"  %>\n\n");
+        else
+        	out.write("<%@ include file=\"../_include.jsp\"  %>\n\n");
     }
 
     public void generateTopLevelHeaderPrefix(BufferedWriter out) throws IOException {
@@ -1088,7 +1094,7 @@ public class JSPGenerator {
         out.write(spaces(spaces + 16)+"</div>\n");
         out.write(spaces(spaces + 12)+"</div>\n");
         out.write(spaces(spaces + 8)+"</div>\n");
-        out.write(spaces(spaces + 8)+"<jsp:include page=\"" + (uplink ? "../" : "") + "footer.jsp\" />\n");
+        out.write(spaces(spaces + 8)+"<jsp:include page=\"" + (multiSchema && uplink ? "../" : "") + (uplink ? "../" : "") + "footer.jsp\" />\n");
         out.write(spaces(spaces + 4)+"</body>\n");
         out.write(spaces(spaces)+"</html>");
     }

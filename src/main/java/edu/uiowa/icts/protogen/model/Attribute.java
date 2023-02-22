@@ -267,6 +267,8 @@ public class Attribute extends Element {
             type = "int";
         else if (type.toLowerCase().equals("int4"))
             type = "int";
+        else if (type.toLowerCase().equals("serial"))
+            type = "int";
         else if (type.toLowerCase().equals("numeric"))
             type = "float"; // could be double
         else if (type.toLowerCase().equals("money"))
@@ -396,7 +398,7 @@ public class Attribute extends Element {
             return (get ? "get" : "set") + "Int";
         else if (sqlType.equals("Text") || sqlType.toLowerCase().equals("char") || sqlType.toLowerCase().equals("varchar"))
             return (get ? "get" : "set") + "String";
-        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("smallint"))
+        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("smallint") || sqlType.toLowerCase().equals("serial"))
             return (get ? "get" : "set") + "Int";
         else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
             return (get ? "get" : "set") + "Long";
@@ -425,7 +427,7 @@ public class Attribute extends Element {
             return "Integer.parseInt(" + label + ")";
         else if (sqlType.equals("Text") || sqlType.toLowerCase().equals("char") || sqlType.toLowerCase().equals("varchar"))
             return label;
-        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("int") || sqlType.toLowerCase().equals("smallint"))
+        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("int") || sqlType.toLowerCase().equals("smallint") || sqlType.toLowerCase().equals("serial"))
             return "Integer.parseInt(" + label + ")";
         else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
             return "Long.parseLong(" + label + ")";
@@ -452,7 +454,7 @@ public class Attribute extends Element {
             return "Integer.parseInt(request.getParameter(\"" + label + "\").trim())";
         else if (sqlType.equals("Text") || sqlType.toLowerCase().equals("char") || sqlType.toLowerCase().equals("varchar"))
             return "request.getParameter(\"" + label + "\").trim()";
-        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("int") || sqlType.toLowerCase().equals("smallint"))
+        else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("int") || sqlType.toLowerCase().equals("smallint") || sqlType.toLowerCase().equals("serial"))
             return "Integer.parseInt(request.getParameter(\"" + label + "\").trim())";
         else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
             return "Long.parseLong(request.getParameter(\"" + label + "\").trim())";
