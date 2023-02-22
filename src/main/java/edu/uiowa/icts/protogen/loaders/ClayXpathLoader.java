@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,6 +33,7 @@ public class ClayXpathLoader implements DatabaseModelLoader {
 	
 	Element databaseNode = null;
 	Database database = null;
+	Hashtable<String,String> suppressionHash = null;
 	
 	public Database load(String fileName) throws IOException, DocumentException {
 		File input = new File(fileName);
@@ -62,6 +64,10 @@ public class ClayXpathLoader implements DatabaseModelLoader {
 		return database;
 	}
 	
+	public void setSuppressionHash(Hashtable<String,String> suppressionHash) {
+		this.suppressionHash = suppressionHash;
+	}
+	
 	@SuppressWarnings("unchecked")
 	void processSchemas(Database database, Element dbnode) {
 		logger.info("database: " + database.getSqlLabel());
@@ -87,6 +93,10 @@ public class ClayXpathLoader implements DatabaseModelLoader {
 	@SuppressWarnings("unchecked")
 	void processEntities(Schema schema, Element schemaNode) {
 		for (Element tableNode : (List<Element>)schemaNode.selectNodes("table-list/table")) {
+			if (suppressionHash != null && suppressionHash.containsKey(tableNode.attributeValue("name"))) {
+				logger.info("suppressing entity " + tableNode.attributeValue("name"));
+				continue;
+			}
 			Entity entity = new Entity(tableNode.attributeValue("name"), tableNode.attributeValue("remarks"));
 			logger.info("\tentity: " + entity.getSqlLabel());
 			schema.addEntity(entity);
@@ -124,11 +134,21 @@ public class ClayXpathLoader implements DatabaseModelLoader {
 		for (Element schemaNode : (List<Element>)databaseNode.selectNodes("schema-list/schema")) {
 			Schema targetSchema = database.getSchemaByName(schemaNode.attributeValue("name"));
 			for (Element entityNode : (List<Element>)schemaNode.selectNodes("table-list/table")) {
+				if (suppressionHash != null && suppressionHash.containsKey(entityNode.attributeValue("name"))) {
+					logger.info("suppressing relationship with target " + entityNode.attributeValue("name"));
+					continue;
+				}
 				Entity entity = targetSchema.getEntityByLabel(entityNode.attributeValue("name"));
 				for (Element keyNode : (List<Element>)entityNode.selectNodes("foreign-key-list/foreign-key")) {
 					Relationship relationship = new Relationship();
 					Schema sourceSchema = database.getSchemaByName(keyNode.attributeValue("referenced-table-schema"));
 					Entity sourceEntity = sourceSchema.getEntityByLabel(keyNode.attributeValue("referenced-table"));
+					
+					if (suppressionHash != null && suppressionHash.containsKey(keyNode.attributeValue("referenced-table"))) {
+						logger.info("suppressing relationship with source " + keyNode.attributeValue("referenced-table"));
+						continue;
+					}
+
 					relationship.setSourceEntity(sourceEntity);
 					relationship.setTargetEntity(entity);
 					

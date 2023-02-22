@@ -1,6 +1,7 @@
 package edu.uiowa.icts.protogen.webapp;
 
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -52,6 +53,17 @@ public class Generator {
 		String projectName = props.getProperty("project.name");
 		String packageName = props.getProperty("package.name");
 		String webAppName = props.getProperty("jsp.project.name");
+		String suppressionList = props.getProperty("suppression list");
+		Hashtable<String,String> suppressionHash = null;
+		
+		if (suppressionList != null) {
+			suppressionHash = new Hashtable<String,String>();
+			log.info("suppression list: " + suppressionList);
+			for (String suppressed : suppressionList.split("[ \n\r\t]+")) {
+				log.info("suppressing: " + suppressed);	
+				suppressionHash.put(suppressed, suppressed);
+			}
+		}
 		
 		if(props.getProperty("pathPrefix") != null){
 			pathPrefix = props.getProperty("path.prefix");
@@ -66,6 +78,8 @@ public class Generator {
 		DatabaseModelLoader theLoader = null;
 		if(modelSource.equalsIgnoreCase("clay")) {
 			theLoader = new ClayXpathLoader();
+			if (suppressionHash != null)
+				((ClayXpathLoader)theLoader).setSuppressionHash(suppressionHash);
 			String clayFile = "";
 			try {
 				clayFile = props.getProperty("clay.file", pathPrefix + projectName + "/WebContent/resources/" + projectName + ".clay");
@@ -96,7 +110,7 @@ public class Generator {
 
 		theDatabase = theLoader.getDatabase();
 		theDatabase.dump();
-
+		
 		log.debug("PathPrefix:"+pathPrefix);
 
 
