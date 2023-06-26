@@ -126,6 +126,7 @@ public class TLDGenerator {
 //        out.write("\t\t<info>iterator tag for " + theEntity.getUnqualifiedLabel() + "</info>\n");
         generateAttribute("var", true, false);
         generateAttribute("sortCriteria", false, true);
+        generateAttribute("filterCriteria", false, true);
         generateAttribute("limitCriteria", false, true);
         for (int i = 0; i < theEntity.getPrimaryKeyAttributes().size(); i++) {
             if (theEntity.getPrimaryKeyAttributes().elementAt(i).getLabel().equals("ID"))

@@ -935,6 +935,9 @@ public class TagClassGenerator {
         
         out.write("\n    PreparedStatement stat = null;\n"
                 + "    ResultSet rs = null;\n"
+                + "    String fromList = null;\n"
+                + "    String joinCriteria = null;\n"
+                + "    String filterCriteria = null;\n"
                 + "    String sortCriteria = null;\n"
                 + "    int limitCriteria = 0;\n"
                 + "    String var = null;\n"
@@ -1138,6 +1141,7 @@ public class TagClassGenerator {
         out.write("            stat = getConnection().prepareStatement(\"SELECT count(*)");
         out.write(" from \" + generateFromClause() + \" where 1=1\"\n");
         out.write("                                                        + generateJoinCriteria()\n");
+        out.write("                                                        + generateFilterCriteria()\n");
         
         StringBuffer queryBuffer = new StringBuffer();
 //        for (int i = 0; i < parentKeys.size(); i++) {
@@ -1209,6 +1213,7 @@ public class TagClassGenerator {
         }
         out.write(" from \" + generateFromClause() + \" where 1=1\"\n");
         out.write("                                                        + generateJoinCriteria()\n");
+        out.write("                                                        + generateFilterCriteria()\n");
         queryBuffer = new StringBuffer();
         
         for (int i = 0; i < theEntity.getParents().size(); i++) {
@@ -1274,6 +1279,7 @@ public class TagClassGenerator {
         out.write("        return SKIP_BODY;\n");
         out.write("    }\n");
         out.write("\n");
+
         out.write("    private String generateFromClause() {\n"
                 + "       StringBuffer theBuffer = new StringBuffer(\"" + theSchema.getSqlLabel() + "." + theEntity.getSqlLabel() + "\");\n");
         if (theEntity.getParents().size() > 1) {
@@ -1287,6 +1293,7 @@ public class TagClassGenerator {
         out.write("      return theBuffer.toString();\n"
                 + "    }\n"
                 + "\n");
+
         out.write("    private String generateJoinCriteria() {\n"
                 + "       StringBuffer theBuffer = new StringBuffer();\n");
         if (theEntity.getParents().size() > 1) {
@@ -1303,6 +1310,16 @@ public class TagClassGenerator {
         out.write("      return theBuffer.toString();\n"
                 + "    }\n"
                 + "\n");
+
+        out.write("    private String generateFilterCriteria() {\n"
+                + "        if (filterCriteria != null) {\n"
+                + "            return \" and \" + filterCriteria;\n"
+                + "        } else {\n"
+                + "            return \"\";\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n");
+        
         out.write("    private String generateSortCriteria() {\n"
                 + "        if (sortCriteria != null) {\n"
                 + "            return sortCriteria;\n"
@@ -1442,6 +1459,30 @@ public class TagClassGenerator {
                 + "        this.sortCriteria = null;\n"
                 + "        this.var = null;\n"
                 + "        this.rsCount = 0;\n"
+                + "    }\n"
+                + "\n"
+                + "    public String getFromList() {\n"
+                + "        return fromList;\n"
+                + "    }\n"
+                + "\n"
+                + "    public void setFromList(String fromList) {\n"
+                + "        this.fromList = fromList;\n"
+                + "    }\n"
+                + "\n"
+                + "    public String getJoinCriteria() {\n"
+                + "        return joinCriteria;\n"
+                + "    }\n"
+                + "\n"
+                + "    public void setJoinCriteria(String joinCriteria) {\n"
+                + "        this.joinCriteria = joinCriteria;\n"
+                + "    }\n"
+                + "\n"
+                + "    public String getFilterCriteria() {\n"
+                + "        return filterCriteria;\n"
+                + "    }\n"
+                + "\n"
+                + "    public void setFilterCriteria(String filterCriteria) {\n"
+                + "        this.filterCriteria = filterCriteria;\n"
                 + "    }\n"
                 + "\n"
                 + "    public String getSortCriteria() {\n"
