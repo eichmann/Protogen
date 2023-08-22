@@ -2,6 +2,7 @@ package edu.uiowa.icts.plugin.protogen;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
@@ -84,7 +85,12 @@ public class WebApp  extends AbstractMojo {
 		
 		if (Boolean.parseBoolean(props.getProperty("generator.enabled", "true"))) {
 			Generator gen = new Generator();
-			gen.runGenerator(props);
+			try {
+				gen.runGenerator(props);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
 			log.info("Generator has been disabled: generator.enabled = " +props.getProperty("generator.enabled","false"));
 		}

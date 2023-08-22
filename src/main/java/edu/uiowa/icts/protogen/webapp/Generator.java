@@ -1,5 +1,8 @@
 package edu.uiowa.icts.protogen.webapp;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -47,7 +50,7 @@ public class Generator {
 
 	public static Database theDatabase = null;
 
-	public int runGenerator(Properties props) {
+	public int runGenerator(Properties props) throws IOException {
 		
 		int error = 0;
 		String projectName = props.getProperty("project.name");
@@ -92,6 +95,8 @@ public class Generator {
 		} else if(modelSource.equalsIgnoreCase("jdbc")) {
 
 			theLoader = new JDBCLoader();
+			if (suppressionHash != null)
+				((JDBCLoader)theLoader).setSuppressionHash(suppressionHash);
 			try {
 				theLoader.run(props);
 			} catch (Exception e) {
@@ -108,165 +113,179 @@ public class Generator {
 			}
 		}
 
+        File dumpFile = new File(pathPrefix + projectName + "/src/non-packaged-resources/" + modelSource + ".txt");
+        FileWriter fstream = new FileWriter(dumpFile);
+        BufferedWriter out = new BufferedWriter(fstream);
+
 		theDatabase = theLoader.getDatabase();
-		theDatabase.dump();
+		theDatabase.dump(out);
+		out.close();
 		
 		log.debug("PathPrefix:"+pathPrefix);
 
+		try {
+			switch (mode) {
+			case "tags":
+				String packageRoot = packageName;
+				if (Boolean.parseBoolean(props.getProperty("generate.tags", "true"))) {
+					String tagLocation = props.getProperty("tag.file.location", pathPrefix + "/" + projectName+ "/"  + "src");
+					TagClassGenerator theGenerator;
+					String databaseType = props.getProperty("database.type", "postgres");
+					
+					theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName, databaseType);
+					
+					try {
+						theGenerator.generateTagClasses(theDatabase);
+					} catch (IOException e2) {
+						log.error("Could not generate Tag Classes: " + tagLocation, e2);
+						error=1;
+					}
+				}
+				
+				if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
+					//TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
+					TLDGenerator theTLDgenerator = new TLDGenerator(props);
+					try {
+						theTLDgenerator.generateTLD(theDatabase);
+					} catch (IOException e1) {
+						log.error("Could not generate TLD File: " +  props.getProperty("tld.file.location"), e1);
+						error = 1;
+					}
+				}
+				
+				if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
+					String jspLocation = props.getProperty("jsp.file.location", pathPrefix + projectName + "/WebContent/");
+					
+					JSPGenerator theJSPgenerator;
+					if(props.getProperty("jsp.taglibrary.prefix") != null){
+						theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName, props.getProperty("jsp.taglibrary.prefix"));
+					}else{
+						theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
+					}
+					
+					if (props.getProperty("jsp.resources.location") != null)
+						theJSPgenerator.setResourcesPath(props.getProperty("jsp.resources.location"));
+					
+					try {
+						theJSPgenerator.generateJSPs(webAppName, theDatabase);
+					} catch (IOException e) {
+						log.error("Could not generate JSP Files: " + jspLocation, e);
+						error = 1;
+					}
+				}
+				break;
+			case "hibernate":
+				SpringHibernateModel model = new SpringHibernateModel( theDatabase, packageName, props );
 
-		if(mode.equalsIgnoreCase("tags")) {
-			String packageRoot = packageName;
-			if (Boolean.parseBoolean(props.getProperty("generate.tags", "true"))) {
-				String tagLocation = props.getProperty("tag.file.location", pathPrefix + "/" + projectName+ "/"  + "src");
-				TagClassGenerator theGenerator;
-				String databaseType = props.getProperty("database.type", "postgres");
-				
-				theGenerator = new TagClassGenerator(tagLocation, packageRoot, projectName, databaseType);
-				
-				try {
-					theGenerator.generateTagClasses(theDatabase);
-				} catch (IOException e2) {
-					log.error("Could not generate Tag Classes: " + tagLocation, e2);
-					error=1;
+				/*
+				 * generate.domain = true 
+				 */
+				if ( Boolean.parseBoolean( props.getProperty( "generate.domain", "true" ) ) ) {
+					String domainPath = props.getProperty( "domain.file.location", pathPrefix + projectName + "/" + "src" );
+					DomainCodeGenerator codeGen = new DomainCodeGenerator( model, domainPath, packageName );
+					try {
+						log.debug( "***********Writing domain code*****************" );
+						codeGen.generate();
+					} catch ( IOException e ) {
+						log.debug( "Error writing domain code" );
+						log.error( "Error writing domain code", e );
+						error = 1;
+					}
+				} else {
+					log.debug("Not generating domain code");
 				}
-			}
-			
-			if (Boolean.parseBoolean(props.getProperty("generate.tld", "true"))) {
-				//TLDGenerator theTLDgenerator = new TLDGenerator(tldLocation, packageRoot, projectName);
-				TLDGenerator theTLDgenerator = new TLDGenerator(props);
-				try {
-					theTLDgenerator.generateTLD(theDatabase);
-				} catch (IOException e1) {
-					log.error("Could not generate TLD File: " +  props.getProperty("tld.file.location"), e1);
-					error = 1;
-				}
-			}
-			
-			if (Boolean.parseBoolean(props.getProperty("generate.jsps", "true"))) {
-				String jspLocation = props.getProperty("jsp.file.location", pathPrefix + projectName + "/WebContent/");
-				
-				JSPGenerator theJSPgenerator;
-				if(props.getProperty("jsp.taglibrary.prefix") != null){
-					theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName, props.getProperty("jsp.taglibrary.prefix"));
-				}else{
-					theJSPgenerator = new JSPGenerator(jspLocation, packageRoot, projectName);
-				}
-				
-				if (props.getProperty("jsp.resources.location") != null)
-					theJSPgenerator.setResourcesPath(props.getProperty("jsp.resources.location"));
-				
-				try {
-					theJSPgenerator.generateJSPs(webAppName, theDatabase);
-				} catch (IOException e) {
-					log.error("Could not generate JSP Files: " + jspLocation, e);
-					error = 1;
-				}
-			}
-		} else {
 
-			SpringHibernateModel model = new SpringHibernateModel( theDatabase, packageName, props );
-
-			/*
-			 * generate.domain = true 
-			 */
-			if ( Boolean.parseBoolean( props.getProperty( "generate.domain", "true" ) ) ) {
-				String domainPath = props.getProperty( "domain.file.location", pathPrefix + projectName + "/" + "src" );
-				DomainCodeGenerator codeGen = new DomainCodeGenerator( model, domainPath, packageName );
-				try {
-					log.debug( "***********Writing domain code*****************" );
-					codeGen.generate();
-				} catch ( IOException e ) {
-					log.debug( "Error writing domain code" );
-					log.error( "Error writing domain code", e );
-					error = 1;
+				/*
+				 * generate.dao = true 
+				 */
+				if (Boolean.parseBoolean(props.getProperty("generate.dao", "true"))) {
+					String daoPath = props.getProperty("dao.file.location",	pathPrefix +projectName+ "/"  + "src");
+					
+					DAOCodeGenerator codeGen = new DAOCodeGenerator(model,daoPath,packageName,props);
+					
+					try {
+						codeGen.generate();
+					} catch (Exception e3) {
+						log.error("Could not generate DAO Classes: " +daoPath, e3);
+						error=1;
+					}
+				} else {
+					log.debug("Not generating dao code");
 				}
-			} else {
-				log.debug("Not generating domain code");
-			}
 
-			/*
-			 * generate.dao = true 
-			 */
-			if (Boolean.parseBoolean(props.getProperty("generate.dao", "true"))) {
-				String daoPath = props.getProperty("dao.file.location",	pathPrefix +projectName+ "/"  + "src");
+				/*
+				 * generate.controller = true 
+				 */
+				if ( Boolean.parseBoolean( props.getProperty( "generate.controller", "true" ) ) ) {
+					String controllerPath = props.getProperty( "controller.file.location", pathPrefix + projectName + "/" + "src" );
+					ControllerCodeGenerator codeGen = new ControllerCodeGenerator( model, controllerPath, packageName, props );
+					try {
+						codeGen.generate();
+					} catch ( Exception e3 ) {
+						log.error( "Could not generate Controller Classes: " + controllerPath, e3 );
+						error = 1;
+					}
+				} else {
+					log.debug( "Not generating controller code" );
+				}
 				
-				DAOCodeGenerator codeGen = new DAOCodeGenerator(model,daoPath,packageName,props);
 				
-				try {
-					codeGen.generate();
-				} catch (Exception e3) {
-					log.error("Could not generate DAO Classes: " +daoPath, e3);
-					error=1;
+				/*
+				 * generate.jsp = true 
+				 */
+				if (Boolean.parseBoolean(props.getProperty("generate.jsp", "true"))) {
+					String jspPath = props.getProperty("jsp.file.location",	pathPrefix +projectName+ "/"  + "src");
+					JSPCodeGenerator codeGen = new JSPCodeGenerator(model,jspPath,packageName,props);
+					try {
+						codeGen.generate();
+					} catch (Exception e3) {
+						log.error("Could not generate JSP files: " +jspPath, e3);
+						error=1;
+					}
+				} else {
+					log.debug("Not generating jsp code");
 				}
-			} else {
-				log.debug("Not generating dao code");
-			}
-
-			/*
-			 * generate.controller = true 
-			 */
-			if ( Boolean.parseBoolean( props.getProperty( "generate.controller", "true" ) ) ) {
-				String controllerPath = props.getProperty( "controller.file.location", pathPrefix + projectName + "/" + "src" );
-				ControllerCodeGenerator codeGen = new ControllerCodeGenerator( model, controllerPath, packageName, props );
-				try {
-					codeGen.generate();
-				} catch ( Exception e3 ) {
-					log.error( "Could not generate Controller Classes: " + controllerPath, e3 );
-					error = 1;
+				
+				/*
+				 * generate.test = true 
+				 */
+				if ( Boolean.parseBoolean( props.getProperty( "generate.test", "true" ) ) ) {
+					String testPath = props.getProperty( "test.file.location", pathPrefix + projectName + "/" + "src" );
+					BaseTestCodeGenerator codeGen = new BaseTestCodeGenerator( model, testPath, packageName, props );
+					try {
+						codeGen.generate();
+					} catch ( Exception e3 ) {
+						log.error( "Could not generate Test Classes: " + testPath, e3 );
+						error = 1;
+					}
+				} else {
+					log.debug( "Not generating test code" );
 				}
-			} else {
-				log.debug( "Not generating controller code" );
-			}
-			
-			
-			/*
-			 * generate.jsp = true 
-			 */
-			if (Boolean.parseBoolean(props.getProperty("generate.jsp", "true"))) {
-				String jspPath = props.getProperty("jsp.file.location",	pathPrefix +projectName+ "/"  + "src");
-				JSPCodeGenerator codeGen = new JSPCodeGenerator(model,jspPath,packageName,props);
-				try {
-					codeGen.generate();
-				} catch (Exception e3) {
-					log.error("Could not generate JSP files: " +jspPath, e3);
-					error=1;
+				
+				/*
+				 * deobfuscate.column.names = true
+				 */
+				if (Boolean.parseBoolean(props.getProperty("deobfuscate.column.names", "false"))) {
+					String path = props.getProperty("dao.file.location", pathPrefix + projectName+ "/"  + "src");
+					ColumnDeobfuscationCodeGenerator codeGen = new ColumnDeobfuscationCodeGenerator(model,path,packageName,props);
+					try {
+						codeGen.generate();
+					} catch (Exception e3) {
+						log.error("Could not generate Column Deobfuscation files: " + path, e3);
+						error=1;
+					}
+				} else {
+					log.debug("Not generating test code");
 				}
-			} else {
-				log.debug("Not generating jsp code");
+				break;
+			default:
+				break;
 			}
-			
-			/*
-			 * generate.test = true 
-			 */
-			if ( Boolean.parseBoolean( props.getProperty( "generate.test", "true" ) ) ) {
-				String testPath = props.getProperty( "test.file.location", pathPrefix + projectName + "/" + "src" );
-				BaseTestCodeGenerator codeGen = new BaseTestCodeGenerator( model, testPath, packageName, props );
-				try {
-					codeGen.generate();
-				} catch ( Exception e3 ) {
-					log.error( "Could not generate Test Classes: " + testPath, e3 );
-					error = 1;
-				}
-			} else {
-				log.debug( "Not generating test code" );
-			}
-			
-			/*
-			 * deobfuscate.column.names = true
-			 */
-			if (Boolean.parseBoolean(props.getProperty("deobfuscate.column.names", "false"))) {
-				String path = props.getProperty("dao.file.location", pathPrefix + projectName+ "/"  + "src");
-				ColumnDeobfuscationCodeGenerator codeGen = new ColumnDeobfuscationCodeGenerator(model,path,packageName,props);
-				try {
-					codeGen.generate();
-				} catch (Exception e3) {
-					log.error("Could not generate Column Deobfuscation files: " + path, e3);
-					error=1;
-				}
-			} else {
-				log.debug("Not generating test code");
-			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 		return error;
 	}
 	

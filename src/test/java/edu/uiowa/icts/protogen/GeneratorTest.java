@@ -1,5 +1,6 @@
 package edu.uiowa.icts.protogen;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -85,9 +86,10 @@ public class GeneratorTest extends TestCase {
 	/**
 	 * Verify the generation 2 data tables method and list.jsp generates properly using velocity.
 	 * @author rrlorent
+	 * @throws IOException 
 	 * @since August 5, 2014
 	 */
-	public void generation2Datatable() {
+	public void generation2Datatable() throws IOException {
 
 		String projectName = "Protogen";
 		String pathPrefix = System.getProperty( "user.dir" );

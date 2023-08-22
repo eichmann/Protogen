@@ -1,5 +1,7 @@
 package edu.uiowa.icts.protogen.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -46,10 +48,10 @@ public class Database extends Element {
             schemas.elementAt(i).relabel();
     }
 
-    public void dump() {
-        log.debug("database: " + label + "\tuid: " + uid);
+    public void dump(BufferedWriter out) throws IOException {
+        out.write("database: " + label + "\tuid: " + uid + "\n");
         for (int i = 0; i < schemas.size(); i++)
-            schemas.elementAt(i).dump();
+            schemas.elementAt(i).dump(out);
     }
 
 }

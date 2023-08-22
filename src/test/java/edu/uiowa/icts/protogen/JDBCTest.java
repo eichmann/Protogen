@@ -1,5 +1,6 @@
 package edu.uiowa.icts.protogen;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -63,9 +64,15 @@ public class JDBCTest extends TestCase {
 		props.setProperty( "db.driver", "org.postgresql.Driver" );
 
 		Generator gen = new Generator();
-		int result = gen.runGenerator( props );
-		log.debug( "result = " + result );
-		assertEquals( "Error during domain code generation", 0, 0 );
+		int result;
+		try {
+			result = gen.runGenerator( props );
+			log.debug( "result = " + result );
+			assertEquals( "Error during domain code generation", 0, 0 );
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 }

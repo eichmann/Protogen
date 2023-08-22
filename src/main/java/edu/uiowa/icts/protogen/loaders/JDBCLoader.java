@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,7 +22,7 @@ public class JDBCLoader implements DatabaseModelLoader {
 
 	private Database database = null;
 	private Connection conn = null;
-	// private String currentSchema=null;
+	Hashtable<String,String> suppressionHash = null;
 
 	public JDBCLoader() {
 
@@ -33,6 +34,10 @@ public class JDBCLoader implements DatabaseModelLoader {
 		return database;
 	}
 
+	public void setSuppressionHash(Hashtable<String,String> suppressionHash) {
+		this.suppressionHash = suppressionHash;
+	}
+	
 	public void run(Properties prop) throws Exception {
 
 		String schema = prop.getProperty("db.schema");
@@ -79,15 +84,6 @@ public class JDBCLoader implements DatabaseModelLoader {
 		}
 		
 		for(Schema s:database.getSchemas()) {
-			for (int i = 0; i < s.getRelationships().size(); i++) {
-				Relationship currentRelationship = s.getRelationships().elementAt(i);
-				if (currentRelationship.sourceEntity == null) {
-					log.debug("source entity is null for " + currentRelationship.getSourceEntityName() + " -> " + s.getEntityByLabel(currentRelationship.getSourceEntityName()));
-					currentRelationship.setSourceEntity(s.getEntityByLabel(currentRelationship.getSourceEntityName()));
-				}
-				currentRelationship.getSourceEntity().setChild(currentRelationship);
-			}
-			
 			for(Entity e : s.getEntities()) {
 				e.generateParentKeys();
 				e.generateSubKeys();
@@ -308,6 +304,16 @@ public class JDBCLoader implements DatabaseModelLoader {
 					
 					if(pktable.equalsIgnoreCase(fktable) && pkcolumn.equalsIgnoreCase(fkcolumn))
 						continue;
+					if (suppressionHash != null && suppressionHash.containsKey(pktable)) {
+						log.info("suppressing relationship with source " + pktable);
+						continue;
+					}
+					if (suppressionHash != null && suppressionHash.containsKey(fktable)) {
+						log.info("suppressing relationship with target " + fktable);
+						continue;
+					}
+
+					Relationship relationship = new Relationship();
 
 					Schema pks = getSchema(pkschema);
 					Entity pke = getEntity(pks, pktable);
@@ -317,33 +323,20 @@ public class JDBCLoader implements DatabaseModelLoader {
 					Entity fke = getEntity(fks, fktable);
 					Attribute  fka = getAttribute(fke, fkcolumn);
 
-					fka.setForeignAttribute(pka);
+					relationship.setSourceEntity(pke);
+					relationship.setTargetEntity(fke);
+					
+					pke.setChild(relationship);
+					fke.setParent(relationship);
+					fke.getSchema().addRelationship(relationship);
 
-					Relationship r = new Relationship();
-					r.setSourceEntity(pke);
-					r.setSourceEntityName(pke.getLabel());
-					
-					r.setTargetEntity(fke);
-					
-					r.setLabel("foreign_key");
-					
-					fke.setParent(r);
-					fks.getRelationships().add(r);
-					
-					if(!rels.contains(pktable+"."+pkcolumn+"->"+fktable+"."+fkcolumn)){
-						rels.add(pktable+"."+pkcolumn+"->"+fktable+"."+fkcolumn);
-						
-						fke.setParent(r);
-						fks.getRelationships().add(r);
-						
-						r.setForeignReferencedAttributeMapping(fka.getLabel(),pka.getLabel());
-					}else{
-						log.debug("relationship exists: "+pktable+"."+pkcolumn+" -> "+fktable+"."+fkcolumn); 
-					}
-					
-					fka.setReferencedEntityName(pktable);
-					
-					log.debug("Relationship:"+r);
+					relationship.setForeignReferencedAttributeMapping(fka.getLabel(), pka.getLabel());
+		            fke.getAttributeByLabel(fka.getLabel()).setForeign(true); 
+		            fke.getAttributeByLabel(fka.getLabel()).setReferencedEntityName(pke.getLabel());
+					pke.getAttributeByLabel(pka.getLabel()).setForeignAttribute(fke.getAttributeByLabel(fka.getLabel()));
+					log.debug("\tforeign key: " + pks.getLabel() + "." + pke.getLabel() + "." + pka.getLabel()
+									+ " -> " + fks.getLabel() + "." + fke.getLabel() + "." + fka.getLabel());
+
 				}
 				count++;
 
@@ -423,6 +416,10 @@ public class JDBCLoader implements DatabaseModelLoader {
 		// log.debug("Tables in "+schema);
 		while(rs.next()) {
 			String x = rs.getString(3);
+			if (suppressionHash != null && suppressionHash.containsKey(x)) {
+				log.info("suppressing entity " + x);
+				continue;
+			}
 			if(!x.endsWith("_pkey")){
 				Entity e = createEntity(dbMeta, label, rs.getString(3));
 				e.setSchema(schema);
@@ -462,11 +459,14 @@ public class JDBCLoader implements DatabaseModelLoader {
 			if(getAttribute(e, aLabel) == null) {
 				a.setLabel(aLabel);
 				a.setType(type);
+				a.setMandatory(rs.getString(18).equals("NO"));
+				a.setAutoIncrement(rs.getString(23).equals("YES"));
+				
 				a.setEntity(e);
 				e.getAttributes().add(a);
 			}
 
-			log.debug("Creating new attribute" + "\n     label:   "+aLabel+ "\n     type:    "+type+ "\n     eLabel:  "+e.getUnqualifiedLabel());
+			log.debug("\tCreating new attribute label:   "+aLabel+ "\ttype:    "+type+ "\teLabel:  "+e.getUnqualifiedLabel());
 
 		}
 		rs.close();

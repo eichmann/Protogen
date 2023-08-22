@@ -40,11 +40,11 @@ public class DTDump {
 		if (logger.isDebugEnabled()) {
 			Enumeration<Entity> entityEnum = entityHash.elements();
 			while (entityEnum.hasMoreElements()) {
-				entityEnum.nextElement().dump();
+			//	entityEnum.nextElement().dump();
 			}
 			Enumeration<Relationship> relationEnum = relationHash.elements();
 			while (relationEnum.hasMoreElements()) {
-				relationEnum.nextElement().dump();
+			//	relationEnum.nextElement().dump();
 			}
 		}
 	}

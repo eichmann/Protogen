@@ -1,5 +1,7 @@
 package edu.uiowa.icts.protogen.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +39,7 @@ public class Attribute extends Element {
 	private Domain domain = null;
 	private String sqlType = null;
 	private String type = null;
-	private String remarks = null;
+	private String remarks = "";
 	private String origLabel = null;
 	private boolean mandatory = false;
 	private boolean primary = false;
@@ -289,6 +291,8 @@ public class Attribute extends Element {
             type = "String";
         else if (type.toLowerCase().equals("char"))
             type = "String";
+        else if (type.toLowerCase().equals("json") || type.toLowerCase().equals("jsonb"))
+            type = "String";
         else if (type.toLowerCase().equals("varchar") || type.toLowerCase().equals("varchar2") || type.toLowerCase().equals("clob") || type.toLowerCase().equals("char"))
             type = "String";
         else if (type.toLowerCase().equals("datetime"))
@@ -309,6 +313,8 @@ public class Attribute extends Element {
             type = "double";
         else if (type.toLowerCase().equals("float"))
             type = "float";
+        else if (type.toLowerCase().equals("float8"))
+            type = "double";
         else if (type.toLowerCase().equals("boolean"))
             type = "boolean";
         else if (type.toLowerCase().equals("bool"))
@@ -317,8 +323,10 @@ public class Attribute extends Element {
             type = "boolean";
         else if (type.toLowerCase().equals("real"))
             type = "float";
-        else
+        else {
             type = "Object";
+            log.error("\tattribute type mapping failed for " + type);
+        }
         log.debug("           new label: label="+label +"   type="+type);
     }
     
@@ -398,6 +406,8 @@ public class Attribute extends Element {
             return (get ? "get" : "set") + "Int";
         else if (sqlType.equals("Text") || sqlType.toLowerCase().equals("char") || sqlType.toLowerCase().equals("varchar"))
             return (get ? "get" : "set") + "String";
+        else if (sqlType.toLowerCase().equals("json") || sqlType.toLowerCase().equals("jsonb"))
+            return (get ? "get" : "set") + "String";
         else if (sqlType.toLowerCase().equals("int4") || sqlType.toLowerCase().equals("integer") || sqlType.toLowerCase().equals("smallint") || sqlType.toLowerCase().equals("serial"))
             return (get ? "get" : "set") + "Int";
         else if (sqlType.toLowerCase().equals("int8") || sqlType.toLowerCase().equals("bigint"))
@@ -470,8 +480,8 @@ public class Attribute extends Element {
             return "request.getParameter(\" + label + \").trim()";
     }
 
-    public void dump() {
-        log.debug("\t\t\tattribute: " + label + "\tuid: " + uid + "\ttype: " + type + "\tmandatory: " + mandatory + "\tprimary: " + primary + "\tauto-increment: " + autoIncrement + "\tremarks: " + remarks + "\tcounter: " + counter + "\tsequence: " + sequence + "\tsequence name: " + sequenceName);
+    public void dump(BufferedWriter out) throws IOException {
+        out.write("\t\t\tattribute: " + label + "\tuid: " + uid + "\ttype: " + type + "\tmandatory: " + mandatory + "\tprimary: " + primary + "\tauto-increment: " + autoIncrement + "\tremarks: " + remarks + "\tcounter: " + counter + "\tsequence: " + sequence + "\tsequence name: " + sequenceName + "\n");
     }
 
 

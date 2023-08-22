@@ -1,5 +1,7 @@
 package edu.uiowa.icts.protogen.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -329,13 +331,13 @@ public class Entity extends Element {
             attributes.elementAt(i).matchRemarks();
     }
 
-    public void dump() {
-        log.debug("\t\tentity: " + label + "\tuid: " + uid);
+    public void dump(BufferedWriter out) throws IOException {
+        out.write("\t\tentity: " + label + "\tuid: " + uid + "\n");
         for (int i = 0; i < children.size(); i++){
-        	log.debug("\t\t\tchild " + children.elementAt(i).targetEntity.getLabel());
+        	out.write("\t\t\tchild " + children.elementAt(i).targetEntity.getLabel() + "\n");
         }
         for (int i = 0; i < attributes.size(); i++){
-        	attributes.elementAt(i).dump();
+        	attributes.elementAt(i).dump(out);
         }
     }
 

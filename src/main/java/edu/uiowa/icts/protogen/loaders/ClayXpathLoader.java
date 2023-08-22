@@ -28,7 +28,7 @@ public class ClayXpathLoader implements DatabaseModelLoader {
 	public static void main(String[] args) throws IOException, DocumentException {
 		ClayXpathLoader loader = new ClayXpathLoader();
 		Database database = loader.load("/Users/eichmann/Documents/Components/workspace/Protogen/src/test/resources/ryanlorentzen.clay");
-		database.dump();
+	//	database.dump();
 	}
 	
 	Element databaseNode = null;
@@ -163,7 +163,7 @@ public class ClayXpathLoader implements DatabaseModelLoader {
 			            entity.getAttributeByLabel(targetAttributeName).setForeign(true); 
 			            entity.getAttributeByLabel(targetAttributeName).setReferencedEntityName(sourceEntity.getLabel());
 						sourceEntity.getAttributeByLabel(sourceAttributeName).setForeignAttribute(entity.getAttributeByLabel(targetAttributeName));
-						logger.info("\tforeign key: " + sourceSchema.getLabel() + "." + sourceEntity.getLabel() + "." + sourceAttributeName
+						logger.debug("\tforeign key: " + sourceSchema.getLabel() + "." + sourceEntity.getLabel() + "." + sourceAttributeName
 										+ " -> " + targetSchema.getLabel() + "." + entity.getLabel() + "." + targetAttributeName);
 					}
 				}

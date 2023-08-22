@@ -1,5 +1,7 @@
 package edu.uiowa.icts.protogen.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -91,8 +93,8 @@ public class Relationship extends Element {
 	    return attributeMap.get(referencedAttribute);
 	}
 
-    public void dump() {
-        log.debug("\t\tsource entity: " + sourceEntity + "\ttarget entity: " + targetEntity + "\tuid: " + uid);
+    public void dump(BufferedWriter out) throws IOException {
+        out.write("\t\tsource entity: " + sourceEntity + "\ttarget entity: " + targetEntity + "\tuid: " + uid + "\n");
         log.debug("\t\tsource entity: " + (sourceEntity == null ? null : sourceEntity.getLabel()) + "\ttarget entity: " + (targetEntity == null ? null : targetEntity.getLabel()) + "\tuid: " + uid);
     }
 

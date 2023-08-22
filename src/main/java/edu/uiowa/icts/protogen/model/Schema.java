@@ -1,5 +1,7 @@
 package edu.uiowa.icts.protogen.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -134,12 +136,12 @@ public class Schema extends Element {
             entities.elementAt(i).relabel();
     }
 
-    public void dump() {
-        log.debug("\tschema: " + label + "\tuid: " + uid);
+    public void dump(BufferedWriter out) throws IOException {
+        out.write("\tschema: " + label + "\tuid: " + uid + "\n");
         for (int i = 0; i < entities.size(); i++)
-            entities.elementAt(i).dump();
+            entities.elementAt(i).dump(out);
         for (int i = 0; i < relationships.size(); i++)
-            relationships.elementAt(i).dump();
+            relationships.elementAt(i).dump(out);
     }
 
 }
