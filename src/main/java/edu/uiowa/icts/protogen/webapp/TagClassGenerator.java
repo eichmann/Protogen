@@ -1254,8 +1254,10 @@ public class TagClassGenerator {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
         }
-        out.write("                if (var != null)\n"
+        out.write("                if (var != null) {\n"
                 + "                    pageContext.setAttribute(var, this);\n"
+                + "                    pageContext.setAttribute(var+\"Count\", ++rsCount);\n"
+                + "                }\n"
                 + "                return EVAL_BODY_INCLUDE;\n"
                 + "            }\n");
         
@@ -1355,6 +1357,7 @@ public class TagClassGenerator {
             Attribute theKey = primaryKeys.elementAt(i);
             out.write("                " + theKey.getLabel() + " = rs." + theKey.getSQLMethod(true) + "(" + (i+1) + ");\n");
         }
+        out.write("                pageContext.setAttribute(var+\"Count\", ++rsCount);\n");
         out.write("                return EVAL_BODY_AGAIN;\n");
         out.write("            }\n");
         out.write("        } catch (SQLException e) {\n");
