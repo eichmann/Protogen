@@ -2467,7 +2467,7 @@ public class TagClassGenerator {
 
         out.write("import org.apache.logging.log4j.LogManager;\n");
         out.write("import org.apache.logging.log4j.Logger;\n");
-        out.write("import org.cd2h.N3CDashboardTagLib.Sequence;\n");
+        out.write("import " + packagePrefix + ".Sequence;\n");
         out.write("\n");
         
         out.write("@WebServlet(\"/" + theEntity.getUpperLabel() + "UploadServlet\")\n");
@@ -2643,7 +2643,7 @@ public class TagClassGenerator {
         			firstAttr = false;
         		}
         		if (attribute.isPrimary() && !attribute.isForeign())
-            		assignList += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount,Sequence.generateID());\n";
+            		assignList += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount,(seqnum > 0 ? seqnum : Sequence.generateID()));\n";
         		else
         			assignList += "\t\t\t\tstmt." + attribute.getSQLMethod(false) + "(++paramCount," + attribute.getLabel() + ");\n";
         	}
@@ -2665,7 +2665,7 @@ public class TagClassGenerator {
         /*
          * tidy up the post method
          */
-        out.write("\t\tresponse.sendRedirect(request.getContextPath() + \"/" + theEntity.getLowerLabel() + "/list.jsp\");\n");
+        out.write("\t\tresponse.sendRedirect(request.getContextPath() + (request.getParameter(\"redirect\") != null ? request.getParameter(\"redirect\") : \"/" + theEntity.getLowerLabel() + "/list.jsp\"));\n");
         out.write("\t}\n\n");
         
         /*
@@ -2694,7 +2694,7 @@ public class TagClassGenerator {
         out.write("\n");
         out.write("\tpublic DataSource getDataSource() {\n");
         out.write("\t\tif (theDataSource == null) try {\n");
-        out.write("\t\t\ttheDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/N3CDashboardTagLib\");\n");
+        out.write("\t\t\ttheDataSource = (DataSource)new InitialContext().lookup(\"java:/comp/env/jdbc/" + projectName + "\");\n");
         out.write("\t\t} catch (Exception e) {\n");
         out.write("\t\t\tlog.error(\"Error in database initialization\", e);\n");
         out.write("\t\t}\n");
