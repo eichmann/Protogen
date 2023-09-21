@@ -408,6 +408,7 @@ public class TagClassGenerator {
 	            out.write(resultBuffer.toString());
 	            out.write("\t\t\t\t\tfound = true;\n");
 	            out.write("\t\t\t\t}\n");
+	            out.write("\t\t\t\trs.close();\n");
 	            out.write("\t\t\t\tstmt.close();\n");
 	            out.write("\n");
 	            out.write("\t\t\t\tif (!found) {\n");
@@ -462,6 +463,7 @@ public class TagClassGenerator {
         out.write(resultBuffer.toString());
         out.write("\t\t\t\t\tfound = true;\n");
         out.write("\t\t\t\t}\n");
+        out.write("\t\t\t\trs.close();\n");
         out.write("\t\t\t\tstmt.close();\n");
         out.write("\n");
         out.write("\t\t\t\tif (!found) {\n");
@@ -702,6 +704,7 @@ public class TagClassGenerator {
                 out.write("\t\twhile (rs.next()) {\n");
                 out.write("\t\t\t" + theAttribute.getLabel() + " = rs.getInt(1) + 1;\n");
                 out.write("\t\t}\n");
+                out.write("\t\trs.close();\n");
                 out.write("\t\tcountStmt.close();\n");
                 out.write("\n");
             } else if (theAttribute.isPrimary() && !theEntity.isForeignReference(theAttribute) && theAttribute.isInt()) {
@@ -760,6 +763,7 @@ public class TagClassGenerator {
             out.write("\t\t}\n");
             out.write("\n");
         }
+        out.write("\t\tirs.close();\n");
         out.write("\t\tstmt.close();\n");
         
         if (autoIncrementAttribute != null) {
@@ -970,6 +974,7 @@ public class TagClassGenerator {
                     + "\t\t\tif (crs.next()) {\n");
             out.write("\t\t\t\tcount = crs.getInt(1);\n"
                     + "\t\t\t}\n"
+                    + "\t\t\tcrs.close();\n"
                     + "\t\t\tstat.close();\n"
                     + "\t\t} catch (SQLException e) {\n"
                     + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
@@ -1012,6 +1017,7 @@ public class TagClassGenerator {
             			+ "\t\t\tif (crs.next()) {\n");
             	out.write("\t\t\t\tcount = crs.getInt(1);\n"
             			+ "\t\t\t}\n"
+            			+ "\t\t\tcrs.close();\n"
             			+ "\t\t\tstat.close();\n"
             			+ "\t\t} catch (SQLException e) {\n"
             			+ "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
@@ -1064,6 +1070,7 @@ public class TagClassGenerator {
                     + "\t\t\tif (crs.next()) {\n");
             out.write("\t\t\t\tcount = crs.getInt(1);\n"
                     + "\t\t\t}\n"
+                    + "\t\t\tcrs.close();\n"
                     + "\t\t\tstat.close();\n"
                     + "\t\t} catch (SQLException e) {\n"
                     + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
@@ -1115,6 +1122,7 @@ public class TagClassGenerator {
                         + "\t\t\tif (crs.next()) {\n");
                 out.write("\t\t\t\tcount = crs.getInt(1);\n"
                         + "\t\t\t}\n"
+                        + "\t\t\tcrs.close();\n"
                         + "\t\t\tstat.close();\n"
                         + "\t\t} catch (SQLException e) {\n"
                         + "\t\t\tlog.error(\"JDBC error generating " + theEntity.getLabel() + " iterator\", e);\n"
@@ -2136,6 +2144,7 @@ public class TagClassGenerator {
             out.write("\t\t\twhile (rs.next()) {\n");
             out.write(resultBuffer.toString());
             out.write("\t\t\t}\n");
+            out.write("\t\t\trs.close();\n");
             out.write("\t\t\tstmt.close();\n");
             out.write("\n");
 
@@ -2568,6 +2577,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\tint count = rs.getInt(1);\n");
         out.write("\t\t\t\trecordExists = count == 1;\n");
         out.write("\t\t\t}\n");
+        out.write("\t\t\trs.close();\n");
         out.write("\t\t\tstmt.close();\n");
         out.write("\n");
         
@@ -2852,6 +2862,7 @@ public class TagClassGenerator {
         
         out.write("\t\t\t\t\t\t\tcount = crs.getInt(1);\n");
         out.write("\t\t\t\t\t\t}\n");
+        out.write("\t\t\t\t\t\tcrs.close();\n");
         out.write("\t\t\t\t\t\tstat.close();\n");
         out.write("\t\t\t\t\t} catch (SQLException e) {\n");
                 
@@ -2973,6 +2984,7 @@ public class TagClassGenerator {
                 out.write(resultBuffer.toString());
                 out.write("\t\t\t\t\tfound = true;\n");
                 out.write("\t\t\t\t}\n");
+                out.write("\t\t\t\trs.close();\n");
                 out.write("\t\t\t\tstmt.close();\n");
                 out.write("\n");
                 out.write("\t\t\t\tif (!found) {\n");
@@ -3027,6 +3039,7 @@ public class TagClassGenerator {
         out.write(resultBuffer.toString());
         out.write("\t\t\t\t\tfound = true;\n");
         out.write("\t\t\t\t}\n");
+        out.write("\t\t\t\trs.close();\n");
         out.write("\t\t\t\tstmt.close();\n");
         out.write("\n");
         out.write("\t\t\t\tif (!found) {\n");
@@ -3386,6 +3399,7 @@ public class TagClassGenerator {
         out.write("\t\t\t\t\twhile (rs.next()) {\n");
         out.write("\t\t\t\t\t\tnextInt = rs.getInt(1);\n");
         out.write("\t\t\t\t\t}\n");
+        out.write("\t\t\t\t\trs.close();\n");
         out.write("\t\t\t\t\tstat.close();\n");
         out.write("\t\t\t\t\tbreak;\n");
         out.write("\t\t\t\tcase SQLSERVER:\n");
